@@ -1,0 +1,46 @@
+{
+    "finances": {
+        "tables": {
+            "##repairs": true
+        },
+        "window": {
+            "button": false
+        },
+        "window_on": true
+    },
+    "insert_customer": {
+        "fields": {
+            "##email": false,
+            "##name": true,
+            "##surname": false
+        },
+        "window_on": true
+    },
+    "insert_product": {
+        "ex_vat": true,
+        "vat_rate": 20.0
+    },
+    "insert_repair": {
+        "fields": {
+            "##category": false,
+            "##color": false,
+            "##imei": false,
+            "##model": false,
+            "##note_hidden": false,
+            "##note_visible": true
+        },
+        "window_on": true
+    },
+    "repairs": {
+        "window_on": true
+    },
+    "settings": {
+        "theme": 0
+    },
+    "test": {
+        "size": {
+            "x": 50,
+            "y": 80
+        }
+    }
+}
