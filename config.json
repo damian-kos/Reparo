@@ -1,4 +1,13 @@
 {
+    "custom_devices": {
+        "window_on": true
+    },
+    "customers_view": {
+        "window_on": true
+    },
+    "devices": {
+        "window_on": true
+    },
     "finances": {
         "tables": {
             "##repairs": true
@@ -11,10 +20,10 @@
     "insert_customer": {
         "fields": {
             "##email": false,
-            "##name": true,
+            "##name": false,
             "##surname": false
         },
-        "window_on": true
+        "window_on": false
     },
     "insert_product": {
         "ex_vat": true,
@@ -27,7 +36,13 @@
             "##imei": false,
             "##model": false,
             "##note_hidden": false,
-            "##note_visible": true
+            "##note_visible": false
+        },
+        "window_on": true
+    },
+    "inventory": {
+        "add_item": {
+            "window_on": true
         },
         "window_on": true
     },
