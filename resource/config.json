@@ -59,6 +59,6 @@
         }
     },
     "welcome": {
-        "show": true
+        "show": false
     }
 }
