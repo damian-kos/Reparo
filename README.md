@@ -34,11 +34,14 @@ A red or green indicator bar will notify the user whether the customer details h
 `View` > `Customers` > `Open Database`
 In the Customers View, you have the ability to browse through all the customers recorded in your system. Customer are organized by their phone number.
 You can seach through this databse by phone number. Table can be sorted by all columns.
+
 ![image](https://github.com/damian-kos/Reparo/assets/106775028/b94892f6-94d1-4332-b49d-a9118d3fb037)
 
 - Customers related to any inserted `Repair` can't be removed
+  
     ![image](https://github.com/damian-kos/Reparo/assets/106775028/16bccba4-d0cc-435c-8ce5-2f6184e3481a)
 - Other Customers can be removed
+  
     ![image](https://github.com/damian-kos/Reparo/assets/106775028/85335a96-f984-48cd-98ef-8385cb8ea515)
 
 ### Adding a Repair
