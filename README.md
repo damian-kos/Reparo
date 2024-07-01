@@ -3,10 +3,6 @@
 Reparo is a local-based software which allows repair shops to take control over their repair orders.
 Track you repairs, add, delete, edit them with ease.
 
-## Installation
-
-With first release `.exe` will be provided.
-
 ## Features
 
 - **Platform:** Windows
