@@ -122,28 +122,115 @@ Right-clicking on a repair entry will bring up a popup menu that provides option
 
 #### Insert New Device
 `New` > `Device`
-Allows to insert any device of your choice to databse of devices. You can set:
-  ![image](https://github.com/damian-kos/Reparo/assets/106775028/1134e094-70da-446f-a036-e3e5598c9dc0)
+Allows to insert any device of your choice to database of devices. You can set:
+    ![image](https://github.com/damian-kos/Reparo/assets/106775028/72ea3939-3f6d-4bf5-a325-290fbab4041e)
+
 - `Model` Defines a name of the device
-  
-  ![image](https://github.com/damian-kos/Reparo/assets/106775028/bf87d0cf-f527-4f0f-995a-b44c362bf9b4)
+
+  ![image](https://github.com/damian-kos/Reparo/assets/106775028/a008ca12-1702-4b53-8df8-1b8e6ad41c2b)
 
 - `Type` Defines the type of device
   - `Feature` You can add extra `Types` to do so go to `Optons` > `Add attributes` > `Device Types`.
+
+    ![image](https://github.com/damian-kos/Reparo/assets/106775028/655b9c0a-5705-4254-864f-efadc2529722)
+
   
 - `Brand` Defines a brand of the device
   - `Feature` You can add extra `Types` to do so go to `Optons` > `Add attributes` > `Brands`.
 
+    ![image](https://github.com/damian-kos/Reparo/assets/106775028/8ddd6617-268e-4914-b627-c99595c3867b)
 
+- `Colors` Defines a list of colors of the device
+
+  ![image](https://github.com/damian-kos/Reparo/assets/106775028/c786b181-74b2-49cd-9929-78c94c499a2c)
+
+- `Aliases` Defines a list of aliases of the device
+  
+  ![image](https://github.com/damian-kos/Reparo/assets/106775028/aa78c398-b871-4104-99d7-f2543ed7ef90)
+
+- Example Device:
+  
+     ![image](https://github.com/damian-kos/Reparo/assets/106775028/48297e17-ebbb-432f-9a22-dad54a221eb4)
+
+#### Insert New Device From Custom Devices
+`New` > `New device from custom device` > `Open Database`
+Allows to insert any device basing on a list of devices which were entered during inserting a repair, without adding the device itself to a list of devices.
+If you insert devices with this information message:
+
+![image](https://github.com/damian-kos/Reparo/assets/106775028/f7519a15-6116-4a5c-8fb5-f8c62285680b)
+
+-  This device will then appear in `Custom Devices` table, like so:
+  
+    ![image](https://github.com/damian-kos/Reparo/assets/106775028/0308a42a-9e8b-43c3-a90a-024481b0c173)
+
+- `Right Click` will open a Popup window, where you can this device to main database and change its details like we did in `New Device`
+
+    ![image](https://github.com/damian-kos/Reparo/assets/106775028/3650385a-6f6f-4b1e-b80d-c57ae39fac85)
+
+- `Delete` will remove this device from database of `Custom Devices` and it will be deleted from any associated repairs.
+See example below what it did with repair number `2`. `Model` and `Color` are empty now.
+
+  ![image](https://github.com/damian-kos/Reparo/assets/106775028/e80bfa5d-2b5a-4e32-b3e4-779e330bc562)
+
+#### Insert New Item
+`New` > `Item` > `Open Form`
+Allows to insert any item into the `Inventory`. Necessary fields to be filled out are `SKU` and `Item's name`.
+Later you can print barcodes for these item with their `SKU` for better inventory tracking.
+
+![image](https://github.com/damian-kos/Reparo/assets/106775028/fdac2198-f59f-45e9-98d4-715979976bdc)
+
+- Fields explanation:
+    - `Supplier` Suppliers name. After supplier is inserted once, it becomes avaiable to be picked up from a list of suppliers.
+    - `Supplier's SKU` Supplier's SKU may be different from the one you desire to have for yours internal system. To make this happen make sure that, next field's checkbox is off.
+    - `Shop's SKU same as Supplier's` Off to set different SKUs, On to copy `Supplier's SKU` into `SKU`
+    - `Buy price (inc.VAT)` Buy price of an item including VAT.
+    - `Ex. VAT buy price` If you want to calculate buy price ex. VAT check this box. Otherwise is gonna to be set to 0.
+    - `VAT rate` Set your desired VAT rate basing on which ex. VAT buy price will be calculated.
+    - `Quantity`
+    - `Color` Color of an item from a list of available colors.
+    - `Quality` Quality of an item.
+        - `Feature` You can add extra `Qualities` to do so go to `Optons` > `Add attributes` > `Qualities`.
+    - `Category` Category of an item.
+        - `Feature` You can add extra `Categories` to do so go to `Optons` > `Add attributes` > `Categories`.
+    - `Location` Item's location. After location is inserted once, it becomes avaiable to be picked up from a list of locatons.
+    - `Box of compatible devices` Deterimine with what devices item is compatible with by choosing models from a list of devices at the bottom of this window.
+To remove such device, just click on it in `red` button.
+    - `For models` Set of filters which makes searching for compatible devices quicker.
+  - After successful insertion you can print a barcode for inserted item.
+
+     ![image](https://github.com/damian-kos/Reparo/assets/106775028/3819cd67-da73-4c3e-a7bf-c8960e7179af)
+ 
+#### View Inventory
+`View` > `Inventory` > `Open Database`
+Inserted items can be found in `Inventory`.  At the top of the window you will find filters which will help you search for given item.
+
+![image](https://github.com/damian-kos/Reparo/assets/106775028/1e38f0f4-1935-4f27-a01a-5483caf08974)
+
+From here you can:
+- `Update Item` Change any details of an item. `SKU` can be only changed to other non-existing SKU in database.
+- `Print Barcode Label` Print more barcodes.
+- `Remove item` Removes item from a database.
+- Adjust `Quantity` of an item. To do so, click on a number in `Quantity` column and edit the value in a popup.
+  
+  ![image](https://github.com/damian-kos/Reparo/assets/106775028/a845baf7-d759-4c71-bfb2-f8a79f986486)
+
+
+#### View Finances & Accounting
+`View` > `Finances & Accounting` > `Open Database`
+Allows to view summarized repairs prices sorted by `Repair States`. Can be filtered by date. Below you can find a table with repairs, from where you can do same actions as you would in `Repairs View`.
+As for dates, it takes into consideration when repair was created.
+
+![image](https://github.com/damian-kos/Reparo/assets/106775028/ff626c84-680b-4792-b06c-7c7aebfa51c0)
+
+#### View Devices
+`View` > `Finances & Accounting` > `Open Database`
+Views all `Devices` in databse, together with their `Colors` and `Aliases` from here by `Right Click` on any device you can edit these details.
+If you remove a device, all associated repairs with this device will become blank. Like shown in `Insert New Device From Custom Devices`
+
+![image](https://github.com/damian-kos/Reparo/assets/106775028/d0661d21-13a5-426f-8327-c4e2a8cc4beb)
 
 
 #### Upcoming Features
 Stay tuned for these upcoming features to further enhance the functionality and user experience of Reparo.
 
-- `Upcoming Feature` **Insert Customer** fields will be customizable, allowing users to decide which details are necessary, as some shops may opt not to collect comprehensive data from their customers.
-- `Upcoming Feature` **Devices** Soon, you will be able to add a custom device, offering more flexibility to accommodate a wide range of repairs.
-- `Upcoming Feature` **SN / IMEI** This field will be made editable, allowing you to require it as necessary for your record-keeping.
-- `Upcoming Feature` **Notes section** This section will be made editable, enabling you to require notes as needed.
-- `Upcoming Feature` **Print Repair Ticket** A feature to print the Repair Ticket, which can be handed to your customer for their reference.
-- `Upcoming Feature` **Print Barcode** An option to print a Barcode for the repair, facilitating easier tracking and management of repair jobs.
 
