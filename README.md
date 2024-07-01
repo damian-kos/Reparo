@@ -120,7 +120,7 @@ Right-clicking on a repair entry will bring up a popup menu that provides option
 
 ![image](https://github.com/damian-kos/Reparo/assets/106775028/a3350558-761d-430e-a3d4-09c99fe09ca0)
 
-#### Insert New Device
+### Insert New Device
 `New` > `Device`
 Allows to insert any device of your choice to database of devices. You can set:
     ![image](https://github.com/damian-kos/Reparo/assets/106775028/72ea3939-3f6d-4bf5-a325-290fbab4041e)
@@ -172,7 +172,7 @@ See example below what it did with repair number `2`. `Model` and `Color` are em
 
   ![image](https://github.com/damian-kos/Reparo/assets/106775028/e80bfa5d-2b5a-4e32-b3e4-779e330bc562)
 
-#### Insert New Item
+### Insert New Item
 `New` > `Item` > `Open Form`
 Allows to insert any item into the `Inventory`. Necessary fields to be filled out are `SKU` and `Item's name`.
 Later you can print barcodes for these item with their `SKU` for better inventory tracking.
@@ -200,7 +200,7 @@ To remove such device, just click on it in `red` button.
 
      ![image](https://github.com/damian-kos/Reparo/assets/106775028/3819cd67-da73-4c3e-a7bf-c8960e7179af)
  
-#### View Inventory
+### View Inventory
 `View` > `Inventory` > `Open Database`
 Inserted items can be found in `Inventory`.  At the top of the window you will find filters which will help you search for given item.
 
@@ -215,22 +215,81 @@ From here you can:
   ![image](https://github.com/damian-kos/Reparo/assets/106775028/a845baf7-d759-4c71-bfb2-f8a79f986486)
 
 
-#### View Finances & Accounting
+### View Finances & Accounting
 `View` > `Finances & Accounting` > `Open Database`
 Allows to view summarized repairs prices sorted by `Repair States`. Can be filtered by date. Below you can find a table with repairs, from where you can do same actions as you would in `Repairs View`.
 As for dates, it takes into consideration when repair was created.
 
 ![image](https://github.com/damian-kos/Reparo/assets/106775028/ff626c84-680b-4792-b06c-7c7aebfa51c0)
 
-#### View Devices
+### View Devices
 `View` > `Finances & Accounting` > `Open Database`
 Views all `Devices` in databse, together with their `Colors` and `Aliases` from here by `Right Click` on any device you can edit these details.
 If you remove a device, all associated repairs with this device will become blank. Like shown in `Insert New Device From Custom Devices`
 
 ![image](https://github.com/damian-kos/Reparo/assets/106775028/d0661d21-13a5-426f-8327-c4e2a8cc4beb)
 
+## Options
+
+### Theme 
+`Options` > `Change theme` 
+If you don't like current style of Reparo it can be set to other theme.
+
+![Ro (1)](https://github.com/damian-kos/Reparo/assets/106775028/b3fc6a6c-5278-40d3-966b-ee96e191b7af)
+
+### Load Company Logo
+`Options` > `Load Company Logo` 
+This options allows to choose a `.png` file as a logo which will appear on `Repair Ticket`. As default `Reparo` logo will appear. File Explorer will appear and will let you choose your file.
+
+![image](https://github.com/damian-kos/Reparo/assets/106775028/d542de4b-c356-47d6-ae71-3371d6e5092e)
+
+### Terms & Conditions
+`Options` > `Terms & Conditions` 
+This options allows set a `Terms & Conditions` which will  appear on `Repair Ticket`. As default there is no message set.
+
+![image](https://github.com/damian-kos/Reparo/assets/106775028/aca0a41d-e0a0-4704-8ea0-3017a754f0d9)
+
+### View Repair Ticket Template
+`Options` > `View Repair Ticket Template` 
+Views a current state of how `Repair Ticket` will be looking like with set `Logo` and `T&Cs`.
+
+![image](https://github.com/damian-kos/Reparo/assets/106775028/9ab3e778-6112-4a2f-a366-b55c41da7267)
+
+### Input fields options
+`Options` > `Fields options` 
+Allows to determine which fields can be empto for validation purposes. As a techinician myself I know that some people can't be bothered to collect necessary data. So not allowing to skip some fields, may force them to at least try to fill them.
+
+![image](https://github.com/damian-kos/Reparo/assets/106775028/9a9128a8-e6e7-4409-b87e-f5691ba534a7)
+
+### Add attributes
+`Options` > `Add attribiutes` > `Brands` / `Categories` / `Qualities` / `Repair States` / `Device Types`
+Througrough this application you can come across these attributes. This option allows you to add more of them or change them.
+- `Brands` Adjust database of available brands to chose from. If brand associated with any `Item` or `Device` will be deleted, their `Brand` values will become either `Blank` or `Unknown`
+- `Categories` Adjust database of available categories to chose from. If category associated with any `Repair` `Item` or `Device` will be deleted, their `Category` values will become `Blank`.
+- `Qualities` Adjust database of available qualities to chose from. If quality associated with any `Item` their `Quality` values will become `Blank`
+- `Repair States` Adjust database of available repair states to chose from. If repair state associated with any `Repair` will be deleted, state of this repair will become `All`.
+- `Device Types` Adjust database of available device types to chose from. If devcice type associated with any `Device` will be deleted, their `Device Type` values will become either `Blank` or `Unknown`
+
+  ![image](https://github.com/damian-kos/Reparo/assets/106775028/3f58f1cf-ed94-43ae-8f03-2a3e82e22e04)
+
+### Check for updates
+`Options` > `Check for updates`
+This allow to download lates updates of an application. If there is no Update window will close. Otherwise a popup asking if you want to download an update will appear.
+It is advised to do a copy of a database of your system. To do so go to the folder where you located `Reparo` and copy either whole `resource` directory, or `parts-stock.db` file from mentioned directory.
+
+## Help & Feedback
+Any feedback is more than welcome. To get help on how to use application either use a `Google Form` documents provided in these options or join the Discord Server.
+
+## Credits
+https://github.com/ocornut
+https://github.com/aiekick
+https://github.com/Flix01
+
 
 #### Upcoming Features
-Stay tuned for these upcoming features to further enhance the functionality and user experience of Reparo.
+Stay tuned for upcoming features to further enhance the functionality and user experience of Reparo.
+- `Delete multiple` Delete multiple records
+Any ideas, please let me know.
+  
 
 
