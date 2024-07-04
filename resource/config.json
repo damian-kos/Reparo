@@ -52,12 +52,6 @@
     "settings": {
         "theme": 0
     },
-    "test": {
-        "size": {
-            "x": 50,
-            "y": 80
-        }
-    },
     "welcome": {
         "show": true
     }
