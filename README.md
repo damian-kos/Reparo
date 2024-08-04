@@ -294,13 +294,15 @@ Througrough this application you can come across these attributes. This option a
 
   ![image](https://github.com/damian-kos/Reparo/assets/106775028/3f58f1cf-ed94-43ae-8f03-2a3e82e22e04)
 
-### Check for updates
-`Options` > `Check for updates`
-This allow to download lates updates of an application. If there is no Update window will close. Otherwise a popup asking if you want to download an update will appear.
+### Updates
+Updates are being performed by downloading latest release from release tab.
 It is advised to do a copy of a database of your system. To do so go to the folder where you located `Reparo` and copy either whole `resource` directory, or `parts-stock.db` file from mentioned directory.
 
 ## Help & Feedback
 Any feedback is more than welcome. To get help on how to use application either use a `Google Form` documents provided in these options or join the Discord Server.
+
+![image](https://github.com/user-attachments/assets/c06720b6-42fc-4d60-ab73-bd96a0a89a06)
+
 
 ## Credits
 https://github.com/ocornut
