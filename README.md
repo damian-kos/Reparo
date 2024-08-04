@@ -6,18 +6,18 @@ Track you repairs, add, delete, edit them with ease.
 ## Features
 
 - **Platform:** Windows
-- **User-Friendly:** Main motivation of this software was to make it quick to operate, inserting a new repair can be as little as 5 clicks
-- **Devices database:** You can create your own databse of devices, with corresponding colors and aliases
+- **User-Friendly:** Main motivation for this software was to make it quick and easy to operate. Inserting a new repair is as easy as 5 clicks
+- **Devices database:** You can create your own database of devices, with corresponding colors and aliases
 - **Repairs status:** Easily sort through repair orders by status for a clearer overview of your workload. Add your own repair states.
-- **Calendar:** Organize repairs based on dates. Sort through ID or customer number.
+- **Calendar:** Organize repairs by dates. Sort through ID or customer number.
 - **Notes:** Enables adding notes that can either be visible to the customer or hidden. 
 - **Edit repair:** Modify repair details with a history log for reference.
-- **Delete repairs:** Remove unwanted repairs orders from the system
-- **Finances:**  Monitor your finances through the finances feature
+- **Delete repairs:** Remove unwanted repairs orders from the system.
+- **Finances:**  Monitor your finances through the finances feature.
 - **Inventory system** Insert items to directory. Categorize them by Brand, Color, Quality and so on.
 - **Barcodes** Print barcodes for your inventory and repairs.
-- **Repair Ticket** You can print Repair Ticket, you can add your own logo and T&Cs to it.
-- **Themes:** Choose between Dark and Light modes for your interface
+- **Repair Ticket** You can print Repair Ticket, and add your own logo and T&Cs to it.
+- **Themes:**Choose between Dark and Light modes for your interface.
 
 ### Adding a Customer
 `New` > `Customer` > `Open Form`
@@ -95,6 +95,29 @@ All changes made to a repair order are documented in the `Updates` section. This
 
 ![image](https://github.com/damian-kos/Reparo/assets/106775028/7d5f0799-910f-4cb3-99a9-49405ec10ba6)
 
+### Manage Images
+`Right Click` on any `Repair` in `Repairs View`
+The Manage Images feature allows you to manage images for given `Repair`. At first there will be no images:
+- To add images click `Upload Photos`:
+  
+   ![image](https://github.com/user-attachments/assets/c0684a43-ad5f-4708-8b61-fbfa08039b92)
+  - File dialog will open. Maximum of 6 files at once can be chosen. `JPG` `jpg` `PNG` `png` files are accepted. It is important to choose correct filter.
+  - For multiple selection either use `Ctrl` or `Shift`
+    
+    ![image](https://github.com/user-attachments/assets/55bfd2c5-65e3-4141-9d37-883ed2d6f23b)
+- Loaded images will be displayed. From here you can `Left Click` on them to select them for deletion. Or use `Select All` and `Deselect All`. `Red` color means image is marked for deletion.
+
+ ![image](https://github.com/user-attachments/assets/7af97f2c-6f3d-4513-9f79-d690424a0364)
+
+- Hover over image to enlarge it.
+
+  ![image](https://github.com/user-attachments/assets/9c9f6bea-744f-48ba-be4b-19cf9c238fe3)
+
+- `Right Click` on an image to `Print` `Delete` or `Open File Location`.
+  - Note: `Print` can only print one image at the time. To `Print` multiple use `Open File Location` and print from default file explorer.
+  - Note: It is not advised to delete files from file explorer level.
+    
+    ![image](https://github.com/user-attachments/assets/74ad5007-3b74-42db-96c9-e88aa00e5c94)
 
 ### Repairs View
 `View` > `Repairs` > `Open Database`
