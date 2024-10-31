@@ -1,0 +1,14 @@
+{
+    "finances": {
+        "window_on": true
+    },
+    "insert_customer": {
+        "window_on": true
+    },
+    "insert_repair": {
+        "window_on": true
+    },
+    "repairs": {
+        "window_on": true
+    }
+}
