@@ -17,14 +17,20 @@
 #else
 #include <SDL_opengl.h>
 #endif
+#include <iostream>
 
-#include "src/RoImage.h"
-#include "src/RoLocalization.h"
+#include "src/reparo_core.h"
+
+#include "src/RoImage.h"            // to delete and to be moved to reparo manager
+#include "src/RoLocalization.h"     // to delete and to be moved to reparo manager
 
 // This example can also compile and run with Emscripten! See 'Makefile.emscripten' for details.
 #ifdef __EMSCRIPTEN__
 #include "../libs/emscripten/emscripten_mainloop_stub.h"
 #endif
+
+ReparoCore reparo_core;
+
 // Main code
 int main(int, char**)
 {
@@ -196,9 +202,11 @@ int main(int, char**)
 
             ImGui::End();
         }
-
+        
         Loc::renderUI();
 
+        ReparoCore::RenderDebug();
+      
         // 3. Show another simple window.
         if (show_another_window)
         {

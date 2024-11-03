@@ -12,7 +12,6 @@ if (MSVC)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
-
 # Find common required packages
 find_package(SDL2 CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
@@ -20,37 +19,47 @@ find_package(OpenCV CONFIG REQUIRED)
 find_package(Gettext REQUIRED)
 find_package(Iconv REQUIRED)
 find_package(ZXing CONFIG REQUIRED)
-find_package(PostgreSQL REQUIRED)
 
-# Define the executable and add source files first
+# Define the source directories
+set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set(VENDOR_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor")
+
+# Automatically collect source files
+file(GLOB_RECURSE SRC_FILES 
+    "${SOURCE_DIR}/*.cpp" 
+    "${SOURCE_DIR}/*.h"
+)
+
+# Manually list vendor files since they are specific
+set(VENDOR_FILES 
+    ${VENDOR_DIR}/imgui/imgui.cpp
+    ${VENDOR_DIR}/imgui/imgui_demo.cpp
+    ${VENDOR_DIR}/imgui/imgui_draw.cpp
+    ${VENDOR_DIR}/imgui/imgui_tables.cpp
+    ${VENDOR_DIR}/imgui/imgui_widgets.cpp
+    ${VENDOR_DIR}/imgui/imgui_impl_sdl2.cpp
+    ${VENDOR_DIR}/imgui/imgui_impl_opengl3.cpp
+    ${VENDOR_DIR}/imgui/imconfig.h
+    ${VENDOR_DIR}/imgui/imgui.h
+    ${VENDOR_DIR}/imgui/imgui_impl_opengl3.h
+    ${VENDOR_DIR}/imgui/imgui_impl_sdl2.h
+    ${VENDOR_DIR}/imgui/imgui_internal.h
+    ${VENDOR_DIR}/imgui/imstb_rectpack.h
+    ${VENDOR_DIR}/imgui/imstb_textedit.h
+    ${VENDOR_DIR}/imgui/imstb_truetype.h
+    ${VENDOR_DIR}/imgui/imgui_stdlib.h
+    ${VENDOR_DIR}/imgui/imgui_stdlib.cpp
+    ${VENDOR_DIR}/nlohmann/json.hpp
+    ${VENDOR_DIR}/nlohmann/json_fwd.hpp
+    ${VENDOR_DIR}/sqlite3/sqlite3.c
+    ${VENDOR_DIR}/sqlite3/sqlite3.h
+)
+
+# Define the executable and add source files
 add_executable(${PROJECT_NAME} 
     main.cpp
-    vendor/imgui/imgui.cpp
-    vendor/imgui/imgui_demo.cpp
-    vendor/imgui/imgui_draw.cpp
-    vendor/imgui/imgui_tables.cpp
-    vendor/imgui/imgui_widgets.cpp
-    vendor/imgui/imgui_impl_sdl2.cpp
-    vendor/imgui/imgui_impl_opengl3.cpp
-    vendor/imgui/imconfig.h
-    vendor/imgui/imgui.h
-    vendor/imgui/imgui_impl_opengl3.h
-    vendor/imgui/imgui_impl_opengl3_loader.h
-    vendor/imgui/imgui_impl_sdl2.h
-    vendor/imgui/imgui_internal.h
-    vendor/imgui/imstb_rectpack.h
-    vendor/imgui/imstb_textedit.h
-    vendor/imgui/imstb_truetype.h
-    vendor/imgui/imgui_stdlib.h
-    vendor/imgui/imgui_stdlib.cpp
-    vendor/nlohmann/json.hpp
-    vendor/nlohmann/json_fwd.hpp
-    src/RoImage.h
-    src/RoImage.cpp
-    src/RoLocalization.h
-    src/RoLocalization.cpp
-    src/RoBarcode.h
-    src/RoBarcode.cpp
+    ${VENDOR_FILES} 
+    ${SRC_FILES}
 )
 
 # Platform-specific configurations
@@ -94,7 +103,7 @@ if(WIN32)
         )
     endif()
 
-    target_compile_definitions(${PROJECT_NAME} PRIVATE -DPLATFORM_WINDOWS)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE -DPLATFORM_WINDOWS $<$<CONFIG:Debug>:DEBUG>)
 elseif(APPLE)
     set(VCPKG_TARGET_TRIPLET "x64-osx-static")
     
@@ -126,6 +135,8 @@ target_include_directories(${PROJECT_NAME}
         ${SDL2_INCLUDE_DIRS} 
         ${OPENGL_INCLUDE_DIR}
         ${CMAKE_SOURCE_DIR}/vendor/imgui
+	${CMAKE_SOURCE_DIR}/vendor/nlohmann
+	${CMAKE_SOURCE_DIR}/vendor/sqlite3
         ${OpenCV_INCLUDE_DIRS}
 )
 
@@ -146,7 +157,6 @@ target_link_libraries(${PROJECT_NAME}
         ${OpenCV_LIBS}
         ZXing::Core
         ZXing::ZXing
-	PostgreSQL::PostgreSQL
 )
 
 # Platform-specific libraries
@@ -173,4 +183,14 @@ file(MAKE_DIRECTORY ${LOCALE_INSTALL_DIR})
 target_compile_definitions(${PROJECT_NAME} 
     PRIVATE 
         LOCALE_DIR="${LOCALE_INSTALL_DIR}"
+)
+
+# Set up resource directory
+set(RESOURCE_INSTALL_DIR "${CMAKE_BINARY_DIR}/resource")
+file(MAKE_DIRECTORY ${RESOURCE_INSTALL_DIR})
+
+# Add compile definitions for resource directory
+target_compile_definitions(${PROJECT_NAME} 
+    PRIVATE 
+        RESOURCE_DIR="${RESOURCE_INSTALL_DIR}"
 )

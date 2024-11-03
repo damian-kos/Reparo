@@ -1,1 +1,9 @@
 build/
+.vs/
+Reparo.sln
+Reparo/
+CMakeSettings.json
+# Ignore Visual Studio project files
+Reparo.vcxproj
+Reparo.vcxproj.filters
+Reparo.vcxproj.user
