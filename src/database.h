@@ -1,41 +1,43 @@
 #pragma once
-#include "sqlite3.h"
+#include <soci/soci.h>
+#include <soci/sqlite3/soci-sqlite3.h>
 #include <iostream>
 #include <vector>
 #include <sstream>
 
 class TableCreator;
 
-class SQLTransaction {
-private:
-  sqlite3* db;
-  bool active;
-
-public:
-  SQLTransaction(sqlite3* db);
-  ~SQLTransaction();
-
-  bool EnableForeignKeys();
-  bool Begin();
-  bool Commit();
-  bool Rollback();
-
-};
-
-
+//class SQLTransaction {
+//private:
+//  soci::session db;
+//  bool active;
+//
+//public:
+//  SQLTransaction(soci::session& db);
+//  ~SQLTransaction();
+//
+//  bool Begin();
+//  bool Commit();
+//  bool Rollback();
+//
+//};
+//
+//
 class Database {
 private:
-  static sqlite3* db;
-  static bool OpenDb();
+  static soci::session sql;
 
 public:
+  static bool OpenDb();
+  //static bool TranaExecute(const std::string& _sql);
   static bool Execute(const std::string& _sql);
+  static bool ExecuteTransaction(const std::string& _sql);
   static TableCreator Create();
-  static sqlite3* GetDb() { return db; }
-
-  static bool CreateDatabase();
+//  static sqlite3* GetDb() { return db; }
+//
+//  static bool CreateDatabase();
 };
-
+//
 class TableCreator {
 public:
   TableCreator() = default;
@@ -52,9 +54,16 @@ public:
   TableCreator& PaymentMethodsTable();
   TableCreator& InventoryActionsTable();
   TableCreator& DevicesTable();
+  TableCreator& CustomDevicesTable();
   TableCreator& AliasesTable();
   TableCreator& ModelColorsTable();
-
-private:
-  bool ExecuteWithTransaction(const std::string& _sql);
+  TableCreator& PartsTable();
+  TableCreator& PurchaseInvoicesTable();
+  TableCreator& PurchaseInvoicesItemsTable();
+  TableCreator& PartsHistoryTable();
+  TableCreator& RepairsTable();
+  TableCreator& RepairPartsTable();
+  TableCreator& InvoicesTable();
+  TableCreator& PartModelTable();
+  TableCreator& PartModelAliasTable();
 };

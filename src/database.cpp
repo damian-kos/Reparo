@@ -2,102 +2,107 @@
 #include "database.h"
 #include "debug.h"
 
-SQLTransaction::SQLTransaction(sqlite3* db) : db(db), active(false) {
-  EnableForeignKeys();
-  Begin();
-}
-
-SQLTransaction::~SQLTransaction() {
-  if (active) {
-    Rollback();
-  }
-}
-
-bool SQLTransaction::Begin() {
-  char* _err_msg = nullptr;
-  if (sqlite3_exec(db, "BEGIN TRANSACTION;", NULL, NULL, &_err_msg) == SQLITE_OK) {
-    active = true;
-    return true;
-  }
-  else {
-    std::cerr << "Failed to start transaction: " << _err_msg << std::endl;
-    sqlite3_free(_err_msg);
-    return false;
-  }
-}
-
-bool SQLTransaction::EnableForeignKeys() {
-  char* _err_msg = nullptr;
-  if (sqlite3_exec(db, "PRAGMA foreign_keys = ON;", NULL, NULL, &_err_msg) != SQLITE_OK) {
-    std::cerr << "Failed to enable foreign key constraints: " << _err_msg << std::endl;
-    sqlite3_free(_err_msg);
-    return false;
-  }
-  return true;
-}
-
-bool SQLTransaction::Commit() {
-  char* _err_msg = nullptr;
-  if (sqlite3_exec(db, "COMMIT;", NULL, NULL, &_err_msg) == SQLITE_OK) {
-    active = false;
-    return true;
-  }
-  else {
-    std::cerr << "Failed to Commit transaction: " << _err_msg << std::endl;
-    sqlite3_free(_err_msg);
-    return false;
-  }
-}
-
-bool SQLTransaction::Rollback() {
-  char* _err_msg = nullptr;
-  if (sqlite3_exec(db, "ROLLBACK;", NULL, NULL, &_err_msg) == SQLITE_OK) {
-    active = false;
-    return true;
-  }
-  else {
-    std::cerr << "Failed to Rollback transaction: " << _err_msg << std::endl;
-    sqlite3_free(_err_msg);
-    return false;
-  }
-}
+//SQLTransaction::SQLTransaction(soci::session& db) : db(db), active(false) {
+//  Begin();
+//}
+//
+//SQLTransaction::~SQLTransaction() {
+//  if (active) {
+//    Rollback();
+//  }
+//}
+//
+//bool SQLTransaction::Begin() {
+//  try {
+//    db.begin();
+//    active = true;
+//    return true;
+//  }
+//  catch (const soci::soci_error& e) {
+//    std::cerr << "Failed to start transaction: " << e.what() << std::endl;
+//    return false;
+//  }
+//}
+//
+//bool SQLTransaction::Commit() {
+//  try {
+//    if (active) {
+//      db.commit();
+//      active = false;
+//      return true;
+//    }
+//    return false;
+//  }
+//  catch (const soci::soci_error& e) {
+//    std::cerr << "Failed to commit transaction: " << e.what() << std::endl;
+//    return false;
+//  }
+//}
+//
+//bool SQLTransaction::Rollback() {
+//  try {
+//    if (active) {
+//      db.rollback();
+//      active = false;
+//      return true;
+//    }
+//    return false;
+//  }
+//  catch (const soci::soci_error& e) {
+//    std::cerr << "Failed to rollback transaction: " << e.what() << std::endl;
+//    return false;
+//  }
+//}
 
 
-sqlite3* Database::db = nullptr;
+soci::session Database::sql;
 
-/// <summary>
-/// If Database exists, opens it. Otherwise creates one, and opens it.
-/// </summary>
-/// <returns>Returns true if database could be open, false otherwise.  </returns>
+
+///// <summary>
+///// If Database exists, opens it. Otherwise creates one, and opens it.
+///// </summary>
+///// <returns>Returns true if database could be open, false otherwise.  </returns>
 bool Database::OpenDb() {
-  int _rc = sqlite3_open("resource/reparo.db", &db);
-  if (_rc) {
-    std::cerr << "Cannot open database: " << sqlite3_errmsg(db) << std::endl;
-    return false;
-  }
-  Log::msg("DB IS OPEN");;
-  return true;
+    try {
+        sql.open(soci::sqlite3, "resource/reparo.db");
+        Log::msg("DB IS OPEN");
+        return true;
+    }
+    catch (const soci::soci_error& e) {
+        std::cerr << "Cannot open database: " << e.what() << std::endl;
+        return false;
+    }
 }
 
 bool Database::Execute(const std::string& _sql) {
-  char* _err_msg = nullptr;
-  int _rc = sqlite3_exec(db, _sql.c_str(), nullptr, nullptr, &_err_msg);
-
-  if (_rc != SQLITE_OK) {
-    std::cerr << "SQL error: " << _err_msg << std::endl;
-    sqlite3_free(_err_msg);
+  try {
+    sql << _sql;
+    sql.close();
+    return true;
+  }
+  catch (const std::exception& e) {
+    std::cerr << "Execute failed, rolling back" << e.what() << std::endl;
+    std::cerr << "Query: " << _sql << std::endl;
+    sql.close();
     return false;
   }
-  return true;
 }
 
+bool Database::ExecuteTransaction(const std::string& _sql) {
+  try {
+    soci::transaction tran(sql);
+    sql << _sql;
 
-bool Database::CreateDatabase() {
-  if (OpenDb()) { 
-    Log::msg("Database already exists");
-    return false;  
+    tran.commit();
+    sql.close();
+    return true;
   }
-  return true;
+  catch (const std::exception& e) {
+    std::cerr << "Transaction failed, rolling back" << e.what() << std::endl;
+    std::cerr << "Query: " << _sql << std::endl;
+    sql.close();
+    return false;
+  }
 }
 
 TableCreator Database::Create() {
@@ -105,23 +110,6 @@ TableCreator Database::Create() {
     Log::msg("Failed to open database");
   }
   return TableCreator();
-}
-
-bool TableCreator::ExecuteWithTransaction(const std::string& _sql) {
-  SQLTransaction transaction(Database::GetDb());
-  transaction.EnableForeignKeys();
-
-  if (!Database::Execute(_sql)) {
-    transaction.Rollback();
-    return false;
-  }
-
-  if (!transaction.Commit()) {
-    transaction.Rollback();
-    return false;
-  }
-
-  return true;
 }
 
 TableCreator& TableCreator::BillingAddressesTable() {
@@ -137,7 +125,7 @@ TableCreator& TableCreator::BillingAddressesTable() {
     );
   )";
 
-  ExecuteWithTransaction(_sql);
+  Database::ExecuteTransaction(_sql);
   return *this;
 }
 
@@ -154,7 +142,7 @@ TableCreator& TableCreator::ShipAddressesTable() {
     );
   )";
 
-  ExecuteWithTransaction(_sql);
+  Database::ExecuteTransaction(_sql);
   return *this;
 }
 
@@ -182,7 +170,7 @@ TableCreator& TableCreator::CustomersTable() {
       );
   )";
 
-  ExecuteWithTransaction(_sql);
+  Database::ExecuteTransaction(_sql);
   return *this;
 }
 
@@ -190,11 +178,16 @@ TableCreator& TableCreator::SuppliersTable() {
   std::string _sql = R"(
     CREATE TABLE IF NOT EXISTS suppliers (
       id         INTEGER PRIMARY KEY,
-      supplier   TEXT NOT NULL UNIQUE         
+      supplier   TEXT NOT NULL UNIQUE,
+      line1      TEXT,         
+      line2      TEXT,                
+      line3      TEXT,
+      line4      TEXT,
+      line5      TEXT         
     );
   )";
 
-  ExecuteWithTransaction(_sql);
+  Database::ExecuteTransaction(_sql);
   return *this;
 }
 
@@ -206,7 +199,7 @@ TableCreator& TableCreator::RepairStatesTable() {
     );
   )";
 
-  ExecuteWithTransaction(_sql);
+  Database::ExecuteTransaction(_sql);
   return *this;
 }
 
@@ -218,7 +211,7 @@ TableCreator& TableCreator::ColorsTable() {
     );
   )";
 
-  ExecuteWithTransaction(_sql);
+  Database::ExecuteTransaction(_sql);
   return *this;
 }
 
@@ -229,7 +222,7 @@ TableCreator& TableCreator::RepairCategoriesTable() {
       category  TEXT NOT NULL UNIQUE         
     );
   )";
-  ExecuteWithTransaction(_sql);
+  Database::ExecuteTransaction(_sql);
   return *this;
 }
 
@@ -241,7 +234,7 @@ TableCreator& TableCreator::DeviceTypesTable() {
       );
     )";
 
-  ExecuteWithTransaction(_sql);
+  Database::ExecuteTransaction(_sql);
   return *this;
 }
 
@@ -252,7 +245,7 @@ TableCreator& TableCreator::BrandsTable() {
       brand   TEXT NOT NULL UNIQUE         
     );
   )";
-  ExecuteWithTransaction(_sql);
+  Database::ExecuteTransaction(_sql);
   return *this;
 }
 
@@ -263,7 +256,7 @@ TableCreator& TableCreator::QualitiesTable() {
       quality   TEXT NOT NULL UNIQUE         
     );
   )";
-  ExecuteWithTransaction(_sql);
+  Database::ExecuteTransaction(_sql);
   return *this;
 }
 
@@ -274,7 +267,7 @@ TableCreator& TableCreator::PaymentMethodsTable() {
       method     TEXT NOT NULL UNIQUE         
     );
   )";
-  ExecuteWithTransaction(_sql);
+  Database::ExecuteTransaction(_sql);
   return *this;
 }
 
@@ -285,7 +278,7 @@ TableCreator& TableCreator::InventoryActionsTable() {
       action     TEXT NOT NULL UNIQUE         
     );
   )";
-  ExecuteWithTransaction(_sql);
+  Database::ExecuteTransaction(_sql);
   return *this;
 }
 
@@ -294,21 +287,34 @@ TableCreator& TableCreator::DevicesTable() {
     CREATE TABLE IF NOT EXISTS devices (
       id        INTEGER PRIMARY KEY,
       model     TEXT NOT NULL,
-      brand     INTEGER,
-      type      INTEGER,
+      brand_id  INTEGER,
+      type_id      INTEGER,
 
-      FOREIGN KEY (brand)
+      FOREIGN KEY (brand_id)
         REFERENCES brands(id)
         ON DELETE SET NULL
         ON UPDATE CASCADE,  
  
-      FOREIGN KEY (type)
+      FOREIGN KEY (type_id)
         REFERENCES device_types(id)
         ON DELETE SET NULL
         ON UPDATE CASCADE       
     );
   )";
-  ExecuteWithTransaction(_sql);
+  Database::ExecuteTransaction(_sql);
+  return *this;
+}
+
+TableCreator& TableCreator::CustomDevicesTable() {
+  std::string _sql = R"(
+    CREATE TABLE IF NOT EXISTS custom_devices (
+      id        INTEGER PRIMARY KEY,
+      model     TEXT NOT NULL,
+      brand     TEXT,
+      type      TEXT
+    );
+  )";
+  Database::ExecuteTransaction(_sql);
   return *this;
 }
 
@@ -317,15 +323,15 @@ TableCreator& TableCreator::AliasesTable() {
     CREATE TABLE IF NOT EXISTS aliases (
       id        INTEGER PRIMARY KEY,
       alias     TEXT NOT NULL UNIQUE,
-      model     INTEGER NOT NULL,    
+      model_id     INTEGER NOT NULL,    
 
-      FOREIGN KEY (model)
+      FOREIGN KEY (model_id)
         REFERENCES models(id)
         ON DELETE CASCADE
         ON UPDATE CASCADE     
     );
   )";
-  ExecuteWithTransaction(_sql);
+  Database::ExecuteTransaction(_sql);
   return *this;
 }
 
@@ -333,19 +339,318 @@ TableCreator& TableCreator::AliasesTable() {
 TableCreator& TableCreator::ModelColorsTable() {
   std::string _sql = R"(
     CREATE TABLE IF NOT EXISTS model_colors (
-      model     TEXT NOT NULL,
-      color     TEXT NOT NULL,
+      model_id     TEXT NOT NULL,
+      color_id     TEXT NOT NULL,
 
-      FOREIGN KEY (model)
+      FOREIGN KEY (model_id)
         REFERENCES devices(id)
         ON DELETE CASCADE
         ON UPDATE CASCADE, 
      
-      FOREIGN KEY (color)
+      FOREIGN KEY (color_id)
         REFERENCES colors(id)
         ON UPDATE CASCADE
     );
   )";
-  ExecuteWithTransaction(_sql);
+  Database::ExecuteTransaction(_sql);
+  return *this;
+}
+
+TableCreator& TableCreator::PartsTable() {
+  std::string _sql = R"(
+    CREATE TABLE IF NOT EXISTS parts (
+      id                  INTEGER PRIMARY KEY,
+      name                TEXT NOT NULL,
+      own_sku             TEXT NOT NULL UNIQUE,
+      quality_id          INTEGER,
+      sell_price          REAL,
+      sell_price_ex_vat   REAL,
+      color_id            INTEGER,
+      quantity            INTEGER DEFAULT 0,
+      purch_price         REAL,
+      purch_price_ex_vat  REAL,
+      location            TEXT,
+      reserved_quantity   INTEGER DEFAULT 0,
+      created_at          DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at          DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+      FOREIGN KEY (quality_id)
+        REFERENCES qualities(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE, 
+     
+      FOREIGN KEY (color_id)
+        REFERENCES colors(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+    );
+  )";
+  Database::ExecuteTransaction(_sql);
+  return *this;
+}
+
+TableCreator& TableCreator::PurchaseInvoicesTable() {
+  std::string _sql = R"(
+    CREATE TABLE IF NOT EXISTS purchase_invoices (
+      id                 INTEGER PRIMARY KEY,
+      invoice_number     TEXT NOT NULL,
+      supplier_id        INTEGER,
+      vat_rate           REAL NOT NULL,
+      invoice_date       DATE NOT NULL,
+      created_at         DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+      FOREIGN KEY (supplier_id)
+          REFERENCES suppliers(id)
+          ON DELETE SET NULL
+          ON UPDATE CASCADE
+    );
+  )";
+  Database::ExecuteTransaction(_sql);
+  return *this;
+}
+
+TableCreator& TableCreator::PurchaseInvoicesItemsTable() {
+  std::string _sql = R"(
+    CREATE TABLE IF NOT EXISTS purchase_invoice_items (
+    id                      INTEGER PRIMARY KEY,
+    purchase_invoice_id     TEXT NOT NULL,
+    part_id                 INTEGER,
+    supplier_sku            TEXT,
+    temp_part_name          TEXT,  -- Used when part doesn't exist yet
+    own_sku                 TEXT,  -- Can be used to link to future part
+    purchase_price          REAL NOT NULL,
+    purchase_price_ex_vat   REAL NOT NULL,
+    quantity                INTEGER NOT NULL,
+    created_at              DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (purchase_invoice_id)
+        REFERENCES purchase_invoices(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+        
+    FOREIGN KEY (part_id)
+        REFERENCES parts(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE
+);
+
+  -- Trigger to create new part when own_sku is inserted in purchase_invoice_items
+  CREATE TRIGGER IF NOT EXISTS create_new_part_from_purchase_item
+      AFTER INSERT ON purchase_invoice_items
+      WHEN NEW.part_id IS NULL
+  BEGIN
+      INSERT INTO parts (name, own_sku)
+      VALUES (NEW.supplier_sku, NEW.own_sku);
+    
+      UPDATE purchase_invoice_items
+      SET part_id = (SELECT id FROM parts WHERE own_sku = NEW.own_sku)
+      WHERE id = NEW.id;
+  END;
+
+  -- Trigger to update parts.updated_at
+  CREATE TRIGGER IF NOT EXISTS update_part_timestamp
+      AFTER UPDATE ON parts
+  BEGIN
+      UPDATE parts 
+      SET updated_at = CURRENT_TIMESTAMP
+      WHERE id = NEW.id;
+  END;
+
+  -- Trigger to update parts quantity after purchase
+  CREATE TRIGGER IF NOT EXISTS after_purchase_item_insert
+      AFTER INSERT ON purchase_invoice_items
+      WHEN NEW.part_id IS NOT NULL
+  BEGIN
+      UPDATE parts 
+      SET quantity = quantity + NEW.quantity,
+          last_purchase_price = NEW.purchase_price,
+          last_purchase_price_ex_vat = NEW.purchase_price_ex_vat
+      WHERE id = NEW.part_id;
+  END;
+
+
+  -- Trigger to update parts history after purchase
+  CREATE TRIGGER IF NOT EXISTS update_part_history
+      AFTER INSERT ON purchase_invoice_items
+  BEGIN
+      INSERT INTO parts_history (part_id, operation, quantity, action_id, notes, created_at)
+      VALUES  (NEW.part_id, "Add", NEW.quantity, 1, NEW.purchase_invoice_id, CURRENT_TIMESTAMP)
+  END;
+    );
+  )";
+  Database::ExecuteTransaction(_sql);
+  return *this;
+}
+
+TableCreator& TableCreator::PartsHistoryTable() {
+  std::string _sql = R"(
+    CREATE TABLE IF NOT EXISTS parts_history (
+      id                 INTEGER PRIMARY KEY,
+      part_id            INTEGER NOT NULL,
+      operation          TEXT,  -- Add / Deduct
+      quantity           INTEGER NOT NULL,
+      action_id          INTEGER NOT NULL,
+      notes              TEXT NOT NULL,
+      created_at         DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+      FOREIGN KEY (part_id)
+          REFERENCES parts(id)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE,
+
+      FOREIGN KEY (action_id)
+          REFERENCES inventory_actions(id)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE
+    );
+  )";
+  Database::ExecuteTransaction(_sql);
+  return *this;
+}
+
+TableCreator& TableCreator::RepairsTable() {
+  std::string _sql = R"(
+    CREATE TABLE IF NOT EXISTS repairs (
+      id                 INTEGER PRIMARY KEY,
+      customer_id        INTEGER NOT NULL,
+      model_id           INTEGER DEFAULT NULL,
+      category_id        INTEGER DEFAULT NULL,
+      color_id           INTEGER DEFAULT NULL,
+      visible_desc       TEXT,
+      hidden_desc        TEXT,
+      price              REAL NOT NULL,
+      repair_state_id    INTEGER DEFAULT 1,
+      sn_imei            TEXT,
+      cust_device_id     INTEGER DEFAULT NULL,
+      created_at         DATE DEFAULT CURRENT_TIMESTAMP,
+      finished_at        DATE,
+
+    
+      FOREIGN KEY (customer_id)
+          REFERENCES customers(id)
+          ON UPDATE CASCADE,
+
+      FOREIGN KEY (model_id)
+          REFERENCES devices(id)
+          ON UPDATE CASCADE,
+
+      FOREIGN KEY (category_id)
+          REFERENCES repair_categories(id)
+          ON UPDATE CASCADE,
+
+      FOREIGN KEY (color_id)
+          REFERENCES colors(id)
+          ON UPDATE CASCADE,
+
+      FOREIGN KEY (repair_state_id)
+          REFERENCES repair_states(id)
+          ON UPDATE CASCADE,
+
+      FOREIGN KEY (cust_device_id)
+          REFERENCES custom_devices(id)
+          ON UPDATE CASCADE
+
+);
+ -- Trigger to create new custom device when new device is inserted in repair
+  CREATE TRIGGER IF NOT EXISTS create_new_custom_device
+      AFTER INSERT ON repairs
+      WHEN NEW.model_id IS NULL
+  BEGIN
+      INSERT INTO custom_device (model, brannd, color, )
+      VALUES (NEW.model, NEW.brand, NEW.color);
+  END;
+    );
+  )";
+  Database::ExecuteTransaction(_sql);
+  return *this;
+}
+
+TableCreator& TableCreator::RepairPartsTable() {
+  std::string _sql = R"(
+    CREATE TABLE IF NOT EXISTS repair_parts (
+      repair_id          INTEGER,
+      part_id            INTEGER,
+      quantity           INTEGER NOT NULL,
+
+      FOREIGN KEY (repair_id)
+          REFERENCES repairs(id)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE,
+
+      FOREIGN KEY (part_id)
+          REFERENCES parts(id)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE
+    );
+  )";
+  Database::ExecuteTransaction(_sql);
+  return *this;
+}
+
+TableCreator& TableCreator::InvoicesTable() {
+  std::string _sql = R"(
+    CREATE TABLE IF NOT EXISTS invoices (
+      id                  INTEGER PRIMARY KEY,
+      invoice_num         INTEGER NOT NULL UNIQUE,
+      repair_id           INTEGER,
+      created_at          DATE DEFAULT CURRENT_TIMESTAMP,
+      payment_method_id   INTEGER,
+      paid                REAL,
+      left_to_pay         REAL,
+
+      FOREIGN KEY (repair_id)
+          REFERENCES repairs(id),
+
+      FOREIGN KEY (payment_method_id)
+          REFERENCES payment_methods(id)
+          ON UPDATE CASCADE
+    );
+
+    CREATE TRIGGER IF NOT EXISTS auto_increment_invoice_num
+    AFTER INSERT ON invoices
+    WHEN new.invoice_num IS NULL
+    BEGIN
+        UPDATE invoices 
+        SET invoice_num = (SELECT COALESCE(MAX(invoice_num), 0) + 1 FROM invoices)
+        WHERE id = new.id;
+    END;
+  )";
+  Database::ExecuteTransaction(_sql);
+  return *this;
+}
+
+TableCreator& TableCreator::PartModelTable() {
+  std::string _sql = R"(
+    CREATE TABLE IF NOT EXISTS part_model (
+      part_id             INTEGER NOT NULL,
+      model_id            INTEGER NOT NULL,
+
+      FOREIGN KEY (part_id)
+          REFERENCES parts(id),
+
+      FOREIGN KEY (model_id)
+          REFERENCES models(id)
+          ON UPDATE CASCADE
+    );
+  )";
+  Database::ExecuteTransaction(_sql);
+  return *this;
+}
+
+TableCreator& TableCreator::PartModelAliasTable() {
+  std::string _sql = R"(
+    CREATE TABLE IF NOT EXISTS part_model_alias (
+      part_id             INTEGER NOT NULL,
+      alias_id            INTEGER NOT NULL,
+
+      FOREIGN KEY (part_id)
+          REFERENCES parts(id),
+
+      FOREIGN KEY (alias_id)
+          REFERENCES aliases(id)
+          ON UPDATE CASCADE
+    );
+  )";
+  Database::ExecuteTransaction(_sql);
   return *this;
 }

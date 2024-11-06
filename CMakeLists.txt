@@ -19,6 +19,8 @@ find_package(OpenCV CONFIG REQUIRED)
 find_package(Gettext REQUIRED)
 find_package(Iconv REQUIRED)
 find_package(ZXing CONFIG REQUIRED)
+find_package(unofficial-sqlite3 CONFIG REQUIRED)
+find_package(SOCI CONFIG REQUIRED)
 
 # Define the source directories
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
@@ -51,8 +53,6 @@ set(VENDOR_FILES
     ${VENDOR_DIR}/imgui/imgui_stdlib.cpp
     ${VENDOR_DIR}/nlohmann/json.hpp
     ${VENDOR_DIR}/nlohmann/json_fwd.hpp
-    ${VENDOR_DIR}/sqlite3/sqlite3.c
-    ${VENDOR_DIR}/sqlite3/sqlite3.h
 )
 
 # Define the executable and add source files
@@ -129,6 +129,7 @@ elseif(APPLE)
     )
 endif()
 
+
 # Set include directories
 target_include_directories(${PROJECT_NAME} 
     PRIVATE 
@@ -136,7 +137,6 @@ target_include_directories(${PROJECT_NAME}
         ${OPENGL_INCLUDE_DIR}
         ${CMAKE_SOURCE_DIR}/vendor/imgui
 	${CMAKE_SOURCE_DIR}/vendor/nlohmann
-	${CMAKE_SOURCE_DIR}/vendor/sqlite3
         ${OpenCV_INCLUDE_DIRS}
 )
 
@@ -148,6 +148,14 @@ if(APPLE)
     )
 endif()
 
+# Add these compile definitions
+target_compile_definitions(${PROJECT_NAME} 
+    PRIVATE 
+        SQLITE_STATIC
+        SOCI_STATIC_LIBS
+        SOCI_SQLITE3_STATIC
+)
+
 # Common libraries for both platforms
 target_link_libraries(${PROJECT_NAME} 
     PRIVATE 
@@ -157,6 +165,9 @@ target_link_libraries(${PROJECT_NAME}
         ${OpenCV_LIBS}
         ZXing::Core
         ZXing::ZXing
+	unofficial::sqlite3::sqlite3
+	$<IF:$<TARGET_EXISTS:SOCI::soci_core>,SOCI::soci_core,SOCI::soci_core_static>
+        $<IF:$<TARGET_EXISTS:SOCI::soci_sqlite3>,SOCI::soci_sqlite3,SOCI::soci_sqlite3_static>
 )
 
 # Platform-specific libraries
