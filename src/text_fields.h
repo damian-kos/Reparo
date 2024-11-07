@@ -41,7 +41,7 @@ class TextField {
 public:
   TextField(const std::string& label, ImGuiInputTextFlags = 0, TFFlags = 0);
   virtual void Render();
-
+  const std::string& Get() const;
 protected:
   std::string label;
   std::string buffer;

@@ -24,12 +24,17 @@ find_package(SOCI CONFIG REQUIRED)
 
 # Define the source directories
 set(SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
+set(MODELS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src/models")
 set(VENDOR_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor")
 
 # Automatically collect source files
 file(GLOB_RECURSE SRC_FILES 
     "${SOURCE_DIR}/*.cpp" 
     "${SOURCE_DIR}/*.h"
+)
+file(GLOB_RECURSE MODELS_FILES 
+    "${MODELS_DIR}/*.cpp" 
+    "${MODELS_DIR}/*.h"
 )
 
 # Manually list vendor files since they are specific
@@ -60,6 +65,7 @@ add_executable(${PROJECT_NAME}
     main.cpp
     ${VENDOR_FILES} 
     ${SRC_FILES}
+    ${MODELS_FILES}
 )
 
 # Platform-specific configurations

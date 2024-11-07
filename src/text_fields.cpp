@@ -71,6 +71,10 @@ void TextField::Render() {
   ImGui::InputTextWithHint(("##" + label).c_str(), label.c_str(), &buffer, flags);
 }
 
+const std::string& TextField::Get() const{
+  return buffer;
+}
+
 void PhoneField::Render() {
   const bool err = err_flags & (ValidatorFlags_StrLen | ValidatorFlags_IsDuplicate);
 
