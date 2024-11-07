@@ -3,7 +3,7 @@
 #include "imgui.h"
 #include "database.h"
 #include "RoLocalization.h"
-
+#include "text_fields.h"
 std::vector<ReparoCore::TableCreationInfo> ReparoCore::table_config;
 
 void ReparoCore::Render() {
@@ -16,6 +16,23 @@ void ReparoCore::RenderDebug() {
   InitializeTableBtns();
 
   ImGui::Begin("Debug");
+
+  static TextField tf("Text");
+  tf.Render();
+
+  static std::string pf_buffer;
+  static PhoneField pf("Phone", 0, TFFlags_HAS_POPUP);
+  pf.Render();
+
+  static NameField nf("Name", 0, TFFlags_HAS_POPUP);
+  nf.Render();
+
+  static SurnameField sf("Name w/o popup");
+  sf.Render();
+
+  static EmailField ef("Email");
+  ef.Render();
+
     //List Creation Button for creating a tables in a database
     for (const auto& table : table_config) {
       if (ImGui::Button(table.label.c_str())) {
