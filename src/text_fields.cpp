@@ -86,7 +86,7 @@ void PhoneField::Render() {
 
 #ifdef DEBUG
   ImGui::PushID(label.c_str());
-  if (ro_flags & TFFlags_HAS_POPUP);
+  if (ro_flags & TFFlags_HasPopup);
     Popup::OnTextInput(buffer);
   if (err_flags & ValidatorFlags_StrLen)
     ImGui::Text("Phone too short");
@@ -94,7 +94,7 @@ void PhoneField::Render() {
     ImGui::Text("Phone already exists");
   ImGui::PopID();
 #else 
-  if (ro_flags & TFFlags_HAS_POPUP)
+  if (ro_flags & TFFlags_HasPopup)
     Popup::OnTextInput(buffer);
 #endif // DEBUG
 }
@@ -112,7 +112,7 @@ void NameField::Render() {
   }
 
   ImGui::PushID(label.c_str());
-  if (ro_flags & TFFlags_HAS_POPUP)
+  if (ro_flags & TFFlags_HasPopup)
     Popup::OnTextInput(buffer);
   ImGui::PopID();
 
@@ -135,7 +135,7 @@ void SurnameField::Render() {
   }
 
   ImGui::PushID(label.c_str());
-  if (ro_flags & TFFlags_HAS_POPUP)
+  if (ro_flags & TFFlags_HasPopup)
     Popup::OnTextInput(buffer);
   ImGui::PopID();
 
@@ -158,7 +158,7 @@ void EmailField::Render() {
   }
 
   ImGui::PushID(label.c_str());
-  if (ro_flags & TFFlags_HAS_POPUP)
+  if (ro_flags & TFFlags_HasPopup)
     Popup::OnTextInput(buffer);
   ImGui::PopID();
 

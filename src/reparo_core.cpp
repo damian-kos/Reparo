@@ -21,10 +21,10 @@ void ReparoCore::RenderDebug() {
   tf.Render();
 
   static std::string pf_buffer;
-  static PhoneField pf("Phone", 0, TFFlags_HAS_POPUP);
+  static PhoneField pf("Phone", 0, TFFlags_HasPopup);
   pf.Render();
 
-  static NameField nf("Name", 0, TFFlags_HAS_POPUP);
+  static NameField nf("Name", 0, TFFlags_HasPopup);
   nf.Render();
 
   static SurnameField sf("Name w/o popup");

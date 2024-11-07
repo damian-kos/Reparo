@@ -16,10 +16,10 @@ enum ValidatorFlags_ {
 
 
 enum TFFlags_ {
-  TFFlags_NONE = 0,
-  TFFlags_HAS_POPUP = 1 << 0,
-  TFFlags_HAS_RELATED_FIELD = 1 << 1,
-  TFFlags_HAS_VALIDATOR = 1 << 2,
+  TFFlags_None = 0,
+  TFFlags_HasPopup = 1 << 0,
+  TFFlags_HasRelatedField = 1 << 1,
+  TFFlags_HasValidator = 1 << 2,
 };
 
 typedef int ValidatorFlags;
