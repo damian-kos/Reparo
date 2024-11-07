@@ -7,7 +7,7 @@
 std::vector<ReparoCore::TableCreationInfo> ReparoCore::table_config;
 
 void ReparoCore::Render() {
-
+  customer_win.Render();
 }
 
 #ifdef DEBUG

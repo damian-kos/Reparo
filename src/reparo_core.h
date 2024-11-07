@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <string>
+#include "reparo_windows.h"
 
 class Database;
 class TableCreator;
@@ -8,6 +9,9 @@ class TableCreator;
 class ReparoCore {
 public:
   void Render();
+
+private:
+  CustomerWin customer_win;
 
 #ifdef DEBUG
 public:

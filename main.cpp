@@ -204,7 +204,7 @@ int main(int, char**)
         }
         
         Loc::renderUI();
-
+        reparo_core.Render();
         ReparoCore::RenderDebug();
       
         // 3. Show another simple window.
