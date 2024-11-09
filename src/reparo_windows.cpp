@@ -1,6 +1,7 @@
 #include "reparo_windows.h"
 #include "imgui.h"
 #include "RoLocalization.h"
+#include "modal.h"
 #include "models/customer.h"
 
 CustomerWin::CustomerWin()
@@ -11,6 +12,8 @@ CustomerWin::CustomerWin()
 {}
 
 void CustomerWin::Render() {
+  static Modal<Customer> modal;
+
   ImGui::Begin(_("Insert Customer"), &open);
   phone.Render();
   name.Render();
@@ -23,7 +26,15 @@ void CustomerWin::Render() {
       .Name(name.Get())
       .Surname(surname.Get())
       .Email(email.Get());
-    customer.Get();
+
+    Config<Customer> config{
+      .title = _("Insert Customer?"),
+      .msg = _("Are you sure?"),
+      .caller = customer.Get(),
+    };
+    modal.SetConfig(config);
   }
+  modal.Render();
+
   ImGui::End();
 }

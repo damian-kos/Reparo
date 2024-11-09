@@ -1,17 +1,26 @@
 #include "customer.h"
 #include <iostream>
+#include "imgui.h"
 
 Customer::Customer() {}
 
-Customer Customer::Get() {
+Customer& Customer::Get() {
 #ifdef DEBUG
   std::cout << "Customer: " << id << " / " << phone << " / " << name << " / " << surname << " / " << email << std::endl;
 #endif // DEBUG
-  return Customer();
+  return *this;
 }
 
 CustomerBuilder Customer::Set() {
   return CustomerBuilder(*this);
+}
+
+void Customer::View() {
+  ImGui::Text("ID: %d", id);
+  ImGui::Text("ID: %s", phone.c_str());
+  ImGui::Text("ID: %s", name.c_str());
+  ImGui::Text("ID: %s", surname.c_str());
+  ImGui::Text("ID: %s", email.c_str());
 }
 
 CustomerBuilder::CustomerBuilder(Customer& customer) : customer(customer) { }

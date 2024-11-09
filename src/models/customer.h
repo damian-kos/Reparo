@@ -4,11 +4,12 @@
 
 class CustomerBuilder;
 
-class Customer {
+class Customer{
 public:
   Customer();
-  Customer Get();
+  Customer& Get();
   CustomerBuilder Set();
+  void View();
 
 private:
   friend class CustomerBuilder;

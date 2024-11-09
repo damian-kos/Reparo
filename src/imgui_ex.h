@@ -24,4 +24,10 @@ namespace ImGui {
     if (err)
       ImGui::PopStyleColor();
   }
+
+
+  template<typename T>
+  void View(const T& model) {
+    model.View();
+  }
 }
