@@ -7,9 +7,27 @@ class CustomerBuilder;
 class Customer{
 public:
   Customer();
-  Customer& Get();
+  Customer& GetCustomer();
   CustomerBuilder Set();
   void View();
+
+  class Data {
+  public:
+    Data(const Customer& customer);
+
+    int ID() const;
+    const std::string& Phone() const;
+    const std::string& Name() const;
+    const std::string& Surname() const;
+    const std::string& Email() const;
+    const std::vector<std::string>& BillingAddresses();
+    const std::vector<std::string>& ShipAddresses();
+
+  private:
+    const Customer& customer;
+  };
+
+  Data Get() const { return Data(*this); }
 
 private:
   friend class CustomerBuilder;

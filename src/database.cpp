@@ -1,62 +1,9 @@
 #pragma once
 #include "database.h"
 #include "debug.h"
-
-//SQLTransaction::SQLTransaction(soci::session& db) : db(db), active(false) {
-//  Begin();
-//}
-//
-//SQLTransaction::~SQLTransaction() {
-//  if (active) {
-//    Rollback();
-//  }
-//}
-//
-//bool SQLTransaction::Begin() {
-//  try {
-//    db.begin();
-//    active = true;
-//    return true;
-//  }
-//  catch (const soci::soci_error& e) {
-//    std::cerr << "Failed to start transaction: " << e.what() << std::endl;
-//    return false;
-//  }
-//}
-//
-//bool SQLTransaction::Commit() {
-//  try {
-//    if (active) {
-//      db.commit();
-//      active = false;
-//      return true;
-//    }
-//    return false;
-//  }
-//  catch (const soci::soci_error& e) {
-//    std::cerr << "Failed to commit transaction: " << e.what() << std::endl;
-//    return false;
-//  }
-//}
-//
-//bool SQLTransaction::Rollback() {
-//  try {
-//    if (active) {
-//      db.rollback();
-//      active = false;
-//      return true;
-//    }
-//    return false;
-//  }
-//  catch (const soci::soci_error& e) {
-//    std::cerr << "Failed to rollback transaction: " << e.what() << std::endl;
-//    return false;
-//  }
-//}
-
+#include "models/customer.h"
 
 soci::session Database::sql;
-
 
 ///// <summary>
 ///// If Database exists, opens it. Otherwise creates one, and opens it.
@@ -112,6 +59,10 @@ TableCreator Database::Create() {
   return TableCreator();
 }
 
+Inserter Database::Insert() {
+    return Inserter();
+}
+
 TableCreator& TableCreator::BillingAddressesTable() {
   std::string _sql = R"(
     CREATE TABLE IF NOT EXISTS billing_addresses (
@@ -154,7 +105,6 @@ TableCreator& TableCreator::CustomersTable() {
       name                TEXT,                
       surname             TEXT,
       email               TEXT,
-      line5               TEXT,
       billing_addr_id     INTEGER,
       ship_addr_id        INTEGER,
                 
@@ -653,4 +603,19 @@ TableCreator& TableCreator::PartModelAliasTable() {
   )";
   Database::ExecuteTransaction(_sql);
   return *this;
+}
+
+Inserter& Inserter::Customer_(const Customer& customer) {
+  return ExecuteTransaction(
+    [&customer]() {
+      Database::sql << "INSERT INTO customers "
+        "(phone, name, surname, email, billing_addr_id, ship_addr_id) "
+        "VALUES (:ph, :nm, :sn, :em, :bid, :sid)",
+        soci::use(customer.Get().Phone()),
+        soci::use(customer.Get().Name()),
+        soci::use(customer.Get().Surname()),
+        soci::use(customer.Get().Email());
+    },
+    "Customer insertion (Phone: " + customer.Get().Phone() + ")"
+  );
 }

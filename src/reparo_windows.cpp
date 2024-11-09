@@ -3,6 +3,7 @@
 #include "RoLocalization.h"
 #include "modal.h"
 #include "models/customer.h"
+#include "database.h"
 
 CustomerWin::CustomerWin()
   : phone(_("Phone"), ImGuiInputTextFlags_CharsDecimal, TFFlags_HasPopup)
@@ -21,6 +22,7 @@ void CustomerWin::Render() {
   email.Render();
   if (ImGui::Button(_("Submit Customer Details"))) {
     Customer customer;
+    
     customer.Set()
       .Phone(phone.Get())
       .Name(name.Get())
@@ -30,8 +32,9 @@ void CustomerWin::Render() {
     Config<Customer> config{
       .title = _("Insert Customer?"),
       .msg = _("Are you sure?"),
-      .caller = customer.Get(),
+      .caller = customer.GetCustomer(),
     };
+    Database::Insert().Customer_(customer); // move to modal
     modal.SetConfig(config);
   }
   modal.Render();

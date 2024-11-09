@@ -4,7 +4,7 @@
 
 Customer::Customer() {}
 
-Customer& Customer::Get() {
+Customer& Customer::GetCustomer() {
 #ifdef DEBUG
   std::cout << "Customer: " << id << " / " << phone << " / " << name << " / " << surname << " / " << email << std::endl;
 #endif // DEBUG
@@ -17,10 +17,10 @@ CustomerBuilder Customer::Set() {
 
 void Customer::View() {
   ImGui::Text("ID: %d", id);
-  ImGui::Text("ID: %s", phone.c_str());
-  ImGui::Text("ID: %s", name.c_str());
-  ImGui::Text("ID: %s", surname.c_str());
-  ImGui::Text("ID: %s", email.c_str());
+  ImGui::Text("Phone: %s", phone.c_str());
+  ImGui::Text("Name: %s", name.c_str());
+  ImGui::Text("Surname: %s", surname.c_str());
+  ImGui::Text("Email: %s", email.c_str());
 }
 
 CustomerBuilder::CustomerBuilder(Customer& customer) : customer(customer) { }
@@ -60,3 +60,32 @@ CustomerBuilder& CustomerBuilder::ShipAddresses(const std::vector<std::string>& 
   return *this;
 }
 
+Customer::Data::Data(const Customer& customer) : customer(customer) { }
+
+int Customer::Data::ID() const {
+  return customer.id;
+}
+
+const std::string& Customer::Data::Phone() const {
+  return customer.phone;
+}
+
+const std::string& Customer::Data::Name() const {
+  return customer.name;
+}
+
+const std::string& Customer::Data::Surname() const {
+  return customer.surname;
+}
+
+const std::string& Customer::Data::Email() const {
+  return customer.email;
+}
+
+const std::vector<std::string>& Customer::Data::BillingAddresses() {
+  return customer.billing_addresses;
+}
+
+const std::vector<std::string>& Customer::Data::ShipAddresses() {
+  return customer.ship_addresses;
+}

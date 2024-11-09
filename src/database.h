@@ -6,38 +6,20 @@
 #include <sstream>
 
 class TableCreator;
+class Inserter;
+class Customer;
 
-//class SQLTransaction {
-//private:
-//  soci::session db;
-//  bool active;
-//
-//public:
-//  SQLTransaction(soci::session& db);
-//  ~SQLTransaction();
-//
-//  bool Begin();
-//  bool Commit();
-//  bool Rollback();
-//
-//};
-//
-//
 class Database {
-private:
-  static soci::session sql;
-
 public:
+  static soci::session sql;
   static bool OpenDb();
-  //static bool TranaExecute(const std::string& _sql);
   static bool Execute(const std::string& _sql);
   static bool ExecuteTransaction(const std::string& _sql);
   static TableCreator Create();
-//  static sqlite3* GetDb() { return db; }
-//
-//  static bool CreateDatabase();
+  static Inserter Insert();
+
 };
-//
+
 class TableCreator {
 public:
   TableCreator() = default;
@@ -67,3 +49,40 @@ public:
   TableCreator& PartModelTable();
   TableCreator& PartModelAliasTable();
 };
+
+
+class Inserter {
+public:
+  Inserter() = default;
+  Inserter& Customer_(const Customer& customer);
+
+private:
+  template<typename Func>
+  Inserter& ExecuteTransaction(Func operation, const std::string& description);
+};
+
+template<typename Func>
+inline Inserter& Inserter::ExecuteTransaction(Func operation, const std::string& description) {
+  try {
+    Database::OpenDb();
+    soci::transaction tr(Database::sql);
+    operation();
+    tr.commit();
+    std::cout << "Successfully completed: " << description << std::endl;
+    Database::sql.close();
+    return *this;
+  }
+  catch (const soci::sqlite3_soci_error& e) {
+    std::cerr << "SQLite error in " << description << ": " << e.what() << std::endl;
+    Database::sql.close();
+  }
+  catch (const soci::soci_error& e) {
+    std::cerr << "General SOCI error in " << description << ": " << e.what() << std::endl;
+    Database::sql.close();
+  }
+  catch (const std::exception& e) {
+    std::cerr << "Unexpected error in " << description << ": " << e.what() << std::endl;
+    Database::sql.close();
+  }
+  return *this;
+}
