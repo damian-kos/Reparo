@@ -51,8 +51,8 @@ void CustomerWin::Render() {
       .title = _("Insert Customer?"),
       .msg = _("Are you sure?"),
       .caller = customer.GetCustomer(),
+      .on_confirm = [customer]() { Database::Insert().Customer_(customer); }, // new
     };
-    Database::Insert().Customer_(customer); // move to modal
     modal.SetConfig(config);
   }
   modal.Render();

@@ -3,6 +3,9 @@
 #include <string>
 #include <imgui.h>
 #include "models/customer.h"
+#include <functional>
+#include "RoLocalization.h"
+#include "database.h"
 
 template  <typename T>
 struct Config {
@@ -10,6 +13,7 @@ struct Config {
   std::string msg;
   T caller;
   T temp_caller;
+  std::function<void()> on_confirm;
 };
 
 template  <typename T>
@@ -28,6 +32,13 @@ inline void Modal<T>::Render() {
   ImGui::OpenPopup(config.title.c_str());
   if (ImGui::BeginPopupModal(config.title.c_str(), &is_on)) {
     config.caller.View();
+    if (ImGui::Button(_("Confirm"))) {
+      config.on_confirm();
+      ImGui::CloseCurrentPopup();
+    }
+    if (ImGui::Button(_("Cancel"))) {
+      ImGui::CloseCurrentPopup();
+    }
     ImGui::EndPopup();
   }
 }
