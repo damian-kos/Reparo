@@ -3,6 +3,7 @@
 #include <vector>
 
 class CustomerBuilder;
+class TextField;
 
 class Customer{
 public:
@@ -50,8 +51,8 @@ public:
   CustomerBuilder& Name(const std::string& name);
   CustomerBuilder& Surname(const std::string& surname);
   CustomerBuilder& Email(const std::string& phone);
-  CustomerBuilder& BillingAddresses(const std::vector<std::string>& addresses);
-  CustomerBuilder& ShipAddresses(const std::vector<std::string>& addresses);
+  CustomerBuilder& BillingAddresses(const std::vector<TextField>& addresses);
+  CustomerBuilder& ShipAddresses(const std::vector<TextField>& addresses);
 
 private:
   Customer& customer;

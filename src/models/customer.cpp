@@ -1,6 +1,9 @@
 #include "customer.h"
 #include <iostream>
 #include "imgui.h"
+#include "../../src/text_fields.h"
+#include "../../src/RoLocalization.h"
+#include "../../src/tables.h"
 
 Customer::Customer() {}
 
@@ -16,11 +19,12 @@ CustomerBuilder Customer::Set() {
 }
 
 void Customer::View() {
-  ImGui::Text("ID: %d", id);
-  ImGui::Text("Phone: %s", phone.c_str());
-  ImGui::Text("Name: %s", name.c_str());
-  ImGui::Text("Surname: %s", surname.c_str());
-  ImGui::Text("Email: %s", email.c_str());
+  ImGui::Text(_("ID: %d"), id);
+  ImGui::Text(_("Phone: %s"), phone.c_str());
+  ImGui::Text(_("Name: %s"), name.c_str());
+  ImGui::Text(_("Surname: %s"), surname.c_str());
+  ImGui::Text(_("Email: %s"), email.c_str());
+  RoTable::Addresses(billing_addresses, ship_addresses);
 }
 
 CustomerBuilder::CustomerBuilder(Customer& customer) : customer(customer) { }
@@ -50,13 +54,23 @@ CustomerBuilder& CustomerBuilder::Email(const std::string& email) {
   return *this;
 }
 
-CustomerBuilder& CustomerBuilder::BillingAddresses(const std::vector<std::string>& addresses) {
-  customer.billing_addresses = addresses;
+CustomerBuilder& CustomerBuilder::BillingAddresses(const std::vector<TextField>& addresses) {
+  for (int i = 0; i < addresses.size(); i++) {
+    std::string line = addresses[i].Get();
+    if (line != ""){
+      customer.billing_addresses.emplace_back(line);
+    }
+  }
   return *this;
 }
 
-CustomerBuilder& CustomerBuilder::ShipAddresses(const std::vector<std::string>& addresses) {
-  customer.ship_addresses = addresses;
+CustomerBuilder& CustomerBuilder::ShipAddresses(const std::vector<TextField>& addresses) {
+  for (int i = 0; i < addresses.size(); i++) {
+    std::string line = addresses[i].Get();
+    if (line != "") {
+      customer.ship_addresses.emplace_back(line);
+    }
+  }
   return *this;
 }
 

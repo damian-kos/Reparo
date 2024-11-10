@@ -64,6 +64,8 @@ bool Popup::OnTextInput(std::string& buffer, const std::vector<std::string>& dat
     return closed;
   }
 
+TextField::TextField() { }
+
 TextField::TextField(const std::string& label, ImGuiInputTextFlags flags, TFFlags ro_flags)
   : label(label), flags(flags), ro_flags(ro_flags) { }
 
