@@ -3,15 +3,10 @@
 #include <vector>
 #include "model_handler.h"
 
-//class CustomerBuilder;
-class TextField;
-
-class Customer{
+class Device {
 public:
-  Customer();
-  Customer& GetCustomer();
-  void View();
-
+  Device();
+  Device& GetDevice();
   template<typename T>
   Builder<T> Set();
 
@@ -25,20 +20,19 @@ private:
   friend class ModelData;
 
   int id = -1;
-  std::string phone;
   std::string name;
-  std::string surname;
-  std::string email;
-  std::vector<std::string> billing_addresses;
-  std::vector<std::string> ship_addresses;
+  std::string brand;
+  std::string type;
+  std::vector<std::string> colors;
+  std::vector<std::string> aliases;
 };
 
 template<typename T>
-inline Builder<T> Customer::Set() {
+inline Builder<T> Device::Set() {
   return Builder<T>(*this);
 }
 
 template<typename T>
-inline ModelData<T> Customer::Get() const {
+inline ModelData<T> Device::Get() const {
   return ModelData<T>(*this);
 }

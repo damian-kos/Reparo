@@ -608,10 +608,11 @@ TableCreator& TableCreator::PartModelAliasTable() {
 Inserter& Inserter::Customer_(const Customer& customer) {
   return ExecuteTransaction(
     [&customer]() {
+      ModelData data = customer.Get<Customer>();
       // First insert billing address and get its ID
       int billing_addr_id = 0;
-      if (!customer.Get().BillingAddresses().empty()) {
-        const auto& billing = customer.Get().BillingAddresses(); // Using first address
+      if (!data.BillingAddresses().empty()) {
+        const auto& billing = data.BillingAddresses(); // Using first address
         Database::sql << "INSERT INTO billing_addresses "
           "(line1, line2, line3, line4, line5) "
           "VALUES (:l1, :l2, :l3, :l4, :l5) "
@@ -626,8 +627,8 @@ Inserter& Inserter::Customer_(const Customer& customer) {
 
       // Then insert shipping address and get its ID
       int shipping_addr_id = 0;
-      if (!customer.Get().ShipAddresses().empty()) {
-        const auto& shipping = customer.Get().ShipAddresses(); // Using first address
+      if (!data.ShipAddresses().empty()) {
+        const auto& shipping = data.ShipAddresses(); // Using first address
         Database::sql << "INSERT INTO ship_addresses "
           "(line1, line2, line3, line4, line5) "
           "VALUES (:l1, :l2, :l3, :l4, :l5) "
@@ -640,17 +641,17 @@ Inserter& Inserter::Customer_(const Customer& customer) {
           soci::into(shipping_addr_id);
       }
 
-      // Finally insert the customer with the obtained address IDs
+      
       Database::sql << "INSERT INTO customers "
         "(phone, name, surname, email, billing_addr_id, ship_addr_id) "
         "VALUES (:ph, :nm, :sn, :em, :bid, :sid)",
-        soci::use(customer.Get().Phone()),
-        soci::use(customer.Get().Name()),
-        soci::use(customer.Get().Surname()),
-        soci::use(customer.Get().Email()),
+        soci::use(data.Phone()),
+        soci::use(data.Name()),
+        soci::use(data.Surname()),
+        soci::use(data.Email()),
         soci::use(billing_addr_id),
         soci::use(shipping_addr_id);
     },
-    "Customer insertion (Phone: " + customer.Get().Phone() + ")"
+    "Customer insertion (Phone: " + customer.Get<Customer>().Phone() + ")"
   );
 }
