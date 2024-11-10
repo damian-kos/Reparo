@@ -608,13 +608,48 @@ TableCreator& TableCreator::PartModelAliasTable() {
 Inserter& Inserter::Customer_(const Customer& customer) {
   return ExecuteTransaction(
     [&customer]() {
+      // First insert billing address and get its ID
+      int billing_addr_id = 0;
+      if (!customer.Get().BillingAddresses().empty()) {
+        const auto& billing = customer.Get().BillingAddresses(); // Using first address
+        Database::sql << "INSERT INTO billing_addresses "
+          "(line1, line2, line3, line4, line5) "
+          "VALUES (:l1, :l2, :l3, :l4, :l5) "
+          "RETURNING id",
+          soci::use(billing[0]),
+          soci::use(billing[1]),
+          soci::use(billing[2]),
+          soci::use(billing[3]),
+          soci::use(billing[4]),
+          soci::into(billing_addr_id);
+      }
+
+      // Then insert shipping address and get its ID
+      int shipping_addr_id = 0;
+      if (!customer.Get().ShipAddresses().empty()) {
+        const auto& shipping = customer.Get().ShipAddresses(); // Using first address
+        Database::sql << "INSERT INTO ship_addresses "
+          "(line1, line2, line3, line4, line5) "
+          "VALUES (:l1, :l2, :l3, :l4, :l5) "
+          "RETURNING id",
+          soci::use(shipping[0]),
+          soci::use(shipping[1]),
+          soci::use(shipping[2]),
+          soci::use(shipping[3]),
+          soci::use(shipping[4]),
+          soci::into(shipping_addr_id);
+      }
+
+      // Finally insert the customer with the obtained address IDs
       Database::sql << "INSERT INTO customers "
         "(phone, name, surname, email, billing_addr_id, ship_addr_id) "
         "VALUES (:ph, :nm, :sn, :em, :bid, :sid)",
         soci::use(customer.Get().Phone()),
         soci::use(customer.Get().Name()),
         soci::use(customer.Get().Surname()),
-        soci::use(customer.Get().Email());
+        soci::use(customer.Get().Email()),
+        soci::use(billing_addr_id),
+        soci::use(shipping_addr_id);
     },
     "Customer insertion (Phone: " + customer.Get().Phone() + ")"
   );

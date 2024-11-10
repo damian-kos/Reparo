@@ -57,9 +57,7 @@ CustomerBuilder& CustomerBuilder::Email(const std::string& email) {
 CustomerBuilder& CustomerBuilder::BillingAddresses(const std::vector<TextField>& addresses) {
   for (int i = 0; i < addresses.size(); i++) {
     std::string line = addresses[i].Get();
-    if (line != ""){
-      customer.billing_addresses.emplace_back(line);
-    }
+    customer.billing_addresses.emplace_back(line);
   }
   return *this;
 }
@@ -67,9 +65,7 @@ CustomerBuilder& CustomerBuilder::BillingAddresses(const std::vector<TextField>&
 CustomerBuilder& CustomerBuilder::ShipAddresses(const std::vector<TextField>& addresses) {
   for (int i = 0; i < addresses.size(); i++) {
     std::string line = addresses[i].Get();
-    if (line != "") {
-      customer.ship_addresses.emplace_back(line);
-    }
+    customer.ship_addresses.emplace_back(line);
   }
   return *this;
 }
