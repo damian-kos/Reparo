@@ -3,6 +3,7 @@
 #include "RoLocalization.h"
 #include "modal.h"
 #include "models/customer.h"
+#include "models/simple_models.h"
 #include "database.h"
 #include "tables.h"
 
@@ -38,7 +39,7 @@ void CustomerWin::Render() {
   if (ImGui::Button(_("Submit Customer Details"))) {
     Customer customer;
     
-    customer.Set()
+    customer.Set<Customer>()
       .Phone(phone.Get())
       .Name(name.Get())
       .Surname(surname.Get())
@@ -64,4 +65,24 @@ void CustomerWin::Addresses() {
   if (ImGui::CollapsingHeader("Addresses", ImGuiTreeNodeFlags_None)) {
     RoTable::AddressesInputs(billing_address, ship_address);
   }
+}
+
+BrandWin::BrandWin() 
+  : name(_("Brand"))
+{ 
+} 
+  
+
+void BrandWin::Render() {
+  ImGui::Begin(_("Brands"), &open);
+  ImGui::Text(_("Please right-click to edit or delete value"));
+  // Table
+  name.Render();
+  if (ImGui::Button("Add")) {
+    Brand brand;
+    brand.Set<Brand>()
+      .Name(name.Get());
+    Database::Insert().Brand_(brand);
+  }
+  ImGui::End();
 }

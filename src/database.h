@@ -8,6 +8,7 @@
 class TableCreator;
 class Inserter;
 class Customer;
+class Brand;
 
 class Database {
 public:
@@ -55,6 +56,7 @@ class Inserter {
 public:
   Inserter() = default;
   Inserter& Customer_(const Customer& customer);
+  Inserter& Brand_(Brand& brand);
 
 private:
   template<typename Func>

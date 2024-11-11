@@ -11,6 +11,7 @@ class Builder;
 template<typename T>
 class ModelData;
 
+// Add more concepts so Simple Models won't be able to use other setters and getters beside ID and Name
 template<typename T>
 concept IsDevice = std::is_convertible_v<T&, Device&>;
 

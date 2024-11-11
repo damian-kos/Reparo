@@ -12,6 +12,7 @@ public:
 
 private:
   CustomerWin customer_win;
+  BrandWin    brand_win;
 
 #ifdef DEBUG
 public:

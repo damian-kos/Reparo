@@ -2,6 +2,7 @@
 #include "database.h"
 #include "debug.h"
 #include "models/customer.h"
+#include "models/simple_models.h"
 
 soci::session Database::sql;
 
@@ -653,5 +654,22 @@ Inserter& Inserter::Customer_(const Customer& customer) {
         soci::use(shipping_addr_id);
     },
     "Customer insertion (Phone: " + customer.Get<Customer>().Phone() + ")"
+  );
+}
+
+Inserter& Inserter::Brand_(Brand& brand) {
+  return ExecuteTransaction(
+    [&brand]() {
+      int id = 0;
+      ModelData data = brand.Get<Brand>();
+      // Insert the name from brand and get its ID
+      Database::sql << "INSERT INTO brands (brand) VALUES (:brand) "
+        "RETURNING id",
+        soci::use(data.Name()), soci::into(id);
+
+      // Set the brand's ID if needed
+      brand.Set<Brand>().ID(id);
+    },
+    "Brand insertion (Brand Name: " + brand.Get<Brand>().Name() + ")"
   );
 }
