@@ -77,6 +77,7 @@ void BrandWin::Render() {
   ImGui::Begin(_("Brands"), &open);
   ImGui::Text(_("Please right-click to edit or delete value"));
   // Table
+  RoTable::SimpleModel<Brand>(brands);
   name.Render();
   if (ImGui::Button("Add")) {
     Brand brand;
