@@ -24,9 +24,11 @@ class BrandWin {
 public:
   BrandWin();
   void Render();
-  
+  void LoadData();
+
 private:
   TextField name;
   std::vector<Brand> brands;
   bool open = true;
+  bool initialized = false;
 };

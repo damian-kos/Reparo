@@ -4,22 +4,15 @@
 #include <iostream>
 #include <vector>
 #include <sstream>
+#include "models/simple_models.h"
+#include "../../src/soci_type_conversion_helpers.h"
 
 class TableCreator;
 class Inserter;
 class Customer;
 class Brand;
-
-class Database {
-public:
-  static soci::session sql;
-  static bool OpenDb();
-  static bool Execute(const std::string& _sql);
-  static bool ExecuteTransaction(const std::string& _sql);
-  static TableCreator Create();
-  static Inserter Insert();
-
-};
+class SimpleModel;
+class Database;
 
 class TableCreator {
 public:
@@ -50,7 +43,6 @@ public:
   TableCreator& PartModelTable();
   TableCreator& PartModelAliasTable();
 };
-
 
 class Inserter {
 public:
@@ -88,3 +80,98 @@ inline Inserter& Inserter::ExecuteTransaction(Func operation, const std::string&
   }
   return *this;
 }
+
+template<typename T>
+class Selector {
+public:
+  Selector(const std::string& columns = "*") {
+    sql << "SELECT " << columns;
+  }
+
+  Selector& From() {
+    T temp;
+    sql << " FROM " << temp.Get<T>().Table();
+    return *this;
+  }
+
+  Selector& Where(const std::string& condition) {
+    sql << " WHERE " << condition;
+    return *this;
+  }
+
+  Selector& OrderBy(const std::string& column, const std::string& order = "ASC") {
+    sql << " ORDER BY " << column << " " << order;
+    return *this;
+  }
+
+  Selector& Limit(int count) {
+    sql << " LIMIT " << count;
+    return *this;
+  }
+
+  Selector& Offset(int offset) {
+    sql << " OFFSET " << offset;
+    return *this;
+  }
+
+  std::vector<T> All() {
+    std::vector<T> results;
+    try {
+      Database::OpenDb();
+      soci::rowset<T> rs = (Database::sql.prepare << sql.str());
+      for (const auto& row : rs) {
+        results.push_back(row);
+      }
+      Database::sql.close();
+    }
+    catch (const soci::soci_error& e) {
+      std::cerr << "SOCI error executing query: " << e.what() << std::endl;
+      Database::sql.close();
+    }
+    return results;
+  }
+
+  T One() {
+    try {
+      Database::OpenDb();
+      T result;
+      soci::statement st = (Database::sql.prepare << sql.str(), soci::into(result));
+      st.execute();
+      st.fetch();
+      Database::sql.close();
+      return result;
+    }
+    catch (const soci::soci_error& e) {
+      std::cerr << "SOCI error executing query: " << e.what() << std::endl;
+      Database::sql.close();
+      throw;
+    }
+  }
+
+  std::string GetSql() const {
+    return sql.str();
+  }
+
+private:
+  std::ostringstream sql;
+};
+
+class Database {
+public:
+  static soci::session sql;
+  static bool OpenDb();
+  static bool Execute(const std::string& _sql);
+  static bool ExecuteTransaction(const std::string& _sql);
+  static TableCreator Create();
+  static Inserter Insert();
+  template<typename T>
+  static Selector<T> Select(const std::string& columns = "*");
+};
+
+// After Selector class definition, add the implementation:
+template <typename T>
+inline Selector<T> Database::Select(const std::string& columns) {
+  return Selector<T>(columns);
+}
+
+

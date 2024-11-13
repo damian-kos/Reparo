@@ -22,6 +22,7 @@ public:
 
 template<typename T>
 inline TableCalls RoTable::SimpleModel(std::vector<T>& models) {
+  TableCalls result = TableCalls_None;
   if (ImGui::BeginTable("IDValue", 2)) {
     ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_NoHide);
     ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_NoHide);
@@ -40,17 +41,17 @@ inline TableCalls RoTable::SimpleModel(std::vector<T>& models) {
 
       if (ImGui::BeginPopupContextItem()) {
         if (ImGui::Button("Edit record")) {
-          return TableCalls_Edit;
+          result = TableCalls_Edit;
         }
         if (ImGui::Button("Delete")) {
-          return TableCalls_Delete;
+          result = TableCalls_Delete;
         }
         ImGui::EndPopup();
       }
       ImGui::TableNextColumn();
-      ImGui::Text("%s", data.ID());
+      ImGui::Text("%s", data.Name().c_str());
     }
   ImGui::EndTable();
   }
-  return TableCalls_None;
+  return result;
 }

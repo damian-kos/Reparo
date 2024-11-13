@@ -144,6 +144,9 @@ public:
   const std::vector<std::string>& ShipAddresses() const requires IsCustomer<T>;
   const std::vector<std::string>& Aliases() const requires IsDevice<T>;
   const std::vector<std::string>& Colors() const requires IsDevice<T>;
+  const std::string_view& Table() const;
+  const std::string& Column() const;
+
 
 private:
   const T& model;
@@ -216,4 +219,14 @@ template<typename T>
 inline const std::vector<std::string>& ModelData<T>::Colors() const
   requires IsDevice<T> {
   return model.colors;
+}
+
+template<typename T>
+inline const std::string_view& ModelData<T>::Table() const {
+  return model.table;
+}
+
+template<typename T>
+inline const std::string& ModelData<T>::Column() const {
+  return model.column;
 }

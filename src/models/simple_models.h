@@ -5,11 +5,14 @@ class SimpleModel {
 protected:
   int id = -1;
   std::string name;
+ static constexpr std::string_view table = "";
+ static inline const std::string column = "";
 };
 
 class Brand : public SimpleModel {
 public:
   Brand();
+  ~Brand();
   Brand& GetBrand();
 
   template<typename T>
@@ -23,7 +26,8 @@ private:
   friend class Builder;
   template<typename T>
   friend class ModelData;
-
+  static constexpr std::string_view table = "brands";
+  static inline const std::string column = "brand";
 };
 
 template<typename T>

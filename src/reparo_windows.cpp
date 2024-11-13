@@ -47,7 +47,7 @@ void CustomerWin::Render() {
       .BillingAddresses(billing_address)
       .ShipAddresses(ship_address);
       
-
+    customer.Get<Customer>().Table();
     Config<Customer> config{
       .title = _("Insert Customer?"),
       .msg = _("Are you sure?"),
@@ -67,16 +67,20 @@ void CustomerWin::Addresses() {
   }
 }
 
-BrandWin::BrandWin() 
+BrandWin::BrandWin()
   : name(_("Brand"))
-{ 
-} 
+{
+}
   
 
 void BrandWin::Render() {
+  if (!initialized) {
+    LoadData();
+    initialized = true;
+  }
+
   ImGui::Begin(_("Brands"), &open);
   ImGui::Text(_("Please right-click to edit or delete value"));
-  // Table
   RoTable::SimpleModel<Brand>(brands);
   name.Render();
   if (ImGui::Button("Add")) {
@@ -84,6 +88,13 @@ void BrandWin::Render() {
     brand.Set<Brand>()
       .Name(name.Get());
     Database::Insert().Brand_(brand);
+    LoadData();
+    brand.Get<Brand>().Table();
   }
   ImGui::End();
 }
+
+void BrandWin::LoadData() {
+  brands = Database::Select<Brand>().From().All();
+}
+
