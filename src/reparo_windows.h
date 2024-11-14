@@ -23,6 +23,22 @@ private:
   bool open = true;
 };
 
+class DeviceWin {
+public:
+  DeviceWin();
+  void Render();
+
+private:
+  TextField name;
+  TextField brand;
+  TextField type;
+  TextField color;
+  TextField alias;
+  bool open = true;
+
+};
+};
+
 template <typename T>
 class SimpleModelWin {
 public:

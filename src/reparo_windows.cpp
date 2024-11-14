@@ -5,6 +5,7 @@
 #include "models/simple_models.h"
 #include "database.h"
 #include "tables.h"
+#include "models/device.h"
 
 CustomerWin::CustomerWin()
   : phone(_("Phone"), ImGuiInputTextFlags_CharsDecimal, TFFlags_HasPopup)
@@ -62,4 +63,36 @@ void CustomerWin::Addresses() {
   if (ImGui::CollapsingHeader("Addresses", ImGuiTreeNodeFlags_None)) {
     RoTable::AddressesInputs(billing_address, ship_address);
   }
+}
+
+DeviceWin::DeviceWin() 
+  : name(_("Model"))
+  , brand(_("Brand"))
+  , type(_("Type"))
+  , color(_("Color"))
+  , alias(_("Alias"))
+{
+}
+
+void DeviceWin::Render() { 
+// It is suppposed to be a modal window so change ImGui::Begin() to BeginPopupModal later on.
+  ImGui::Begin(_("Insert new device"), &open);
+  name.Render();
+  brand.Render();
+  type.Render();
+  color.Render();
+  alias.Render();
+
+
+  if (ImGui::Button(_("Build Device"))) {
+    Device device;
+    device.Set<Device>()
+      .Model(name.Get())
+      .Brand(brand.Get())
+      .Type(type.Get());
+      // no builder 
+
+    device.GetDevice();
+  }
+  ImGui::End();
 }
