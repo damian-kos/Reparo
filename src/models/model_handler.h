@@ -146,7 +146,7 @@ public:
   const std::vector<std::string>& Colors() const requires IsDevice<T>;
   const std::string_view& Table() const;
   const std::string& Column() const;
-
+  const std::string& WindowTitle() const;
 
 private:
   const T& model;
@@ -154,8 +154,6 @@ private:
 
 template<typename T>
 inline ModelData<T>::ModelData(const T& model) : model(model) { }
-
-
 
 template<typename T>
 inline const int ModelData<T>::ID() const {
@@ -229,4 +227,9 @@ inline const std::string_view& ModelData<T>::Table() const {
 template<typename T>
 inline const std::string& ModelData<T>::Column() const {
   return model.column;
+}
+
+template<typename T>
+inline const std::string& ModelData<T>::WindowTitle() const {
+  return model.window_title;
 }

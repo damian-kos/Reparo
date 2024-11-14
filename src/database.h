@@ -49,6 +49,8 @@ public:
   Inserter() = default;
   Inserter& Customer_(const Customer& customer);
   Inserter& Brand_(Brand& brand);
+  template <typename T>
+  Inserter& OfSimpleModel(T& model);
 
 private:
   template<typename Func>
@@ -174,4 +176,21 @@ inline Selector<T> Database::Select(const std::string& columns) {
   return Selector<T>(columns);
 }
 
+template<typename T>
+inline Inserter& Inserter::OfSimpleModel(T& model) {
+  return ExecuteTransaction(
+    [&model]() {
+      int id = 0;
+      ModelData data = model.Get<T>();
+      std::string column =  " ("  + data.Column() + ") ";
+      std::string value =   "(:" + data.Column() + ")";
+      Database::sql << "INSERT INTO " << data.Table() << column
+        << "VALUES " << value << " RETURNING id",
+        soci::use(data.Name()), soci::into(id);
 
+      // Set the model's ID if needed
+      model.Set<T>().ID(id);
+    },
+    "SimpleModel insertion (Simple Model Name: " + model.Get<T>().Name() + " Type: " + typeid(T).name() + ")"
+  );
+}

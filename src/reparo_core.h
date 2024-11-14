@@ -12,7 +12,11 @@ public:
 
 private:
   CustomerWin customer_win;
-  BrandWin    brand_win;
+  SimpleModelWin<Brand>    brand_win;
+  SimpleModelWin<RepairState> repair_states_win;
+  SimpleModelWin<RepairCategory> category_win;
+  SimpleModelWin<PaymentMethod> payments_win;
+
 
 #ifdef DEBUG
 public:

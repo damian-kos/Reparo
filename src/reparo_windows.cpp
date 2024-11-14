@@ -1,6 +1,5 @@
 #include "reparo_windows.h"
 #include "imgui.h"
-#include "RoLocalization.h"
 #include "modal.h"
 #include "models/customer.h"
 #include "models/simple_models.h"
@@ -38,7 +37,6 @@ void CustomerWin::Render() {
 
   if (ImGui::Button(_("Submit Customer Details"))) {
     Customer customer;
-    
     customer.Set<Customer>()
       .Phone(phone.Get())
       .Name(name.Get())
@@ -47,7 +45,6 @@ void CustomerWin::Render() {
       .BillingAddresses(billing_address)
       .ShipAddresses(ship_address);
       
-    customer.Get<Customer>().Table();
     Config<Customer> config{
       .title = _("Insert Customer?"),
       .msg = _("Are you sure?"),
@@ -66,35 +63,3 @@ void CustomerWin::Addresses() {
     RoTable::AddressesInputs(billing_address, ship_address);
   }
 }
-
-BrandWin::BrandWin()
-  : name(_("Brand"))
-{
-}
-  
-
-void BrandWin::Render() {
-  if (!initialized) {
-    LoadData();
-    initialized = true;
-  }
-
-  ImGui::Begin(_("Brands"), &open);
-  ImGui::Text(_("Please right-click to edit or delete value"));
-  RoTable::SimpleModel<Brand>(brands);
-  name.Render();
-  if (ImGui::Button("Add")) {
-    Brand brand;
-    brand.Set<Brand>()
-      .Name(name.Get());
-    Database::Insert().Brand_(brand);
-    LoadData();
-    brand.Get<Brand>().Table();
-  }
-  ImGui::End();
-}
-
-void BrandWin::LoadData() {
-  brands = Database::Select<Brand>().From().All();
-}
-
