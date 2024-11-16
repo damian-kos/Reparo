@@ -49,6 +49,7 @@ public:
   Inserter() = default;
   Inserter& Customer_(const Customer& customer);
   Inserter& Brand_(Brand& brand);
+  Inserter& Device_(Device& device);
   template <typename T>
   Inserter& OfSimpleModel(T& model);
 

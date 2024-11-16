@@ -11,8 +11,9 @@ void ReparoCore::Render() {
   device_win.Render();
   brand_win.Render();
   repair_states_win.Render();
-  category_win.Render();
+  categories_win.Render();
   payments_win.Render();
+  device_types_win.Render();
 }
 
 #ifdef DEBUG

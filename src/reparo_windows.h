@@ -4,6 +4,8 @@
 #include "RoLocalization.h"
 #include "tables.h"
 #include "database.h"
+#include "combo.h"
+#include "attributes.h"
 
 class Brand;
 
@@ -20,6 +22,7 @@ private:
   EmailField email;
   std::vector<TextField> billing_address;
   std::vector<TextField> ship_address;
+
   bool open = true;
 };
 
@@ -27,17 +30,17 @@ class DeviceWin {
 public:
   DeviceWin();
   void Render();
+  void DeviceName();
 
 private:
   TextField name;
-  TextField brand;
-  TextField type;
-  TextField color;
-  TextField alias;
+  RoCombo<Brand> brand_combo;
+  RoCombo<DeviceType> type_combo;
+  Attributes<Color> colors;
+  Attributes<Alias> aliases;
   bool open = true;
+};
 
-};
-};
 
 template <typename T>
 class SimpleModelWin {
@@ -58,7 +61,7 @@ template<typename T>
 inline SimpleModelWin<T>::SimpleModelWin() { }
 
 template<typename T>
-inline void SimpleModelWin<T>::Render(){
+inline void SimpleModelWin<T>::Render() {
   if (!initialized) {
     LoadData();
     initialized = true;
@@ -68,7 +71,7 @@ inline void SimpleModelWin<T>::Render(){
   name.Render();
   ImGui::Text(_("Please right-click to edit or delete value"));
   if (ImGui::Button(_("Add"))) {
-   model.Set<T>()
+    model.Set<T>()
       .Name(name.Get());
     Database::Insert().OfSimpleModel<T>(model);
     LoadData();

@@ -15,8 +15,10 @@ private:
   DeviceWin device_win;
   SimpleModelWin<Brand>    brand_win;
   SimpleModelWin<RepairState> repair_states_win;
-  SimpleModelWin<RepairCategory> category_win;
+  SimpleModelWin<RepairCategory> categories_win;
   SimpleModelWin<PaymentMethod> payments_win;
+  SimpleModelWin<DeviceType> device_types_win;
+
 
 
 #ifdef DEBUG

@@ -3,12 +3,12 @@
 #include <vector>
 #include "model_handler.h"
 #include "simple_models.h"
-#include "alias.h"
 
-class Device {
+class Alias {
 public:
-  Device();
-  Device& GetDevice();
+  Alias();
+  Alias(int id, std::string name, int link_id = 0);
+  Alias& GetAlias();
   template<typename T>
   Builder<T> Set();
 
@@ -21,21 +21,18 @@ private:
   template<typename T>
   friend class ModelData;
 
-  int id = -1;
+  int id = -1;        // main id in database
   std::string name;
-  Brand brand;
-  DeviceType type;
-  std::vector<Color> colors;
-  std::vector<Alias> aliases;
-  static constexpr std::string_view table = "devices";
+  int link_id = -1;   // linked id in database in this case device
+  static constexpr std::string_view table = "aliases";
 };
 
 template<typename T>
-inline Builder<T> Device::Set() {
+inline Builder<T> Alias::Set() {
   return Builder<T>(*this);
 }
 
 template<typename T>
-inline ModelData<T> Device::Get() const {
+inline ModelData<T> Alias::Get() const {
   return ModelData<T>(*this);
 }

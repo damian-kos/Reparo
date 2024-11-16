@@ -3,6 +3,9 @@
 #include <iostream>
 
 class SimpleModel {
+public:
+  SimpleModel() = default; // Default constructor
+  SimpleModel(int id, std::string name) : id(id), name(std::move(name)) {} // Parameterized constructor
 protected:
  int id = -1;
  std::string name;
@@ -12,10 +15,11 @@ template <typename Derived>
 class ModelBase : public SimpleModel {
 public:
   ModelBase() = default;
+  ModelBase(int id, std::string name);
   ~ModelBase() = default;
 
   Derived& GetModel() {
-    std::cout << id << " " << name << std::endl;
+    //std::cout << id << " " << name << std::endl;
     return static_cast<Derived&>(*this);
   }
 
@@ -37,6 +41,7 @@ public:
 class Brand : public ModelBase<Brand> {
 public:
   Brand()  = default;
+  Brand(int id, std::string name) : ModelBase<Brand>(id, std::move(name)) {}
   ~Brand() = default;
 
 private:
@@ -112,6 +117,7 @@ private:
 class DeviceType : public ModelBase<DeviceType> {
 public:
   DeviceType() = default;
+  DeviceType(int id, std::string name) : ModelBase<DeviceType>(id, std::move(name)) {}
   ~DeviceType() = default;
 
 private:
@@ -127,6 +133,7 @@ private:
 class Color : public ModelBase<Color> {
 public:
   Color() = default;
+  Color(int id, std::string name) : ModelBase<Color>(id, std::move(name)) {}
   ~Color() = default;
 
 private:
@@ -138,3 +145,7 @@ private:
   static inline const std::string column = "color";
   static inline const std::string window_title = "Colors";
 };
+
+template<typename Derived>
+inline ModelBase<Derived>::ModelBase(int id, std::string name)
+  : SimpleModel(id, std::move(name)) { } // Delegates initialization to SimpleModel

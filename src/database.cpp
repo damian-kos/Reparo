@@ -3,6 +3,8 @@
 #include "debug.h"
 #include "models/customer.h"
 #include "models/simple_models.h"
+#include "models/device.h"
+
 
 soci::session Database::sql;
 
@@ -192,7 +194,7 @@ TableCreator& TableCreator::DeviceTypesTable() {
 TableCreator& TableCreator::BrandsTable() {
   std::string _sql = R"(
     CREATE TABLE IF NOT EXISTS brands (
-      id         INTEGER PRIMARY KEY,
+      id      INTEGER PRIMARY KEY,
       brand   TEXT NOT NULL UNIQUE         
     );
   )";
@@ -237,9 +239,9 @@ TableCreator& TableCreator::DevicesTable() {
   std::string _sql = R"(
     CREATE TABLE IF NOT EXISTS devices (
       id        INTEGER PRIMARY KEY,
-      model     TEXT NOT NULL,
+      model     TEXT UNIQUE NOT NULL,
       brand_id  INTEGER,
-      type_id      INTEGER,
+      type_id   INTEGER,
 
       FOREIGN KEY (brand_id)
         REFERENCES brands(id)
@@ -277,7 +279,7 @@ TableCreator& TableCreator::AliasesTable() {
       model_id     INTEGER NOT NULL,    
 
       FOREIGN KEY (model_id)
-        REFERENCES models(id)
+        REFERENCES devices(id)
         ON DELETE CASCADE
         ON UPDATE CASCADE     
     );
@@ -580,7 +582,7 @@ TableCreator& TableCreator::PartModelTable() {
           REFERENCES parts(id),
 
       FOREIGN KEY (model_id)
-          REFERENCES models(id)
+          REFERENCES devices(id)
           ON UPDATE CASCADE
     );
   )";
@@ -671,5 +673,48 @@ Inserter& Inserter::Brand_(Brand& brand) {
       brand.Set<Brand>().ID(id);
     },
     "Brand insertion (Brand Name: " + brand.Get<Brand>().Name() + ")"
+  );
+}
+
+Inserter& Inserter::Device_(Device& device) {
+  return ExecuteTransaction(
+    [&device]() {
+      int device_id = 0;
+      auto data = device.Get<Device>();
+
+      // 1. Insert main device data and get its ID
+      Database::sql << "INSERT INTO devices (model, brand_id, type_id) VALUES (:model, :brand_id, :type_id) "
+        "RETURNING id",
+        soci::use(device), soci::into(device_id);
+
+      // Set the device's ID
+      device.Set<Device>().ID(device_id);
+
+      // 2. Insert aliases
+      for (const auto& alias : data.Aliases()) {
+        Database::sql << "INSERT INTO aliases (alias, model_id) VALUES (:alias, :model_id)",
+          soci::use(alias.Get<Alias>().Name()), soci::use(device_id);
+      }
+
+      // 3. Handle colors
+      for (const auto& color : data.Colors()) {
+        int color_id = 0;
+
+        // Try to find existing color
+        Database::sql << "SELECT id FROM colors WHERE color = :color",
+          soci::use(color.Get<Color>().Name()), soci::into(color_id);
+
+        if (!color_id) {
+          // Color doesn't exist, insert new color
+          Database::sql << "INSERT INTO colors (color) VALUES (:color) RETURNING id",
+            soci::use(color.Get<Color>().Name()), soci::into(color_id);
+        }
+
+        // Insert into model_colors junction table
+        Database::sql << "INSERT INTO model_colors (model_id, color_id) VALUES (:model_id, :color_id)",
+          soci::use(device_id), soci::use(color_id);
+      }
+    },
+    "Device insertion (Device Name: " + device.Get<Device>().Name() + ")"
   );
 }

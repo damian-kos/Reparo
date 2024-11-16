@@ -4,7 +4,6 @@
 #include "models/customer.h"
 #include "models/simple_models.h"
 #include "database.h"
-#include "tables.h"
 #include "models/device.h"
 
 CustomerWin::CustomerWin()
@@ -67,32 +66,76 @@ void CustomerWin::Addresses() {
 
 DeviceWin::DeviceWin() 
   : name(_("Model"))
-  , brand(_("Brand"))
-  , type(_("Type"))
-  , color(_("Color"))
-  , alias(_("Alias"))
+  , brand_combo(_("Choose brand"))
+  , type_combo(_("Choose type"))
 {
 }
 
 void DeviceWin::Render() { 
 // It is suppposed to be a modal window so change ImGui::Begin() to BeginPopupModal later on.
   ImGui::Begin(_("Insert new device"), &open);
-  name.Render();
-  brand.Render();
-  type.Render();
-  color.Render();
-  alias.Render();
 
+  static ImGuiTableFlags flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_BordersInnerV |
+    ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_Reorderable;
 
-  if (ImGui::Button(_("Build Device"))) {
-    Device device;
-    device.Set<Device>()
-      .Model(name.Get())
-      .Brand(brand.Get())
-      .Type(type.Get());
-      // no builder 
+  static std::vector<std::string> col_names = { _("Model"), _("Type"), _("Brand"), _("Colors"), _("Aliases") };
 
-    device.GetDevice();
+  if (ImGui::BeginTable("Devices", 5, flags)) {
+    for (auto& name : col_names)
+      ImGui::TableSetupColumn(name.c_str());
+    ImGui::TableHeadersRow();
+    ImGui::TableNextRow();
+
+    ImGui::TableNextColumn();
+    DeviceName();
+ 
+    ImGui::TableNextColumn();
+    type_combo.Render();
+
+    ImGui::TableNextColumn();
+    brand_combo.Render();
+
+    ImGui::TableNextColumn();
+    colors.Render();
+
+    ImGui::TableNextColumn();
+    aliases.Render();
+
+    ImGui::EndTable();
   }
+
+  if (ImGui::Button(_("Save"))) {
+    Device device;
+    auto build = device.Set<Device>();
+    build.Name(name.Get())
+      .Brand_(brand_combo.Get())
+      .Type(type_combo.Get())
+      .Colors(colors.Get())
+      .Aliases(aliases.Get());
+    Database::Insert().Device_(device);
+
+  } 
   ImGui::End();
 }
+
+void DeviceWin::DeviceName() {
+  static std::string model;
+  std::string label = model.empty() ? _("Add model") : model;
+  bool focus = false;
+  focus = ImGui::Button(label.c_str());
+  if (ImGui::BeginPopupContextItem("Name edit", ImGuiPopupFlags_MouseButtonLeft)) {
+    if (focus) ImGui::SetKeyboardFocusHere();
+    name.Render();
+    if (ImGui::SmallButton(_("Save"))) {
+      model = name.Get();
+      ImGui::CloseCurrentPopup();
+    }
+    ImGui::SameLine();
+    if (ImGui::SmallButton(_("Cancel"))) {
+      name.Clear();
+      ImGui::CloseCurrentPopup();
+    }
+    ImGui::EndPopup();
+  }
+}
+

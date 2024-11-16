@@ -77,6 +77,10 @@ const std::string& TextField::Get() const{
   return buffer;
 }
 
+const void TextField::Clear() {
+  buffer.clear();
+}
+
 void PhoneField::Render() {
   const bool err = err_flags & (ValidatorFlags_StrLen | ValidatorFlags_IsDuplicate);
 

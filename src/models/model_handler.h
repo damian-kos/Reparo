@@ -5,6 +5,10 @@
 class Customer;
 class Device;
 class TextField;
+class DeviceType;
+class Brand;
+class Color;
+class Alias;
 
 template<typename T>
 class Builder;
@@ -24,17 +28,18 @@ public:
   Builder(T& model);
 
   Builder<T>& ID(const int& id);
+  Builder<T>& LinkID(const int& id);
   Builder<T>& Model(const std::string& name);
-  Builder<T>& Brand(const std::string& brand);
-  Builder<T>& Type(const std::string& type);
+  Builder<T>& Brand_(const Brand& brand);
+  Builder<T>& Type(const DeviceType& type);
   Builder<T>& Name(const std::string& name);
   Builder<T>& Phone(const std::string& phone);
   Builder<T>& Surname(const std::string& surname);
   Builder<T>& Email(const std::string& email);
   Builder<T>& BillingAddresses(const std::vector<TextField>& addresses) requires IsCustomer<T>;
   Builder<T>& ShipAddresses(const std::vector<TextField>& addresses) requires IsCustomer<T>;
-  Builder<T>& Colors(const std::vector<std::string>& colors) requires IsDevice<T>;
-  Builder<T>& Aliases(const std::vector<std::string>& aliases) requires IsDevice<T>;
+  Builder<T>& Colors(const std::vector<Color>& colors) requires IsDevice<T>;
+  Builder<T>& Aliases(const std::vector<Alias>& aliases) requires IsDevice<T>;
 
 private:
   T& model;
@@ -51,19 +56,25 @@ inline Builder<T>& Builder<T>::ID(const int& id) {
 }
 
 template<typename T>
+inline Builder<T>& Builder<T>::LinkID(const int& id) {
+  model.link_id = id;
+  return *this;
+}
+
+template<typename T>
 inline Builder<T>& Builder<T>::Model(const std::string& name) {
   model.name = name;
   return *this;
 }
 
 template<typename T>
-inline Builder<T>& Builder<T>::Brand(const std::string& brand) {
+inline Builder<T>& Builder<T>::Brand_(const Brand& brand) {
   model.brand = brand;
   return *this;
 }
 
 template<typename T>
-inline Builder<T>& Builder<T>::Type(const std::string& type) {
+inline Builder<T>& Builder<T>::Type(const DeviceType& type) {
   model.type = type;
   return *this;
 }
@@ -113,14 +124,14 @@ inline Builder<T>& Builder<T>::ShipAddresses(const std::vector<TextField>& addre
 }
 
 template<typename T>
-inline Builder<T>& Builder<T>::Colors(const std::vector<std::string>& colors)
+inline Builder<T>& Builder<T>::Colors(const std::vector<Color>& colors)
   requires IsDevice<T> {
   model.colors = colors;
   return *this;
 }
 
 template<typename T>
-inline Builder<T>& Builder<T>::Aliases(const std::vector<std::string>& aliases)
+inline Builder<T>& Builder<T>::Aliases(const std::vector<Alias>& aliases)
   requires IsDevice<T> {
   model.aliases = aliases;
   return *this;
@@ -133,17 +144,18 @@ public:
   ModelData(const T& model);
 
   const int ID() const;
+  const int LinkID() const;
   const std::string& Model() const;
-  const std::string& Brand() const;
-  const std::string& Type() const;
+  const Brand& Brand_() const; // _ added so it matches thebuilder
+  const DeviceType& Type() const requires IsDevice<T>;
   const std::string& Name() const;
   const std::string& Phone() const;
   const std::string& Surname() const;
   const std::string& Email() const;
   const std::vector<std::string>& BillingAddresses() const requires IsCustomer<T>;
   const std::vector<std::string>& ShipAddresses() const requires IsCustomer<T>;
-  const std::vector<std::string>& Aliases() const requires IsDevice<T>;
-  const std::vector<std::string>& Colors() const requires IsDevice<T>;
+  const std::vector<Alias>& Aliases() const requires IsDevice<T>;
+  const std::vector<Color>& Colors() const requires IsDevice<T>;
   const std::string_view& Table() const;
   const std::string& Column() const;
   const std::string& WindowTitle() const;
@@ -161,18 +173,24 @@ inline const int ModelData<T>::ID() const {
 }
 
 template<typename T>
+inline const int ModelData<T>::LinkID() const {
+  return model.link_id;
+}
+
+template<typename T>
 inline const std::string& ModelData<T>::Model() const {
   return model.name;
 }
 
 template<typename T>
-inline const std::string& ModelData<T>::Brand() const {
+inline const Brand& ModelData<T>::Brand_() const {
   return model.brand;
 }
 
 template<typename T>
-inline const std::string& ModelData<T>::Type() const {
-  return model.type;
+inline const DeviceType& ModelData<T>::Type() const 
+  requires IsDevice<T> {
+    return model.type;
 }
 
 template<typename T>
@@ -208,13 +226,13 @@ inline const std::vector<std::string>& ModelData<T>::ShipAddresses() const
 }
 
 template<typename T>
-inline const std::vector<std::string>& ModelData<T>::Aliases() const
+inline const std::vector<Alias>& ModelData<T>::Aliases() const
   requires IsDevice<T> {
   return model.aliases;
 }
 
 template<typename T>
-inline const std::vector<std::string>& ModelData<T>::Colors() const
+inline const std::vector<Color>& ModelData<T>::Colors() const
   requires IsDevice<T> {
   return model.colors;
 }
