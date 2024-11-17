@@ -57,6 +57,13 @@ void CustomerWin::Render() {
   ImGui::End();
 }
 
+void CustomerWin::InputFields() {
+  phone.Render();
+  name.Render();
+  surname.Render();
+  email.Render();
+}
+
 void CustomerWin::Addresses() {
   if (ImGui::CollapsingHeader("Addresses", ImGuiTreeNodeFlags_None)) {
     RoTable::AddressesInputs(billing_address, ship_address);
@@ -142,6 +149,7 @@ RepairWin::RepairWin() {
 
 void RepairWin::Render() {
   ImGui::Begin(_("Repair"));
-  customer_part.Render();
+  customer_part.InputFields();
+  customer_part.Addresses();
   ImGui::End();
 }

@@ -13,9 +13,10 @@ class CustomerWin {
 public:
   CustomerWin();
   void Render();
+  void InputFields();
+  void Addresses();
 
 private:
-  void Addresses();
   PhoneField phone;
   NameField name;
   SurnameField surname;
