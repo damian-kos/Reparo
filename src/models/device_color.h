@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "model_handler.h"
 
 struct DeviceColor {
   int id = -1;        // main id in database
