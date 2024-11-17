@@ -13,6 +13,7 @@ public:
 private:
   CustomerWin customer_win;
   DeviceWin device_win;
+  RepairWin repair_win;
   SimpleModelWin<Brand>    brand_win;
   SimpleModelWin<RepairState> repair_states_win;
   SimpleModelWin<RepairCategory> categories_win;

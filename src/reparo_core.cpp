@@ -9,6 +9,7 @@ std::vector<ReparoCore::TableCreationInfo> ReparoCore::table_config;
 void ReparoCore::Render() {
   customer_win.Render();
   device_win.Render();
+  repair_win.Render();
   brand_win.Render();
   repair_states_win.Render();
   categories_win.Render();

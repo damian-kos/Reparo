@@ -137,3 +137,11 @@ void DeviceWin::DeviceName() {
   }
 }
 
+RepairWin::RepairWin() {
+}
+
+void RepairWin::Render() {
+  ImGui::Begin(_("Repair"));
+  customer_part.Render();
+  ImGui::End();
+}

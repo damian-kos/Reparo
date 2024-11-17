@@ -13,9 +13,9 @@ class CustomerWin {
 public:
   CustomerWin();
   void Render();
-  void Addresses();
 
 private:
+  void Addresses();
   PhoneField phone;
   NameField name;
   SurnameField surname;
@@ -41,6 +41,15 @@ private:
   bool open = true;
 };
 
+class RepairWin {
+public:
+  RepairWin();
+  void Render();
+
+private:
+  CustomerWin customer_part;
+
+};
 
 template <typename T>
 class SimpleModelWin {
