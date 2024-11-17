@@ -611,11 +611,9 @@ TableCreator& TableCreator::PartModelAliasTable() {
 Inserter& Inserter::Customer_(const Customer& customer) {
   return ExecuteTransaction(
     [&customer]() {
-      ModelData data = customer.Get<Customer>();
-      // First insert billing address and get its ID
       int billing_addr_id = 0;
-      if (!data.BillingAddresses().empty()) {
-        const auto& billing = data.BillingAddresses(); // Using first address
+      if (!customer.billing_addresses.Get().Lines().empty()) {
+        const auto& billing = customer.billing_addresses.Get().Lines(); // Using first address
         Database::sql << "INSERT INTO billing_addresses "
           "(line1, line2, line3, line4, line5) "
           "VALUES (:l1, :l2, :l3, :l4, :l5) "
@@ -630,8 +628,8 @@ Inserter& Inserter::Customer_(const Customer& customer) {
 
       // Then insert shipping address and get its ID
       int shipping_addr_id = 0;
-      if (!data.ShipAddresses().empty()) {
-        const auto& shipping = data.ShipAddresses(); // Using first address
+      if (!customer.ship_addresses.Get().Lines().empty()) {
+        const auto& shipping = customer.ship_addresses.Get().Lines(); // Using first address
         Database::sql << "INSERT INTO ship_addresses "
           "(line1, line2, line3, line4, line5) "
           "VALUES (:l1, :l2, :l3, :l4, :l5) "
@@ -644,35 +642,14 @@ Inserter& Inserter::Customer_(const Customer& customer) {
           soci::into(shipping_addr_id);
       }
 
-      
       Database::sql << "INSERT INTO customers "
         "(phone, name, surname, email, billing_addr_id, ship_addr_id) "
-        "VALUES (:ph, :nm, :sn, :em, :bid, :sid)",
-        soci::use(data.Phone()),
-        soci::use(data.Name()),
-        soci::use(data.Surname()),
-        soci::use(data.Email()),
-        soci::use(billing_addr_id),
-        soci::use(shipping_addr_id);
+        "VALUES (:phone, :name, :surname, :email, :bid, :sid)",
+        soci::use(customer),
+        soci::use(billing_addr_id, "bid"),
+        soci::use(shipping_addr_id, "sid");
     },
-    "Customer insertion (Phone: " + customer.Get<Customer>().Phone() + ")"
-  );
-}
-
-Inserter& Inserter::Brand_(Brand& brand) {
-  return ExecuteTransaction(
-    [&brand]() {
-      int id = 0;
-      ModelData data = brand.Get<Brand>();
-      // Insert the name from brand and get its ID
-      Database::sql << "INSERT INTO brands (brand) VALUES (:brand) "
-        "RETURNING id",
-        soci::use(data.Name()), soci::into(id);
-
-      // Set the brand's ID if needed
-      brand.Set<Brand>().ID(id);
-    },
-    "Brand insertion (Brand Name: " + brand.Get<Brand>().Name() + ")"
+    "Customer insertion (Phone: " + customer.phone + ")"
   );
 }
 
@@ -680,7 +657,6 @@ Inserter& Inserter::Device_(Device& device) {
   return ExecuteTransaction(
     [&device]() {
       int device_id = 0;
-      auto data = device.Get<Device>();
 
       // 1. Insert main device data and get its ID
       Database::sql << "INSERT INTO devices (model, brand_id, type_id) VALUES (:model, :brand_id, :type_id) "
@@ -688,26 +664,27 @@ Inserter& Inserter::Device_(Device& device) {
         soci::use(device), soci::into(device_id);
 
       // Set the device's ID
-      device.Set<Device>().ID(device_id);
+      device.id = device_id;
 
       // 2. Insert aliases
-      for (const auto& alias : data.Aliases()) {
-        Database::sql << "INSERT INTO aliases (alias, model_id) VALUES (:alias, :model_id)",
-          soci::use(alias.Get<Alias>().Name()), soci::use(device_id);
+      for (const auto& alias : device.aliases) {
+        Database::sql << "INSERT INTO aliases (alias, model_id) VALUES (:alias, :model_id)"
+          "RETURNING id",
+          soci::use(alias.name), soci::use(device.id);
       }
 
       // 3. Handle colors
-      for (const auto& color : data.Colors()) {
+      for (const auto& color : device.colors) {
         int color_id = 0;
 
         // Try to find existing color
         Database::sql << "SELECT id FROM colors WHERE color = :color",
-          soci::use(color.Get<Color>().Name()), soci::into(color_id);
+          soci::use(color.name), soci::into(color_id);
 
         if (!color_id) {
           // Color doesn't exist, insert new color
           Database::sql << "INSERT INTO colors (color) VALUES (:color) RETURNING id",
-            soci::use(color.Get<Color>().Name()), soci::into(color_id);
+            soci::use(color.name), soci::into(color_id);
         }
 
         // Insert into model_colors junction table
@@ -715,6 +692,6 @@ Inserter& Inserter::Device_(Device& device) {
           soci::use(device_id), soci::use(color_id);
       }
     },
-    "Device insertion (Device Name: " + device.Get<Device>().Name() + ")"
+    "Device insertion (Device Name: " + device.name + ")"
   );
 }

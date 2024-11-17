@@ -31,12 +31,12 @@ inline void RoCombo<T>::Render() {
     static std::vector<T> _choices = Database::Select<T>().From().All();
     static int _sel = 0;
 
-    if (ImGui::BeginCombo(label.c_str(), _choices[_sel].Get<T>().Name().c_str())) {
+    if (ImGui::BeginCombo(label.c_str(), _choices[_sel].name.c_str())) {
       for (size_t i = 0; i < _choices.size(); ++i) {
         const bool _is_sel = (_sel == i);
-        if (ImGui::Selectable(_choices[i].Get<T>().Name().c_str(), _is_sel)) {
+        if (ImGui::Selectable(_choices[i].name.c_str(), _is_sel)) {
           _sel = i;
-          _choice = _choices[i].Get<T>().Name();
+          _choice = _choices[i].name;
           model = _choices[i];
         }
         if (_is_sel)

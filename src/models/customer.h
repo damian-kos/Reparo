@@ -3,8 +3,29 @@
 #include <vector>
 #include "model_handler.h"
 
-//class CustomerBuilder;
 class TextField;
+
+class Address {
+public:
+
+  class Data {
+  public:
+    Data(const Address& address);
+    const int& ID() const;
+    const std::vector<std::string> Lines() const;
+    
+  private:
+    const Address& data;
+  };
+
+  Data Get() const { return Data(*this); }
+  Address& SetID(int& _id);
+  Address& SetLines(std::vector<TextField>& _address);
+
+private:
+  int id;
+  std::vector<std::string> address;
+};
 
 class Customer{
 public:
@@ -12,33 +33,12 @@ public:
   Customer& GetCustomer();
   void View();
 
-  template<typename T>
-  Builder<T> Set();
-
-  template<typename T>
-  ModelData<T> Get() const;
-
-private:
-  template<typename T>
-  friend class Builder;
-  template<typename T>
-  friend class ModelData;
-
   int id = -1;
   std::string phone;
   std::string name;
   std::string surname;
   std::string email;
-  std::vector<std::string> billing_addresses;
-  std::vector<std::string> ship_addresses;
+  Address billing_addresses;
+  Address ship_addresses;
+  static constexpr std::string_view table = "customers";
 };
-
-template<typename T>
-inline Builder<T> Customer::Set() {
-  return Builder<T>(*this);
-}
-
-template<typename T>
-inline ModelData<T> Customer::Get() const {
-  return ModelData<T>(*this);
-}

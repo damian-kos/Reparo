@@ -66,21 +66,22 @@ inline void SimpleModelWin<T>::Render() {
     LoadData();
     initialized = true;
   }
-  ImGui::Begin(model.Get<T>().WindowTitle().c_str(), &open);
+  ImGui::Begin(model.window_title.c_str(), &open);
   RoTable::SimpleModel<T>(values);
   name.Render();
   ImGui::Text(_("Please right-click to edit or delete value"));
   if (ImGui::Button(_("Add"))) {
-    model.Set<T>()
-      .Name(name.Get());
+    model.name = name.Get();
     Database::Insert().OfSimpleModel<T>(model);
     LoadData();
-    model.Get<T>().Table();
+    model.table;
   }
   ImGui::End();
 }
 
 template<typename T>
 inline void SimpleModelWin<T>::LoadData() {
+  std::string text = Database::Select<T>().From().GetSql();
+  std::cout << text << std::endl;
   values = Database::Select<T>().From().All();
 }

@@ -4,33 +4,31 @@
 #include "models/simple_models.h"
 #include "models/device.h"
 #include "models/alias.h"
+#include "models/customer.h"
 #include <iostream>
 
 class Database;
 
+
 // Concept definition
 template<typename T>
-concept IsSimple = std::is_convertible_v<T&, SimpleModel&>;
+concept IsSimple = std::is_convertible_v<T&, SimpleModel<T>&>;
 
 // Helper class that will contain our common implementation
 template<IsSimple T>
 struct simple_type_conversion_helper {
   static void from_base(soci::values const& v, soci::indicator ind, T& model) {
-    //std::cout << "Converting from base for " << typeid(T).name() << std::endl;
-    //std::string column_ = column<T>::value;
-    model.Set<T>()
-      .ID(v.get<int>("id"))
-      .Name(v.get<std::string>(model.Get<T>().Column()));
+    model.id = v.get<int>("id");
+    model.name = v.get<std::string>(model.column);
   }
 
   static void to_base(const T& model, soci::values& v, soci::indicator& ind) {
-    v.set("id", model.Get<T>().ID());
-    v.set("name", model.Get<T>().Name());
+    v.set("id", model.id);
+    v.set("name", model.name);
     ind = soci::i_ok;
   }
 };
 
-// Specialization of SOCI's type_conversion for IsSimple types
 namespace soci {
   template<typename T>
     requires IsSimple<T>
@@ -45,23 +43,65 @@ namespace soci {
       simple_type_conversion_helper<T>::to_base(model, v, ind);
     }
   };
-}
 
-// Helper class that will contain our common implementation
-namespace soci {
+  template <>
+    struct type_conversion<Alias> {
+      typedef values base_type;
+
+      static void from_base(const values& v, indicator ind, Alias& model) {
+        if (ind == i_null) {
+          throw std::runtime_error("Null value fetched from database");
+        }
+        model.id = v.get<int>("id");
+        model.name = v.get<std::string>(model.column);
+      }
+
+      static void to_base(const Alias& model, values& v, indicator& ind) {
+        v.set("id", model.id);
+        v.set("name", model.name);
+        ind = i_ok;
+      }
+   };
+
+    template <>
+    struct type_conversion<Customer> {
+      typedef values base_type;
+
+      static void from_base(const values& v, indicator ind, Customer& model) {
+        std::cout << "Converting from base for " << typeid(Customer).name() << std::endl;
+
+        if (ind == i_null) {
+          throw std::runtime_error("Null value fetched from database");
+        }
+        model.id = v.get<int>("id");
+        model.phone = v.get<std::string>("phone");
+        model.name = v.get<std::string>("name");
+        model.surname = v.get<std::string>("surname");
+        model.email = v.get<std::string>("email");      
+      }
+
+      static void to_base(const Customer& model, values& v, indicator& ind) {
+        v.set("id", model.id);
+        v.set("phone", model.phone);
+        v.set("name", model.name);
+        v.set("surname", model.surname);
+        v.set("email", model.email);
+
+        ind = i_ok;
+      }
+    };
+
   template <>
   struct type_conversion<Device>
   {
     typedef values base_type;
 
     static void from_base(values const& v, indicator ind, Device& model) {
-        int columns = v.get_number_of_columns();
-        if (columns <= 0) { return; }
+      int columns = v.get_number_of_columns();
+      if (columns <= 0) { return; }
       std::cout << "Converting from base for " << typeid(Device).name() << std::endl;
 
       try {
-        auto build = model.Set<Device>();
- 
         // Get optional fields with defaults
         int type_id = 0;
         std::string type_name = "Unknown";
@@ -70,19 +110,19 @@ namespace soci {
         std::cout << "Column count: " << columns << std::endl;
         if (columns > 4) {
           type_id = v.get<int>("type_id");
-          type_name = v.get<std::string>("Type", "Unknown");
+          type_name = v.get<std::string>("type", "Unknown");
           brand_id = v.get<int>("brand_id");
-          brand_name = v.get<std::string>("Brand", "Unknown");
+          brand_name = v.get<std::string>("brand", "Unknown");
         }
 
-        DeviceType type(type_id, type_name);
-        Brand brand(brand_id, brand_name);
+        DeviceType type{ type_id, type_name };
+        Brand brand{ brand_id, brand_name };
 
         // Build the device object
-        build.ID(v.get<int>("id"))
-          .Model(v.get<std::string>("model"))
-          .Type(type)
-          .Brand_(brand);
+        model.id = v.get<int>("id");
+        model.name = v.get<std::string>("model");
+        model.brand = brand;
+        model.type = type;
 
       }
       catch (const std::exception& e) {
@@ -91,49 +131,18 @@ namespace soci {
     }
 
     static void to_base(const Device& model, values& v, indicator& ind) {
-      auto device = model.Get<Device>();
-
-      std::string model_name = device.Name();
-
-      std::cout << "Debug - to_base conversion:" << std::endl;
-      std::cout << "Model name length: " << model_name.length() << std::endl;
-      std::cout << "Model name: '" << model_name << "'" << std::endl;
-
-      if (model_name.empty()) {
+      if (model.name.empty()) {
         throw std::runtime_error("Device model name cannot be empty");
       }
-
       
-      v.set("model", model_name);
-      v.set("type_id", device.Type().Get<DeviceType>().ID()); 
-      v.set("brand_id", device.Brand_().Get<Brand>().ID());
-
-
-      ind = i_ok;
-    }
-  };
-
-  template <>
-  struct type_conversion<Alias>
-  {
-    typedef values base_type;
-
-    static void from_base(values const& v, indicator ind, Alias& model) {
-      std::cout << "Converting from base for " << typeid(Alias).name() << std::endl;
-      model.Set<Alias>()
-        .ID(v.get<int>("id"))
-        .Name(v.get<std::string>("alias"))
-        .LinkID(v.get<int>("model_id"));
-
-    }
-
-    static void to_base(const Alias& model, values& v, indicator& ind) {
-      const auto& data = model.Get<Alias>();
-      v.set("id", data.ID());
-      v.set("alias", data.Name());
-      v.set("link_id", data.LinkID());
+      v.set("model", model.name);
+      v.set("type_id", model.type.id); 
+      v.set("brand_id", model.brand.id);
 
       ind = i_ok;
     }
   };
+
 }
+
+

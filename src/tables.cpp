@@ -14,9 +14,8 @@ void RoTable::AddressesInputs(std::vector<TextField>& first, std::vector<TextFie
   }
 }
 
-void RoTable::Addresses(std::vector<std::string>& first, std::vector<std::string>& second) {
+void RoTable::Addresses(const std::vector<std::string>& first, const std::vector<std::string>& second) {
   if (ImGui::BeginTable("Address", 2)) {
-    // Determine the maximum size of both vectors
     size_t max_size = std::max(first.size(), second.size());
 
     static std::vector<std::string> col_names = { "Billing Address", "Shipping Address" };

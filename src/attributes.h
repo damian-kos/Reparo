@@ -41,8 +41,7 @@ inline void Attributes<T>::Render() {
   if (!attrs.empty()) {
     int _index = 0; // Track the _index manually
     for (auto& _attr : attrs) {
-      const auto& data = _attr.Get<T>();
-      std::string name = data.Name();
+      std::string name = _attr.name;
 
       if (ImGui::BeginTable("Attrs", 2, ImGuiTableFlags_None, ImVec2(150, 20))) {
 
@@ -67,7 +66,7 @@ inline void Attributes<T>::Render() {
   if (ImGui::BeginPopupContextItem("Attrs", ImGuiPopupFlags_MouseButtonLeft)) {
     input.Render();
     if (ImGui::Button(_("Save"))) {
-      T _new_attr(0, input.Get());
+      T _new_attr{ 0, input.Get() };
       attrs.emplace_back(_new_attr);
       ;
     }

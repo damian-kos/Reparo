@@ -1,151 +1,70 @@
 #pragma once
-#include "model_handler.h" 
+#include <string>
 #include <iostream>
 
-class SimpleModel {
-public:
-  SimpleModel() = default; // Default constructor
-  SimpleModel(int id, std::string name) : id(id), name(std::move(name)) {} // Parameterized constructor
-protected:
- int id = -1;
- std::string name;
+// Struct to hold ID and Name
+struct SimpleModelData {
+  int id;
+  std::string name;
 };
 
+// Base struct using CRTP
 template <typename Derived>
-class ModelBase : public SimpleModel {
+struct SimpleModel {
 public:
-  ModelBase() = default;
-  ModelBase(int id, std::string name);
-  ~ModelBase() = default;
+  int id = -1;
+  std::string name;
 
-  Derived& GetModel() {
-    //std::cout << id << " " << name << std::endl;
-    return static_cast<Derived&>(*this);
+  // Returns the data as a SimpleModelData struct
+  SimpleModelData Get() const {
+    return { id, name };
   }
 
-  const Derived& GetModel() const {
-    return static_cast<const Derived&>(*this);
-  }
-
-  template <typename T>
-  Builder<T> Set() {
-    return Builder<T>(GetModel());  // Directly pass GetModel(), which is already a reference to Derived
-  }
-
-  template <typename T>
-  ModelData<T> Get() const {
-    return ModelData<T>(GetModel());  // Directly pass *this as const reference to Derived
-  }
+  // Static accessors for common properties
+  static std::string_view Table() { return Derived::table; }
+  static const std::string& Column() { return Derived::column; }
+  static const std::string& WindowTitle() { return Derived::window_title; }
 };
 
-class Brand : public ModelBase<Brand> {
-public:
-  Brand()  = default;
-  Brand(int id, std::string name) : ModelBase<Brand>(id, std::move(name)) {}
-  ~Brand() = default;
-
-private:
-  template<typename T>
-  friend class Builder;
-  template<typename T>
-  friend class ModelData;
+// Derived structs
+struct Brand : SimpleModel<Brand> {
   static constexpr std::string_view table = "brands";
   static inline const std::string column = "brand";
   static inline const std::string window_title = "Brands";
 };
 
-class RepairState : public ModelBase<RepairState> {
-public:
-  RepairState()  = default;
-  ~RepairState() = default;
-
-private:
-  template<typename T>
-  friend class Builder;
-  template<typename T>
-  friend class ModelData;
+struct RepairState : SimpleModel<RepairState> {
   static constexpr std::string_view table = "repair_states";
   static inline const std::string column = "state";
   static inline const std::string window_title = "Repair States";
 };
 
-class RepairCategory : public ModelBase<RepairCategory> {
-public:
-  RepairCategory()  = default;
-  ~RepairCategory() = default;
-
-private:
-  template<typename T>
-  friend class Builder;
-  template<typename T>
-  friend class ModelData;
+struct RepairCategory : SimpleModel<RepairCategory> {
   static constexpr std::string_view table = "repair_categories";
   static inline const std::string column = "category";
   static inline const std::string window_title = "Categories";
 };
 
-class PaymentMethod : public ModelBase<PaymentMethod> {
-public:
-  PaymentMethod() = default;
-  ~PaymentMethod() = default;
-
-private:
-  template<typename T>
-  friend class Builder;
-  template<typename T>
-  friend class ModelData;
+struct PaymentMethod : SimpleModel<PaymentMethod> {
   static constexpr std::string_view table = "payment_methods";
   static inline const std::string column = "method";
-  static inline const std::string window_title = "Payment methods";
+  static inline const std::string window_title = "Payment Methods";
 };
 
-class Quality : public ModelBase<Quality> {
-public:
-  Quality() = default;
-  ~Quality() = default;
-
-private:
-  template<typename T>
-  friend class Builder;
-  template<typename T>
-  friend class ModelData;
+struct Quality : SimpleModel<Quality> {
   static constexpr std::string_view table = "qualities";
   static inline const std::string column = "quality";
   static inline const std::string window_title = "Qualities";
 };
 
-class DeviceType : public ModelBase<DeviceType> {
-public:
-  DeviceType() = default;
-  DeviceType(int id, std::string name) : ModelBase<DeviceType>(id, std::move(name)) {}
-  ~DeviceType() = default;
-
-private:
-  template<typename T>
-  friend class Builder;
-  template<typename T>
-  friend class ModelData;
+struct DeviceType : SimpleModel<DeviceType> {
   static constexpr std::string_view table = "device_types";
   static inline const std::string column = "type";
-  static inline const std::string window_title = "Device types";
+  static inline const std::string window_title = "Device Types";
 };
 
-class Color : public ModelBase<Color> {
-public:
-  Color() = default;
-  Color(int id, std::string name) : ModelBase<Color>(id, std::move(name)) {}
-  ~Color() = default;
-
-private:
-  template<typename T>
-  friend class Builder;
-  template<typename T>
-  friend class ModelData;
+struct Color : SimpleModel<Color> {
   static constexpr std::string_view table = "colors";
   static inline const std::string column = "color";
   static inline const std::string window_title = "Colors";
 };
-
-template<typename Derived>
-inline ModelBase<Derived>::ModelBase(int id, std::string name)
-  : SimpleModel(id, std::move(name)) { } // Delegates initialization to SimpleModel

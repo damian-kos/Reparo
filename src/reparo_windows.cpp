@@ -37,19 +37,18 @@ void CustomerWin::Render() {
 
   if (ImGui::Button(_("Submit Customer Details"))) {
     Customer customer;
-    customer.Set<Customer>()
-      .Phone(phone.Get())
-      .Name(name.Get())
-      .Surname(surname.Get())
-      .Email(email.Get())
-      .BillingAddresses(billing_address)
-      .ShipAddresses(ship_address);
-      
+    customer.phone = phone.Get();
+    customer.name = name.Get();
+    customer.surname = surname.Get();
+    customer.email = email.Get();
+    customer.billing_addresses.SetLines(billing_address);
+    customer.ship_addresses.SetLines(ship_address);
+
     Config<Customer> config{
       .title = _("Insert Customer?"),
       .msg = _("Are you sure?"),
       .caller = customer.GetCustomer(),
-      .on_confirm = [customer]() { Database::Insert().Customer_(customer); }, // new
+      .on_confirm = [customer]() { Database::Insert().Customer_(customer); }, 
     };
     modal.SetConfig(config);
   }
@@ -106,12 +105,11 @@ void DeviceWin::Render() {
 
   if (ImGui::Button(_("Save"))) {
     Device device;
-    auto build = device.Set<Device>();
-    build.Name(name.Get())
-      .Brand_(brand_combo.Get())
-      .Type(type_combo.Get())
-      .Colors(colors.Get())
-      .Aliases(aliases.Get());
+    device.name = name.Get();
+    device.brand = brand_combo.Get();
+    device.type = type_combo.Get();
+    device.colors = colors.Get();
+    device.aliases = aliases.Get();
     Database::Insert().Device_(device);
 
   } 

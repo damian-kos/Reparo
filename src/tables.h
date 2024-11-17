@@ -15,7 +15,7 @@ typedef int TableCalls;
 class RoTable {
 public:
   static void AddressesInputs(std::vector<TextField>& first, std::vector<TextField>& second);
-  static void Addresses(std::vector<std::string>& first, std::vector<std::string>& second);
+  static void Addresses(const std::vector<std::string>& first, const std::vector<std::string>& second);
   template <typename T>
   static TableCalls SimpleModel(std::vector<T>& models);
 };
@@ -29,13 +29,13 @@ inline TableCalls RoTable::SimpleModel(std::vector<T>& models) {
     ImGui::TableHeadersRow();
     ImGui::TableNextRow();
     for (auto& model : models) {
-      ModelData data = model.Get<T>();
+      //ModelData data = model.Get<T>();
       static int selected = -1;
-      const bool is_selected = (selected == data.ID());
+      const bool is_selected = (selected == model.id);
 
       ImGui::TableNextColumn();
       char label[32];
-      sprintf_s(label, "%d", data.ID());
+      sprintf_s(label, "%d", model.id);
       if (ImGui::Selectable(label, is_selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_DontClosePopups)) {
       }
 
@@ -49,7 +49,7 @@ inline TableCalls RoTable::SimpleModel(std::vector<T>& models) {
         ImGui::EndPopup();
       }
       ImGui::TableNextColumn();
-      ImGui::Text("%s", data.Name().c_str());
+      ImGui::Text("%s", model.name.c_str());
     }
   ImGui::EndTable();
   }

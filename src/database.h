@@ -11,7 +11,8 @@ class TableCreator;
 class Inserter;
 class Customer;
 class Brand;
-class SimpleModel;
+//template <typename Derived>
+//class SimpleModel;
 class Database;
 
 class TableCreator {
@@ -48,7 +49,6 @@ class Inserter {
 public:
   Inserter() = default;
   Inserter& Customer_(const Customer& customer);
-  Inserter& Brand_(Brand& brand);
   Inserter& Device_(Device& device);
   template <typename T>
   Inserter& OfSimpleModel(T& model);
@@ -93,7 +93,7 @@ public:
 
   Selector& From() {
     T temp;
-    sql << " FROM " << temp.Get<T>().Table();
+    sql << " FROM " << temp.table;
     return *this;
   }
 
@@ -182,16 +182,16 @@ inline Inserter& Inserter::OfSimpleModel(T& model) {
   return ExecuteTransaction(
     [&model]() {
       int id = 0;
-      ModelData data = model.Get<T>();
-      std::string column =  " ("  + data.Column() + ") ";
-      std::string value =   "(:" + data.Column() + ")";
-      Database::sql << "INSERT INTO " << data.Table() << column
-        << "VALUES " << value << " RETURNING id",
-        soci::use(data.Name()), soci::into(id);
+      std::string column = " (" + model.column + ") ";
+      std::string value = "(:" + model.column + ")";
+      Database::sql << "INSERT INTO " << model.table << column
+      << "VALUES " << value << " RETURNING id",
+      soci::use(model.name)
+      , soci::into(id);
 
       // Set the model's ID if needed
-      model.Set<T>().ID(id);
+      model.id = id;
     },
-    "SimpleModel insertion (Simple Model Name: " + model.Get<T>().Name() + " Type: " + typeid(T).name() + ")"
-  );
+      "SimpleModel insertion (Simple Model Name: " + model.name + " Type: " + typeid(T).name() + ")"
+    );
 }
