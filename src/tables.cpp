@@ -1,6 +1,7 @@
 #include "tables.h"
 #include "imgui.h"
 #include <iostream>
+
 void RoTable::AddressesInputs(std::vector<TextField>& first, std::vector<TextField>& second) {
   if (ImGui::BeginTable("Address", 2)) {
     static size_t vec_size = first.size();
@@ -16,7 +17,7 @@ void RoTable::AddressesInputs(std::vector<TextField>& first, std::vector<TextFie
 
 void RoTable::Addresses(const std::vector<std::string>& first, const std::vector<std::string>& second) {
   if (ImGui::BeginTable("Address", 2)) {
-    size_t max_size = std::max(first.size(), second.size());
+    size_t max_size = (std::max)(first.size(), second.size());
 
     static std::vector<std::string> col_names = { "Billing Address", "Shipping Address" };
     for (auto& name : col_names)

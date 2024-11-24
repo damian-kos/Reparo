@@ -2,9 +2,9 @@
 #include <soci/soci.h>
 #include <soci/sqlite3/soci-sqlite3.h>
 #include "models/simple_models.h"
-#include "models/device.h"
 #include "models/alias.h"
 #include "models/customer.h"
+#include "models/device.h"
 #include <iostream>
 
 class Database;
@@ -78,6 +78,11 @@ namespace soci {
         model.name = v.get<std::string>("name");
         model.surname = v.get<std::string>("surname");
         model.email = v.get<std::string>("email");      
+        int bill_addr_id = v.get<int>("billing_addr_id", -1);
+        model.billing_addresses.SetID(bill_addr_id);
+        int ship_addr_id = v.get<int>("ship_addr_id", -1);
+        model.ship_addresses.SetID(ship_addr_id);
+
       }
 
       static void to_base(const Customer& model, values& v, indicator& ind) {
@@ -100,18 +105,16 @@ namespace soci {
       int columns = v.get_number_of_columns();
       if (columns <= 0) { return; }
       std::cout << "Converting from base for " << typeid(Device).name() << std::endl;
+        std::cout << "Column count: " << columns << std::endl;
 
       try {
         // Get optional fields with defaults
-        int type_id = 0;
+        int type_id = type_id = v.get<int>("type_id", -1);
         std::string type_name = "Unknown";
-        int brand_id = 0;
+        int brand_id = brand_id = v.get<int>("brand_id", -1);
         std::string brand_name = "Unknown";
-        std::cout << "Column count: " << columns << std::endl;
         if (columns > 4) {
-          type_id = v.get<int>("type_id");
           type_name = v.get<std::string>("type", "Unknown");
-          brand_id = v.get<int>("brand_id");
           brand_name = v.get<std::string>("brand", "Unknown");
         }
 
@@ -136,8 +139,8 @@ namespace soci {
       }
       
       v.set("model", model.name);
-      v.set("type_id", model.type.id); 
-      v.set("brand_id", model.brand.id);
+      v.set("type_id", model.type.id, model.brand.id == -1 ? i_null : i_ok); 
+      v.set("brand_id", model.brand.id, model.brand.id == -1 ? i_null : i_ok);
 
       ind = i_ok;
     }

@@ -7,6 +7,7 @@ template <typename T>
 class Attributes {
 public:
   Attributes();
+  Attributes(const int& _id);
   void Render();
   std::vector<T>& Get();
 
@@ -18,15 +19,26 @@ private:
 
 template<typename T>
 inline Attributes<T>::Attributes() { 
+  attrs = Database::Select<T>().From().All();
+}
+
+template<typename T>
+inline Attributes<T>::Attributes(const int& _id) {
+  std::string _id_str = std::to_string(_id);
+  if constexpr (std::is_same_v<T, Color>) {
+    // Smells, we are also using it RelationalField
+    attrs = Database::Select<T>("id, color") // Smells we are 
+      .From("colors")
+      .InnerJoin("model_colors mc ON colors.id = mc.color_id ")
+      .Where("mc.model_id = " + _id_str).All();
+  }
+  else if constexpr (std::is_same_v<T, Alias>) {
+    attrs = Database::Select<T>().From().Where("model_id = " + _id_str).All();
+  }
 }
 
 template<typename T>
 inline void Attributes<T>::Render() {
-  if (!loaded) {
-    attrs = Database::Select<T>().From().All();
-    loaded = true;
-  }
-
   static bool _reload = false;
   static int _to_pop = -1;
 

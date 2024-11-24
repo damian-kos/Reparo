@@ -4,6 +4,7 @@
 #include "../../src/text_fields.h"
 #include "../../src/RoLocalization.h"
 #include "../../src/tables.h"
+#include "../../src/database.h"
 
 Customer::Customer() {}
 
@@ -23,6 +24,14 @@ void Customer::View() {
   RoTable::Addresses(billing_addresses.Get().Lines(), ship_addresses.Get().Lines());
 }
 
+const std::string Customer::ToString() const {
+  return std::to_string(id) + " | " + phone + " | " + name + " | " + surname + " | " + email;
+}
+
+void Customer::InsertToDb() const {
+  Database::Insert().Customer_(*this);
+}
+
 Address::Data::Data(const Address& address) : data(address) { }
 
 const int& Address::Data::ID() const {
@@ -34,7 +43,7 @@ const std::vector<std::string> Address::Data::Lines() const {
 }
 
 Address& Address::SetID(int& _id) {
-  id = id;
+  id = _id;
   return *this;
 }
 

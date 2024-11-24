@@ -1,35 +1,24 @@
 #pragma once
 #include <vector>
 #include "text_fields.h"
-#include "models/simple_models.h"
-
-enum TableCalls_ {
-  TableCalls_None,
-  TableCalls_Edit,
-  TableCalls_Delete,
-  TableCalls_Print,
-};
-
-typedef int TableCalls;
+#include "modal.h"
 
 class RoTable {
 public:
   static void AddressesInputs(std::vector<TextField>& first, std::vector<TextField>& second);
   static void Addresses(const std::vector<std::string>& first, const std::vector<std::string>& second);
   template <typename T>
-  static TableCalls SimpleModel(std::vector<T>& models);
+  static void SimpleModel(std::vector<T>& models);
 };
 
 template<typename T>
-inline TableCalls RoTable::SimpleModel(std::vector<T>& models) {
-  TableCalls result = TableCalls_None;
+inline void RoTable::SimpleModel(std::vector<T>& models) {
   if (ImGui::BeginTable("IDValue", 2)) {
     ImGui::TableSetupColumn("ID", ImGuiTableColumnFlags_NoHide);
     ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_NoHide);
     ImGui::TableHeadersRow();
     ImGui::TableNextRow();
     for (auto& model : models) {
-      //ModelData data = model.Get<T>();
       static int selected = -1;
       const bool is_selected = (selected == model.id);
 
@@ -40,11 +29,27 @@ inline TableCalls RoTable::SimpleModel(std::vector<T>& models) {
       }
 
       if (ImGui::BeginPopupContextItem()) {
-        if (ImGui::Button("Edit record")) {
-          result = TableCalls_Edit;
+        // This modal builder is here so we can have access to specific records without returning them
+        // Figure out how to put them in SimpleModalWin
+        if (ImGui::Button(_("Edit record"))) {
+          BuildSimpleModelModal<T> build;
+          build.Title(_("Edit this record?"))
+            .Message(_("All the elements with this record will be changed as well."))
+            .SetSimpleModel(model);
+
+          SimpleModelModal<T> modal(build.Build());
+          StackModal::SetModal(modal);
         }
+        // This modal builder is here so we can have access to specific records without returning them
+        // Figure out how to put them in SimpleModalWin
         if (ImGui::Button("Delete")) {
-          result = TableCalls_Delete;
+          BuildSimpleModelModal<T> build;
+          build.Title(_("Delete this record?"))
+            .Message(_("Are you sure? All records which are including this record will be set to Unknown."))
+            .SetSimpleModel(model);
+
+          SimpleModelModal<T> modal(build.Build());
+          StackModal::SetModal(modal);
         }
         ImGui::EndPopup();
       }
@@ -53,5 +58,4 @@ inline TableCalls RoTable::SimpleModel(std::vector<T>& models) {
     }
   ImGui::EndTable();
   }
-  return result;
 }

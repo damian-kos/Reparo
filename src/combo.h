@@ -4,7 +4,6 @@
 class Brand;
 class DeviceWin;
 
-
 template <typename T>
 class RoCombo {
 public:
@@ -12,6 +11,7 @@ public:
   RoCombo(const std::string& label);
   void Render();
   T& Get();
+  void SetLabel(const std::string& _label);
 private:
   T model;
   std::string label;
@@ -25,7 +25,7 @@ template<typename T>
 inline void RoCombo<T>::Render() {
   static std::string _choice;
   label = _choice.empty() ? label : _choice;
-
+  ImGui::PushID(typeid(T).name());
   ImGui::Button(label.c_str());
   if (ImGui::BeginPopupContextItem(typeid(T).name(), ImGuiPopupFlags_MouseButtonLeft)) {
     static std::vector<T> _choices = Database::Select<T>().From().All();
@@ -46,9 +46,16 @@ inline void RoCombo<T>::Render() {
     }
     ImGui::EndPopup();
   }
+  ImGui::PopID();
 }
 
 template<typename T>
 inline T& RoCombo<T>::Get() {
   return model;
+}
+
+template<typename T>
+inline void RoCombo<T>::SetLabel(const std::string& _label) {
+  if (_label.empty()) { return; }
+  label = _label;
 }

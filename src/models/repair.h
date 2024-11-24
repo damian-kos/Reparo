@@ -1,6 +1,5 @@
 #pragma once
 #include "customer.h"
-#include <iostream>
 
 class Repair  {
   static constexpr std::string_view table = "repairs";

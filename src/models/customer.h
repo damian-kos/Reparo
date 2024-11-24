@@ -31,6 +31,8 @@ public:
   Customer();
   Customer& GetCustomer();
   void View();
+  const std::string ToString() const;
+  void InsertToDb() const;
 
   int id = -1;
   std::string phone;

@@ -6,16 +6,26 @@
 #include "database.h"
 #include "combo.h"
 #include "attributes.h"
+#include "modal.h"
 
 class Brand;
+
 
 class CustomerWin {
 public:
   CustomerWin();
+  CustomerWin(TFFlags phone_flags);
+  void Init();
   void Render();
+  void Debug();
+  void Feedback();
+  void Submit();
+  void FillBuffersByPhone(Customer& autofill);
   void InputFields();
   void Addresses();
+  void FieldsValidate();
 
+  bool error = true;
 private:
   PhoneField phone;
   NameField name;
@@ -32,9 +42,10 @@ public:
   DeviceWin();
   void Render();
   void DeviceName();
+  void FillDeviceByName(Device& autofill);
 
 private:
-  TextField name;
+  DeviceField name;
   RoCombo<Brand> brand_combo;
   RoCombo<DeviceType> type_combo;
   Attributes<Color> colors;
@@ -46,10 +57,33 @@ class RepairWin {
 public:
   RepairWin();
   void Render();
+  void CustomerSection();
+  void DeviceSection();
+  void NotesSection();
+  void FieldsValidate();
+  void DeviceFeedback();
+  void NotesFeedback();
+  void PriceSection();
+  void PriceFeedback();
+  void Submit();
+  void RepairValidated();
 
 private:
-  CustomerWin customer_part;
+  CustomerWin customer_section;
+  bool device_section_error = true;
+  bool notes_section_error = true;
+  bool price_section_error = true;
+  bool error = true;
+  double price = 0;
+  bool price_can_be_zero;
+  DeviceField device;
+  SimpleModelField<RepairCategory> category;
+  RelationalField<Color, Device> color;
+  TextField sn_imei;
+  TextField vis_note;
+  TextField hid_note;
 
+  bool open = true;
 };
 
 template <typename T>
@@ -63,30 +97,32 @@ private:
   T model;
   TextField name;
   std::vector<T> values;
-  bool open = true;
-  bool initialized = false;
+  bool open = false;
 };
 
 template<typename T>
-inline SimpleModelWin<T>::SimpleModelWin() { }
+inline SimpleModelWin<T>::SimpleModelWin() {
+  LoadData();
+}
 
 template<typename T>
 inline void SimpleModelWin<T>::Render() {
-  if (!initialized) {
-    LoadData();
-    initialized = true;
+  if(ImGui::Button(model.column.c_str())){
+    open = true;
+    ImGui::OpenPopup(model.window_title.c_str());
   }
-  ImGui::Begin(model.window_title.c_str(), &open);
-  RoTable::SimpleModel<T>(values);
-  name.Render();
-  ImGui::Text(_("Please right-click to edit or delete value"));
-  if (ImGui::Button(_("Add"))) {
-    model.name = name.Get();
-    Database::Insert().OfSimpleModel<T>(model);
-    LoadData();
-    model.table;
+  if (ImGui::BeginPopupModal(model.window_title.c_str(), &open)) {
+    RoTable::SimpleModel<T>(values);
+    name.Render();
+    ImGui::Text(_("Please right-click to edit or delete value"));
+    if (ImGui::Button(_("Add"))) {
+      model.name = name.Get();
+      Database::Insert().OfSimpleModel(model);
+      LoadData();
+    }
+    StackModal::RenderModal();
+    ImGui::EndPopup();
   }
-  ImGui::End();
 }
 
 template<typename T>

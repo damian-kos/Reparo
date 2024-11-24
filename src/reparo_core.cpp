@@ -4,41 +4,44 @@
 #include "database.h"
 #include "RoLocalization.h"
 #include "text_fields.h"
+
 std::vector<ReparoCore::TableCreationInfo> ReparoCore::table_config;
+
+ReparoCore::ReparoCore() {
+  modals.Attach(this);
+}
 
 void ReparoCore::Render() {
   customer_win.Render();
+  brand_win.Render();
+  device_types_win.Render();
+  categories_win.Render();
+  repair_states_win.Render();
+  payments_win.Render();
   device_win.Render();
   repair_win.Render();
-  brand_win.Render();
-  repair_states_win.Render();
-  categories_win.Render();
-  payments_win.Render();
-  device_types_win.Render();
+  if (modals.RenderModal() != ModalCallback_None) {
+    modals.Notify();
+  }
+  //ModalManager::RenderModal();
 }
 
 #ifdef DEBUG
+
+void ReparoCore::Update() {
+  brand_win.LoadData();
+  device_types_win.LoadData();
+  categories_win.LoadData();
+  repair_states_win.LoadData();
+  payments_win.LoadData();
+}
 
 void ReparoCore::RenderDebug() {
   InitializeTableBtns();
 
   ImGui::Begin("Debug");
 
-  static TextField tf("Text");
-  tf.Render();
 
-  static std::string pf_buffer;
-  static PhoneField pf("Phone", 0, TFFlags_HasPopup);
-  pf.Render();
-
-  static NameField nf("Name", 0, TFFlags_HasPopup);
-  nf.Render();
-
-  static SurnameField sf("Name w/o popup");
-  sf.Render();
-
-  static EmailField ef("Email");
-  ef.Render();
 
     //List Creation Button for creating a tables in a database
     for (const auto& table : table_config) {

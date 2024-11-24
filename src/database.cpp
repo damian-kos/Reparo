@@ -3,7 +3,7 @@
 #include "debug.h"
 #include "models/customer.h"
 #include "models/simple_models.h"
-#include "models/device.h"
+//#include "models/device.h"
 
 
 soci::session Database::sql;
@@ -13,15 +13,23 @@ soci::session Database::sql;
 ///// </summary>
 ///// <returns>Returns true if database could be open, false otherwise.  </returns>
 bool Database::OpenDb() {
-    try {
-        sql.open(soci::sqlite3, "resource/reparo.db");
-        Log::msg("DB IS OPEN");
-        return true;
+  try {
+    // If already connected, return success
+    if (sql.is_connected()) {
+      return true;
     }
-    catch (const soci::soci_error& e) {
-        std::cerr << "Cannot open database: " << e.what() << std::endl;
-        return false;
-    }
+
+    // Open new connection
+    sql.open(soci::sqlite3, "resource/reparo.db");
+    is_initialized = true;
+    Log::msg("DB IS OPEN");
+    return true;
+  }
+  catch (const soci::soci_error& e) {
+    std::cerr << "Cannot open database: " << e.what() << std::endl;
+    is_initialized = false;
+    return false;
+  }
 }
 
 bool Database::Execute(const std::string& _sql) {
@@ -64,6 +72,14 @@ TableCreator Database::Create() {
 
 Inserter Database::Insert() {
     return Inserter();
+}
+
+Updater Database::Update() {
+  return Updater();
+}
+
+Deleter Database::Delete() {
+    return Deleter();
 }
 
 TableCreator& TableCreator::BillingAddressesTable() {

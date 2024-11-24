@@ -2,12 +2,15 @@
 #include <functional>
 #include <string>
 #include "reparo_windows.h"
+#include "modal.h"
+#include "observer.h"
 
 class Database;
 class TableCreator;
 
-class ReparoCore {
+class ReparoCore : public IObserver {
 public:
+  ReparoCore();
   void Render();
 
 private:
@@ -15,12 +18,12 @@ private:
   DeviceWin device_win;
   RepairWin repair_win;
   SimpleModelWin<Brand>    brand_win;
-  SimpleModelWin<RepairState> repair_states_win;
-  SimpleModelWin<RepairCategory> categories_win;
-  SimpleModelWin<PaymentMethod> payments_win;
   SimpleModelWin<DeviceType> device_types_win;
-
-
+  SimpleModelWin<RepairCategory> categories_win;
+  SimpleModelWin<RepairState> repair_states_win;
+  SimpleModelWin<PaymentMethod> payments_win;
+  ModalManager modals;
+  void Update() override;
 
 #ifdef DEBUG
 public:

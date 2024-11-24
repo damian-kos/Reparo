@@ -20,7 +20,7 @@
 #include <iostream>
 
 #include "src/reparo_core.h"
-
+#include "src/database.h"
 #include "src/RoImage.h"            // to delete and to be moved to reparo manager
 #include "src/RoLocalization.h"     // to delete and to be moved to reparo manager
 
@@ -29,11 +29,11 @@
 #include "../libs/emscripten/emscripten_mainloop_stub.h"
 #endif
 
-ReparoCore reparo_core;
 
 // Main code
 int main(int, char**)
 {
+    ReparoCore reparo_core;
     Loc::initLocalization();
 
     // Setup SDL

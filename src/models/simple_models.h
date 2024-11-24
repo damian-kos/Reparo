@@ -1,6 +1,10 @@
 #pragma once
-#include <string>
+#include "imgui.h"
 #include <iostream>
+#include <string>
+
+class Database;
+class ModalManager;
 
 // Struct to hold ID and Name
 struct SimpleModelData {
@@ -24,6 +28,12 @@ public:
   static std::string_view Table() { return Derived::table; }
   static const std::string& Column() { return Derived::column; }
   static const std::string& WindowTitle() { return Derived::window_title; }
+  const std::string ToString() const;
+  void UpdateInDb();
+  void DeleteInDb();
+  bool Edit();
+  bool Delete();
+
 };
 
 // Derived structs
@@ -68,3 +78,14 @@ struct Color : SimpleModel<Color> {
   static inline const std::string column = "color";
   static inline const std::string window_title = "Colors";
 };
+
+template<typename Derived>
+inline bool SimpleModel<Derived>::Delete() {
+  bool action = false;
+  if (ImGui::Button("Confirm")) {
+    action = true;
+    DeleteInDb();
+    ImGui::CloseCurrentPopup();
+  }
+  return action;
+}
