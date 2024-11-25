@@ -165,14 +165,36 @@ TableCreator& TableCreator::SuppliersTable() {
 }
 
 TableCreator& TableCreator::RepairStatesTable() {
-  std::string _sql = R"(
+  // Step 1: Create the table
+  std::string create_table_sql = R"(
     CREATE TABLE IF NOT EXISTS repair_states (
-      id         INTEGER PRIMARY KEY,
-      state   TEXT NOT NULL UNIQUE        
+      id INTEGER PRIMARY KEY,
+      state TEXT NOT NULL UNIQUE
     );
-  )";
+)";
+  Database::ExecuteTransaction(create_table_sql);
 
-  Database::ExecuteTransaction(_sql);
+  Database::OpenDb();
+  // Step 2: Insert initial rows
+  std::string insert_rows_sql = R"(
+    INSERT OR IGNORE INTO repair_states (id, state) VALUES
+    (1, 'Pending'),
+    (2, 'Completed');
+)";
+  Database::ExecuteTransaction(insert_rows_sql);
+
+  // Step 3: Create the trigger
+  Database::OpenDb();
+  std::string create_trigger_sql = R"(
+    CREATE TRIGGER IF NOT EXISTS prevent_delete
+    BEFORE DELETE ON repair_states
+    FOR EACH ROW
+    WHEN OLD.id IN (1, 2)
+    BEGIN
+      SELECT RAISE(ABORT, 'Cannot delete this row');
+    END;
+)";
+  Database::ExecuteTransaction(create_trigger_sql);
   return *this;
 }
 
@@ -307,7 +329,6 @@ TableCreator& TableCreator::AliasesTable() {
   Database::ExecuteTransaction(_sql);
   return *this;
 }
-
 
 TableCreator& TableCreator::ModelColorsTable() {
   std::string _sql = R"(

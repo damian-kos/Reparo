@@ -321,6 +321,7 @@ void RepairWin::Submit() {
     repair.vis_note = vis_note.Get();
     repair.hid_note = hid_note.Get();
     repair.price = price;
+    repair.repair_state = RepairState(2);
     
     // Create repair object;
   }

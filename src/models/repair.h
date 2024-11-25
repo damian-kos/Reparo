@@ -12,7 +12,7 @@ public:
   std::string vis_note;
   std::string hid_note;
   double price;
-  int repair_state;
+  RepairState repair_state;
   int cust_device_id;
   static constexpr std::string_view table = "repairs";
 
