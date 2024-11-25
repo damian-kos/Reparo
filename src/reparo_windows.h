@@ -7,6 +7,7 @@
 #include "combo.h"
 #include "attributes.h"
 #include "modal.h"
+#include "models/customer.h"
 
 class Brand;
 
@@ -24,7 +25,7 @@ public:
   void InputFields();
   void Addresses();
   void FieldsValidate();
-
+  Customer GetCustomer();
   bool error = true;
 private:
   PhoneField phone;

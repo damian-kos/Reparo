@@ -169,6 +169,10 @@ void PhoneField::Feedback() {
   }
 }
 
+Customer PhoneField::GetFromDb() {
+  return Database::Get().Customer_<std::string>(buffer);
+}
+
 int NameField::Render() {
   ImGui::BeginValid(has_error_with_content);
   ImGui::InputTextWithHint(("##" + label).c_str(), (label + "...").c_str(), &buffer, flags);
@@ -299,6 +303,10 @@ void DeviceField::Feedback() {
   }
 }
 
+Device DeviceField::GetFromDb() {
+  return Database::Get().Device_(buffer);
+}
+
 template<typename SM>
 SM& SimpleModelField<SM>::Render() {
   static std::vector<SM> vec;
@@ -344,13 +352,23 @@ void SimpleModelField<SM>::Feedback() {
   }
 }
 
+template<typename SM>
+SM SimpleModelField<SM>::GetFromDb() {
+  if (buffer.empty()) {
+    SM model;
+    model.id = -1;
+    model.name = buffer;
+    return model; // Return a default model with invalid id and buffer as name
+  }
+  return Database::Get().SimpleModel_<std::string, SM>(buffer);
+}
+
 template struct SimpleModelField<Brand>;
 template struct SimpleModelField<RepairState>;
 template struct SimpleModelField<RepairCategory>;
 template struct SimpleModelField<PaymentMethod>;
 template struct SimpleModelField<DeviceType>;
 template struct SimpleModelField<Color>;
-
 
 
 template<typename SM, typename R>
@@ -406,6 +424,12 @@ void RelationalField<SM, R>::Feedback() {
   if (err_flags & ValidatorFlags_StrLen) {
     ImGui::Text("%s too short", label.c_str()); ImGui::SameLine();
   }
+}
+
+template<typename SM, typename R>
+SM RelationalField<SM, R>::GetFromDb() {
+  if (buffer.empty()) { return SM(); }
+  return Database::Get().SimpleModel_<std::string, SM>(buffer);
 }
 
 template struct RelationalField<Color, Device>;

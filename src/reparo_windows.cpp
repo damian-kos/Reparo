@@ -4,6 +4,7 @@
 #include "models/customer.h"
 #include "models/simple_models.h"
 #include "database.h"
+#include "models/repair.h"
 
 
 CustomerWin::CustomerWin()
@@ -120,6 +121,10 @@ void CustomerWin::Addresses() {
 
 void CustomerWin::FieldsValidate() {
   error = phone.error || name.error || surname.error || email.error;
+}
+
+Customer CustomerWin::GetCustomer() {
+  return phone.GetFromDb();
 }
 
 DeviceWin::DeviceWin() 
@@ -242,6 +247,7 @@ void RepairWin::CustomerSection() {
 void RepairWin::DeviceSection() {
   ImGui::SeparatorColor(_("DEVICE"), device_section_error);
   FieldsValidate();
+  RepairValidated();
   DeviceFeedback();
   ImGui::NewLine();
   static Device temp_device;
@@ -251,6 +257,7 @@ void RepairWin::DeviceSection() {
   sn_imei.Render();
   NotesSection();
   PriceSection();
+  Submit();
 }
 
 void RepairWin::NotesSection() {
@@ -298,14 +305,28 @@ void RepairWin::PriceFeedback() {
 }
 
 void RepairWin::Submit() {
-  ImGui::SeparatorColor(_("Submit"), error);
+  ImGui::SeparatorColor(_("SUBMIT"), error);
+  ImGui::BeginDisabled(error);
   if (ImGui::Button(_("Submit Repair"))) {
+    Repair repair;
+    repair.customer = customer_section.GetCustomer();
+    // We can change database query below if we needed to get brand and type of the device
+    repair.device = device.GetFromDb();
+    repair.category = category.GetFromDb();
+    repair.color = color.GetFromDb();
+    repair.sn_imei = sn_imei.Get();
+    repair.vis_note = vis_note.Get();
+    repair.hid_note = hid_note.Get();
+    repair.price = price;
+
+    std::cout << repair.color.ToString() << std::endl;
+    
     // Create repair object;
   }
-
+  ImGui::EndDisabled();
 }
 
 void RepairWin::RepairValidated() {
-  error = device_section_error || notes_section_error || price_section_error;
+  error = customer_section.error ||  device_section_error || notes_section_error || price_section_error;
 }
 

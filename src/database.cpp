@@ -82,6 +82,10 @@ Deleter Database::Delete() {
     return Deleter();
 }
 
+DBGet Database::Get(){
+  return DBGet();
+}
+
 TableCreator& TableCreator::BillingAddressesTable() {
   std::string _sql = R"(
     CREATE TABLE IF NOT EXISTS billing_addresses (
@@ -711,3 +715,46 @@ Inserter& Inserter::Device_(Device& device) {
     "Device insertion (Device Name: " + device.name + ")"
   );
 }
+
+template<typename T>
+Customer DBGet::Customer_(const T& _value) {
+  Database::OpenDb();
+   std::string query;
+   if (std::is_same_v<T, int>)
+     query = "id = (:id) ";
+   else
+     query = "phone = (:phone)";
+   
+  Customer customer;
+  T value = _value;
+  Database::sql << "SELECT * FROM customers WHERE " << query,
+    soci::use(_value),
+    soci::into(customer);
+  Database::sql.close();
+  return customer;
+}
+
+template<typename T>
+Device DBGet::Device_(const T& _value){
+  Database::OpenDb();
+  std::string query;
+  if (std::is_same_v<T, int>)
+    query = "id = (:id) ";
+  else
+    query = "model = (:model)";
+
+  Device device;
+  T value = _value;
+  Database::sql << "SELECT * FROM devices WHERE " << query,
+    soci::use(_value),
+    soci::into(device);
+  Database::sql.close();
+  return device;
+}
+
+
+
+template Customer DBGet::Customer_<std::string>(const std::string&);
+template Customer DBGet::Customer_<int>(const int&);
+template Device DBGet::Device_<std::string>(const std::string&);
+template Device DBGet::Device_<int>(const int&);

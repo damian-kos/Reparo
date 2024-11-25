@@ -5,7 +5,7 @@
 #include <vector>
 #include <sstream>
 #include "../../src/soci_type_conversion_helpers.h"
-#include "models/simple_models.h"
+//#include "models/customer.h"
 
 class TableCreator;
 class Inserter;
@@ -197,6 +197,16 @@ private:
     std::ostringstream sql;
 };
 
+class DBGet {
+public:
+  template <typename T>
+  static Customer Customer_(const T& _value);
+  template <typename T>
+  static Device Device_(const T& _value);
+  template <typename T, typename SM>
+  static SM SimpleModel_(const T& _value);
+};
+
 class Database {
 public:
   Database() { OpenDb(); };
@@ -211,6 +221,7 @@ public:
   template<typename T>
   static Selector<T> Select(const std::string& columns = "*");
   static inline bool is_initialized = false;
+  static DBGet Get();
 };
 
 // After Selector class definition, add the implementation:
@@ -315,3 +326,40 @@ inline Deleter& Deleter::OfSimpleModel(T& model) {
   );
 }
 
+template<typename T, typename SM>
+inline SM DBGet::SimpleModel_(const T& _value) {
+  try {
+    Database::OpenDb();
+
+    // So we can use soci::into
+    SM model;
+
+    std::string query;
+    if (std::is_same_v<T, int>)
+      query = "id = (:id)";
+    else
+      query = model.column + " = (:" + model.column+ ")";
+    // soci docs suggests this for safety
+    T value = _value;
+    Database::sql << "SELECT * FROM " << model.table << " WHERE " << query,
+      soci::use(value),
+      soci::into(model);
+
+    Database::sql.close();
+
+    return model;
+  }
+  catch (const soci::soci_error& e) {
+    std::cerr << "[DB ERROR] Failed to execute query in SimpleModel_: "
+      << e.what() << std::endl
+      << "[Query Info] Table: " << SM{}.table
+      << ", Value: " << _value << std::endl;
+    throw; // Re-throw the exception to allow higher-level handling
+  }
+  catch (const std::exception& e) {
+    // Log other standard exceptions
+    std::cerr << "[ERROR] Unexpected error in SimpleModel_: "
+      << e.what() << std::endl;
+    throw; // Re-throw for higher-level handling
+  }
+}

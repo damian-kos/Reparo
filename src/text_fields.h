@@ -70,7 +70,7 @@ public:
   Customer Render();
   void Validate() override;
   void Feedback() override;
-
+  Customer GetFromDb();
 };
 
 class NameField : public TextField {
@@ -106,6 +106,7 @@ public:
   Device& Render();
   void Validate() override;
   void Feedback() override;
+  Device GetFromDb();
 private:
   Device device;
 };
@@ -117,6 +118,7 @@ public:
   SM& Render();
   void Validate() override;
   void Feedback() override;
+  SM GetFromDb();
 };
 
 template <typename SM, typename R>
@@ -126,4 +128,5 @@ public:
   SM& Render(const R& related);
   void Validate() override;
   void Feedback() override;
+  SM GetFromDb();
 };
