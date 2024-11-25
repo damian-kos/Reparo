@@ -103,10 +103,11 @@ public:
 class DeviceField : public TextField {
 public:
   using TextField::TextField;
-  Device& Render();
+  Device Render();
   void Validate() override;
   void Feedback() override;
   Device GetFromDb();
+  bool IsInDb();
 private:
   Device device;
 };
@@ -121,11 +122,12 @@ public:
   SM GetFromDb();
 };
 
+// Currently it works only with <Color, DeviceField> which is suboptimal
 template <typename SM, typename R>
 class RelationalField : public TextField {
 public:
   using TextField::TextField;
-  SM& Render(const R& related);
+  SM& Render(R& related);
   void Validate() override;
   void Feedback() override;
   SM GetFromDb();

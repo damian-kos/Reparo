@@ -79,7 +79,7 @@ private:
   bool price_can_be_zero;
   DeviceField device;
   SimpleModelField<RepairCategory> category;
-  RelationalField<Color, Device> color;
+  RelationalField<Color, DeviceField> color;
   TextField sn_imei;
   TextField vis_note;
   TextField hid_note;

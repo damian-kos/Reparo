@@ -220,7 +220,7 @@ void DeviceWin::FillDeviceByName(Device& autofill) {
 
 RepairWin::RepairWin()
   : customer_section(TFFlags_HasPopup | TFFlags_AllowDbPresence)
-  , device(_("Model"), 0, TFFlags_HasPopup)
+  , device(_("Model"), 0, TFFlags_HasPopup | TFFlags_AllowDbPresence)
   , category(_("Category"), 0, TFFlags_HasPopup)
   , color(_("Color"), 0, TFFlags_HasPopup)
   , sn_imei(_("Serial / IMEI"))
@@ -231,8 +231,13 @@ RepairWin::RepairWin()
 
 void RepairWin::Render() {
   ImGui::Begin(_("Repair"));
+  FieldsValidate();
+  RepairValidated();
   CustomerSection();
   DeviceSection();
+  NotesSection();
+  PriceSection();
+  Submit();
   ImGui::End();
 }
 
@@ -246,18 +251,16 @@ void RepairWin::CustomerSection() {
 
 void RepairWin::DeviceSection() {
   ImGui::SeparatorColor(_("DEVICE"), device_section_error);
-  FieldsValidate();
-  RepairValidated();
   DeviceFeedback();
   ImGui::NewLine();
-  static Device temp_device;
-  temp_device = device.Render();
+  device.Render();
   category.Render();
-  color.Render(temp_device);
+  color.Render(device);
   sn_imei.Render();
-  NotesSection();
-  PriceSection();
-  Submit();
+  if (!device.IsInDb())
+    ImGui::Text("Custom device");
+  else
+    ImGui::Text("");
 }
 
 void RepairWin::NotesSection() {
@@ -318,8 +321,6 @@ void RepairWin::Submit() {
     repair.vis_note = vis_note.Get();
     repair.hid_note = hid_note.Get();
     repair.price = price;
-
-    std::cout << repair.color.ToString() << std::endl;
     
     // Create repair object;
   }

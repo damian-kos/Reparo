@@ -250,13 +250,14 @@ void EmailField::Feedback() {
   }
 }
 
-Device& DeviceField::Render() {
+Device DeviceField::Render() {
   static std::vector<Device> vec;
   ImGui::BeginValid(has_error_with_content);
   ImGui::InputTextWithHint(("##" + label).c_str(), (label + "...").c_str(), &buffer, flags);
   ImGui::EndValid(has_error_with_content);
-
+ 
   if (ImGui::IsItemEdited() || ImGui::IsItemActivated()) {
+    device = Device();
     Validate();
     vec.clear();
     vec = Database::Select<Device>(" devices.*, dt.type, b.brand ")
@@ -274,11 +275,11 @@ Device& DeviceField::Render() {
   }
   ImGui::PopID();
   if (temp.id > 0) {
-    device = temp;
-    std::cout << device.ToString() << std::endl;
-    buffer = device.name;
+    buffer = temp.name;
     Validate();
-    return device;
+  }
+  if (ImGui::IsItemDeactivated()) {
+    device = GetFromDb();
   }
   return device;
 }
@@ -286,9 +287,13 @@ Device& DeviceField::Render() {
 void DeviceField::Validate() {
   err_flags = ValidatorFlags_Pass;
   // Database check can be moved after length check to avoid unecessary checks
-  err_flags |= Validator::DatabaseChk<Device>("devices", "model = " + buffer); // Edit with corresponding table once data in db exists
+  std::string buf = "'" + buffer + "'";
+  err_flags |= Validator::DatabaseChk<Device>("devices", "model = " + buf); // Edit with corresponding table once data in db exists
   err_flags |= Validator::StrLen(buffer, 3);
-  error = err_flags & (ValidatorFlags_StrLen | ValidatorFlags_IsDuplicate);
+  if (!(ro_flags & TFFlags_AllowDbPresence))
+    error = err_flags & (ValidatorFlags_StrLen | ValidatorFlags_IsDuplicate);
+  else
+    error = err_flags & ValidatorFlags_StrLen;
   has_error_with_content = error && buffer.size() > 0;
 }
 
@@ -305,6 +310,10 @@ void DeviceField::Feedback() {
 
 Device DeviceField::GetFromDb() {
   return Database::Get().Device_(buffer);
+}
+
+bool DeviceField::IsInDb() {
+  return (err_flags & ValidatorFlags_IsDuplicate) || error ;
 }
 
 template<typename SM>
@@ -371,19 +380,20 @@ template struct SimpleModelField<DeviceType>;
 template struct SimpleModelField<Color>;
 
 
+// Currently it works only with <Color, DeviceField> which is suboptimal
 template<typename SM, typename R>
-SM& RelationalField<SM, R>::Render(const R& related) {
+SM& RelationalField<SM, R>::Render(R& related) {
   static std::vector<SM> vec;
   static SM model;
+  static int curr_id = -1;
   ImGui::BeginValid(has_error_with_content);
   ImGui::InputTextWithHint(("##" + label).c_str(), (label + "...").c_str(), &buffer, flags);
   ImGui::EndValid(has_error_with_content);
-
-  if (ImGui::IsItemEdited() || ImGui::IsItemActivated()) {
-    Validate();
+  if (ImGui::IsItemActivated()) {
+    curr_id = related.GetFromDb().id;
     vec.clear();
-    if (related.id > 0) {
-      std::string _id_str = std::to_string(related.id);
+    if (curr_id > 0) {
+      std::string _id_str = std::to_string(curr_id);
       // Smells, we are also using it attributes.h
       vec = Database::Select<SM>("id, color") // Smells we are 
         .From("colors")
@@ -393,6 +403,9 @@ SM& RelationalField<SM, R>::Render(const R& related) {
     if (vec.empty()) {
       vec = Database::Select<SM>().From().All();
     }
+  }
+  if (ImGui::IsItemEdited()) {
+    Validate();
   }
   ImGui::PushID(label.c_str());
   SM temp;
@@ -432,4 +445,4 @@ SM RelationalField<SM, R>::GetFromDb() {
   return Database::Get().SimpleModel_<std::string, SM>(buffer);
 }
 
-template struct RelationalField<Color, Device>;
+template struct RelationalField<Color, DeviceField>;
