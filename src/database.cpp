@@ -737,6 +737,35 @@ Inserter& Inserter::Device_(Device& device) {
   );
 }
 
+Inserter& Inserter::Repair_(Repair& repair) {
+  return ExecuteTransaction(
+    [&repair]() {
+      int repair_id = 0;
+      Repair r = repair;
+      try {
+
+        Database::sql << "INSERT INTO repairs (customer_id, model_id, category_id, color_id, visible_desc, hidden_desc, price, repair_state_id, sn_imei, cust_device_id) "
+          "VALUES (:customer_id, :model_id, :category_id, :color_id, :visible_desc, :hidden_desc, :price, :repair_state_id, :sn_imei, :cust_device_id) "
+          "RETURNING id",
+          soci::use(r),
+          soci::into(repair_id);
+
+        // Set the repair's ID
+        repair.id = repair_id;
+      }
+      catch (const soci::soci_error& e) {
+        std::cerr << "SOCI Error during repair insertion: " << e.what() << std::endl;
+        throw;
+      }
+      catch (const std::exception& e) {
+        std::cerr << "Standard exception during repair insertion: " << e.what() << std::endl;
+        throw;
+      }
+    },
+    "Device insertion (Device Name: " + repair.ToString() + ")"
+  );
+}
+
 template<typename T>
 Customer DBGet::Customer_(const T& _value) {
   Database::OpenDb();

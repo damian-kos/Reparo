@@ -5,7 +5,7 @@
 #include <vector>
 #include <sstream>
 #include "../../src/soci_type_conversion_helpers.h"
-//#include "models/customer.h"
+
 
 class TableCreator;
 class Inserter;
@@ -49,6 +49,7 @@ public:
   Inserter() = default;
   Inserter& Customer_(const Customer& customer);
   Inserter& Device_(Device& device);
+  Inserter& Repair_(Repair& repair);
   template <typename T>
   Inserter& OfSimpleModel(T& model);
 

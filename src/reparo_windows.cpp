@@ -322,7 +322,9 @@ void RepairWin::Submit() {
     repair.hid_note = hid_note.Get();
     repair.price = price;
     repair.repair_state = RepairState(2);
-    
+    repair.cust_device_id = device.IsInDb() ? -1 : 1;
+    std::cout << repair.ToString() << std::endl;
+    Database::Insert().Repair_(repair);
     // Create repair object;
   }
   ImGui::EndDisabled();

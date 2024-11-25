@@ -5,9 +5,8 @@
 #include "models/alias.h"
 #include "models/customer.h"
 #include "models/device.h"
+#include "models/repair.h"
 #include <iostream>
-
-class Database;
 
 
 // Concept definition
@@ -146,6 +145,49 @@ namespace soci {
     }
   };
 
+  template <>
+  struct type_conversion<Repair> {
+    typedef values base_type;
+
+    static void from_base(const values& v, indicator ind, Repair& model) {
+      std::cout << "Converting from base for " << typeid(Repair).name() << std::endl;
+
+      if (ind == i_null) {
+        throw std::runtime_error("Null value fetched from database");
+      }
+      model.id = v.get<int>("id");
+      model.customer.id = v.get<int>("customer_id");
+      //model.customer = Database::Get().Customer_(model.customer.id);
+      model.device.id = v.get<int>("model_id");
+      //model.device = Database::Get().Device_(model.device.id);
+      model.color.id = v.get<int>("color_id");
+      //model.color = Database::Get().SimpleModel_<int, Color>(model.color.id);
+      model.vis_note = v.get<std::string>("visible_desc");
+      model.hid_note = v.get<std::string>("hidden_desc");
+      model.price = v.get<double>("price");
+      model.repair_state.id = v.get<int>("repair_state_id");
+      //model.repair_state = Database::Get().SimpleModel_<int, RepairState>(model.repair_state.id);
+      model.sn_imei = v.get<std::string>("sn_imei");
+      model.cust_device_id = v.get<int>("cust_device_id", -1);
+
+    }
+
+    static void to_base(const Repair& model, values& v, indicator& ind) {
+      v.set("id", model.id);
+      v.set("customer_id", model.customer.id);
+      v.set("model_id", model.device.id);
+      v.set("category_id", model.category.id);
+      v.set("color_id", model.color.id);
+      v.set("visible_desc", model.vis_note);
+      v.set("hidden_desc", model.hid_note);
+      v.set("price", model.price);
+      v.set("repair_state_id", model.repair_state.id);
+      v.set("sn_imei", model.sn_imei);
+      v.set("cust_device_id", model.cust_device_id, model.cust_device_id == -1 ? i_null : i_ok);
+
+      ind = i_ok;
+    }
+  };
 }
 
 

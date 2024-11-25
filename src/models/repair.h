@@ -1,5 +1,7 @@
 #pragma once
 #include "customer.h"
+#include "simple_models.h"
+#include "device.h"
 
 class Repair  {
 public:
@@ -15,5 +17,6 @@ public:
   RepairState repair_state;
   int cust_device_id;
   static constexpr std::string_view table = "repairs";
+  const std::string ToString() const;
 
 };
