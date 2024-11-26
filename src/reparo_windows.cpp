@@ -73,13 +73,7 @@ void CustomerWin::Feedback() {
 void CustomerWin::Submit() {
   ImGui::BeginDisabled(error);
   if (ImGui::Button(_("Submit Customer Details"))) {
-    Customer customer;
-    customer.phone = phone.Get();
-    customer.name = name.Get();
-    customer.surname = surname.Get();
-    customer.email = email.Get();
-    customer.billing_addresses.SetLines(billing_address);
-    customer.ship_addresses.SetLines(ship_address);
+    Customer customer = CreateCustomer();
 
     BuildCustomerModal build;
     build.Title(_("Insert Customer?"))
@@ -123,8 +117,35 @@ void CustomerWin::FieldsValidate() {
   error = phone.error || name.error || surname.error || email.error;
 }
 
+/// <summary>
+/// Creates custoemr object from filled fields.
+/// </summary>
+/// <returns></returns>
+Customer CustomerWin::CreateCustomer() {
+  Customer customer;
+  customer.phone = phone.Get();
+  customer.name = name.Get();
+  customer.surname = surname.Get();
+  customer.email = email.Get();
+  customer.billing_addresses.SetLines(billing_address);
+  customer.ship_addresses.SetLines(ship_address);
+  return customer;
+}
+
+/// <summary>
+/// Gets customer from CustomerWin. If customer is present in Database, get Customer with all its data from there, otherwise
+/// return the customer created with current input fields buffers.
+/// </summary>
+/// <returns></returns>
 Customer CustomerWin::GetCustomer() {
-  return phone.GetFromDb();
+  Customer customer = phone.GetFromDb();
+  if (customer.id > 1) {
+    return customer;
+  }
+  else {
+    customer = CreateCustomer();
+    return customer;
+  }
 }
 
 DeviceWin::DeviceWin() 
@@ -325,6 +346,7 @@ void RepairWin::Submit() {
     repair.cust_device_id = device.IsInDb() ? -1 : 1;
     std::cout << repair.ToString() << std::endl;
     Database::Insert().Repair_(repair);
+    std::cout << repair.ToString() << std::endl;
     // Create repair object;
   }
   ImGui::EndDisabled();

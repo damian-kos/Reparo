@@ -3,7 +3,7 @@
 #include "debug.h"
 #include "models/customer.h"
 #include "models/simple_models.h"
-//#include "models/device.h"
+#include "queries.h"
 
 
 soci::session Database::sql;
@@ -649,46 +649,12 @@ TableCreator& TableCreator::PartModelAliasTable() {
   return *this;
 }
 
-Inserter& Inserter::Customer_(const Customer& customer) {
+Inserter& Inserter::Customer_(Customer& customer) {
   return ExecuteTransaction(
     [&customer]() {
-      int billing_addr_id = 0;
-      if (!customer.billing_addresses.Get().Lines().empty()) {
-        const auto& billing = customer.billing_addresses.Get().Lines(); // Using first address
-        Database::sql << "INSERT INTO billing_addresses "
-          "(line1, line2, line3, line4, line5) "
-          "VALUES (:l1, :l2, :l3, :l4, :l5) "
-          "RETURNING id",
-          soci::use(billing[0]),
-          soci::use(billing[1]),
-          soci::use(billing[2]),
-          soci::use(billing[3]),
-          soci::use(billing[4]),
-          soci::into(billing_addr_id);
-      }
-
-      // Then insert shipping address and get its ID
-      int shipping_addr_id = 0;
-      if (!customer.ship_addresses.Get().Lines().empty()) {
-        const auto& shipping = customer.ship_addresses.Get().Lines(); // Using first address
-        Database::sql << "INSERT INTO ship_addresses "
-          "(line1, line2, line3, line4, line5) "
-          "VALUES (:l1, :l2, :l3, :l4, :l5) "
-          "RETURNING id",
-          soci::use(shipping[0]),
-          soci::use(shipping[1]),
-          soci::use(shipping[2]),
-          soci::use(shipping[3]),
-          soci::use(shipping[4]),
-          soci::into(shipping_addr_id);
-      }
-
-      Database::sql << "INSERT INTO customers "
-        "(phone, name, surname, email, billing_addr_id, ship_addr_id) "
-        "VALUES (:phone, :name, :surname, :email, :bid, :sid)",
-        soci::use(customer),
-        soci::use(billing_addr_id, "bid"),
-        soci::use(shipping_addr_id, "sid");
+      Query::InsertBillingAddress(customer);
+      Query::InsertShippingAddress(customer);
+      Query::InsertCustomer(customer);
     },
     "Customer insertion (Phone: " + customer.phone + ")"
   );
@@ -740,27 +706,15 @@ Inserter& Inserter::Device_(Device& device) {
 Inserter& Inserter::Repair_(Repair& repair) {
   return ExecuteTransaction(
     [&repair]() {
-      int repair_id = 0;
-      Repair r = repair;
-      try {
-
-        Database::sql << "INSERT INTO repairs (customer_id, model_id, category_id, color_id, visible_desc, hidden_desc, price, repair_state_id, sn_imei, cust_device_id) "
-          "VALUES (:customer_id, :model_id, :category_id, :color_id, :visible_desc, :hidden_desc, :price, :repair_state_id, :sn_imei, :cust_device_id) "
-          "RETURNING id",
-          soci::use(r),
-          soci::into(repair_id);
-
-        // Set the repair's ID
-        repair.id = repair_id;
+    
+      if (repair.customer.id < 0) {
+        Query::InsertBillingAddress(repair.customer);
+        Query::InsertShippingAddress(repair.customer);
+        Query::InsertCustomer(repair.customer);
       }
-      catch (const soci::soci_error& e) {
-        std::cerr << "SOCI Error during repair insertion: " << e.what() << std::endl;
-        throw;
-      }
-      catch (const std::exception& e) {
-        std::cerr << "Standard exception during repair insertion: " << e.what() << std::endl;
-        throw;
-      }
+      
+      Query::InsertRepair(repair);
+    
     },
     "Device insertion (Device Name: " + repair.ToString() + ")"
   );

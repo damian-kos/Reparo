@@ -28,7 +28,7 @@ const std::string Customer::ToString() const {
   return std::to_string(id) + " | " + phone + " | " + name + " | " + surname + " | " + email;
 }
 
-void Customer::InsertToDb() const {
+void Customer::InsertToDb() {
   Database::Insert().Customer_(*this);
 }
 

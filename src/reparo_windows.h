@@ -25,6 +25,7 @@ public:
   void InputFields();
   void Addresses();
   void FieldsValidate();
+  Customer CreateCustomer();
   Customer GetCustomer();
   bool error = true;
 private:

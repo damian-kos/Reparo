@@ -77,8 +77,8 @@ namespace soci {
         model.name = v.get<std::string>("name");
         model.surname = v.get<std::string>("surname");
         model.email = v.get<std::string>("email");      
-        int bill_addr_id = v.get<int>("billing_addr_id", -1);
-        model.billing_addresses.SetID(bill_addr_id);
+        int billing_addr_id = v.get<int>("billing_addr_id", -1);
+        model.billing_addresses.SetID(billing_addr_id);
         int ship_addr_id = v.get<int>("ship_addr_id", -1);
         model.ship_addresses.SetID(ship_addr_id);
 
@@ -90,6 +90,9 @@ namespace soci {
         v.set("name", model.name);
         v.set("surname", model.surname);
         v.set("email", model.email);
+        v.set("billing_addr_id", model.billing_addresses.Get().ID());
+        v.set("ship_addr_id", model.ship_addresses.Get().ID());
+
 
         ind = i_ok;
       }
@@ -158,9 +161,9 @@ namespace soci {
       model.id = v.get<int>("id");
       model.customer.id = v.get<int>("customer_id");
       //model.customer = Database::Get().Customer_(model.customer.id);
-      model.device.id = v.get<int>("model_id");
+      model.device.id = v.get<int>("model_id", -1);
       //model.device = Database::Get().Device_(model.device.id);
-      model.color.id = v.get<int>("color_id");
+      model.color.id = v.get<int>("color_id", -1);
       //model.color = Database::Get().SimpleModel_<int, Color>(model.color.id);
       model.vis_note = v.get<std::string>("visible_desc");
       model.hid_note = v.get<std::string>("hidden_desc");
@@ -175,9 +178,9 @@ namespace soci {
     static void to_base(const Repair& model, values& v, indicator& ind) {
       v.set("id", model.id);
       v.set("customer_id", model.customer.id);
-      v.set("model_id", model.device.id);
-      v.set("category_id", model.category.id);
-      v.set("color_id", model.color.id);
+      v.set("model_id", model.device.id, model.device.id == -1 ? i_null : i_ok);
+      v.set("category_id", model.category.id, model.category.id == -1 ? i_null : i_ok);
+      v.set("color_id", model.color.id, model.color.id == -1 ? i_null : i_ok);
       v.set("visible_desc", model.vis_note);
       v.set("hidden_desc", model.hid_note);
       v.set("price", model.price);

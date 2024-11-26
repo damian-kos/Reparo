@@ -32,7 +32,7 @@ public:
   Customer& GetCustomer();
   void View();
   const std::string ToString() const;
-  void InsertToDb() const;
+  void InsertToDb();
 
   int id = -1;
   std::string phone;

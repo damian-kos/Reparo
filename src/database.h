@@ -47,7 +47,7 @@ public:
 class Inserter {
 public:
   Inserter() = default;
-  Inserter& Customer_(const Customer& customer);
+  Inserter& Customer_(Customer& customer);
   Inserter& Device_(Device& device);
   Inserter& Repair_(Repair& repair);
   template <typename T>
@@ -72,14 +72,17 @@ inline Inserter& Inserter::ExecuteTransaction(Func operation, const std::string&
   catch (const soci::sqlite3_soci_error& e) {
     std::cerr << "SQLite error in " << description << ": " << e.what() << std::endl;
     Database::sql.close();
+    throw; // Re-throw to allow higher-level error handling
   }
   catch (const soci::soci_error& e) {
     std::cerr << "General SOCI error in " << description << ": " << e.what() << std::endl;
     Database::sql.close();
+    throw; // Re-throw to allow higher-level error handling
   }
   catch (const std::exception& e) {
     std::cerr << "Unexpected error in " << description << ": " << e.what() << std::endl;
     Database::sql.close();
+    throw; // Re-throw to allow higher-level error handling
   }
   return *this;
 }
