@@ -32,38 +32,38 @@ ValidatorFlags Validator::IsEmail(const std::string& buffer) {
 }
 
 template <typename T>
-T Popup::OnTextInput(std::string& buffer, const std::vector<T>& data) {
+bool Popup<T>::OnTextInput(std::string& buffer, const std::vector<T>& data) {
     float x = ImGui::GetWindowContentRegionMax().x;
-    bool closed = false;
     int _selected = -1;
+    bool state = false;
     bool is_input_active = ImGui::IsItemActive();
     bool is_input_activated = ImGui::IsItemActivated();
-    T _curr_record;
     if (is_input_activated) {
       ImGui::OpenPopup("Popup");
+      selected = -1;
     }
 
     ImGui::SetNextWindowPos(ImVec2(ImGui::GetItemRectMin().x, ImGui::GetItemRectMax().y));
       if (ImGui::BeginPopup("Popup", ImGuiWindowFlags_NoTitleBar
       | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize
       | ImGuiWindowFlags_ChildWindow))
-    {
+      {
 
-      ImVec2 scrolling_child_size = ImVec2(x - 30, ImGui::GetFrameHeightWithSpacing() * 3 + 30);
-      ImGui::BeginChild("scrolling", scrolling_child_size, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar);
-      ImGui::HelpMarker("Click auto fill with selection.");
-      for (auto& record : data) {
-        std::string label = record.ToString();
-        if (ImGui::Selectable(label.c_str())) {
-          _selected = record.id;
-          _curr_record = record;
-          closed = true;
-          ImGui::CloseCurrentPopup();
-        }
+        ImVec2 scrolling_child_size = ImVec2(x - 30, ImGui::GetFrameHeightWithSpacing() * 3 + 30);
+        ImGui::BeginChild("scrolling", scrolling_child_size, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar);
+        ImGui::HelpMarker("Click auto fill with selection.");
+        for (auto& _record : data) {
+          std::string label = _record.ToString();
+          if (ImGui::Selectable(label.c_str())) {
+            _selected = _record.id;
+            record = _record;
+            selected = _record.id;
+            state = true;
+            ImGui::CloseCurrentPopup();           
+          }
       }
       if (!is_input_active && !ImGui::IsWindowFocused()) {
-        std::cout << "Close current popup" << std::endl;
-        closed = true;
+        std::cout << "Close current popup #2" << std::endl;
         ImGui::CloseCurrentPopup();
       }
       float scroll_x = ImGui::GetScrollX();
@@ -71,7 +71,7 @@ T Popup::OnTextInput(std::string& buffer, const std::vector<T>& data) {
       ImGui::EndChild();
       ImGui::EndPopup();
     }
-    return _curr_record;
+      return state;
   }
 
 TextField::TextField() { }
@@ -119,7 +119,7 @@ void TextField::FillBuffer(const std::string& fill) {
 Customer PhoneField::Render() {
   static std::vector<Customer> vec;
   static int autofill = -1;
-  Customer customer;
+  //Customer customer;
   ImGui::BeginValid(has_error_with_content);
   ImGui::InputTextWithHint(("##" + label).c_str(), (label + "...").c_str(), &buffer, flags);
   ImGui::EndValid(has_error_with_content);
@@ -137,15 +137,13 @@ Customer PhoneField::Render() {
   ImGui::PushID(label.c_str());
   Customer temp;
   if (ro_flags & TFFlags_HasPopup) {
-    temp = Popup::OnTextInput<Customer>(buffer, vec);
+    if (popup.OnTextInput(buffer, vec)) {
+      buffer = popup.record.phone;
+      customer = GetFromDb();
+      Validate();
+    }
   }
   ImGui::PopID();
-  if (temp.id > 0) {
-    customer = temp;
-    buffer = customer.phone;
-    Validate();
-    return customer;
-  }
   return customer;
 }
 
@@ -269,18 +267,14 @@ Device DeviceField::Render() {
       .All();
   }
   ImGui::PushID(label.c_str());
-  Device temp;
   if (ro_flags & TFFlags_HasPopup) {
-    temp = Popup::OnTextInput<Device>(buffer, vec);
+    if (popup.OnTextInput(buffer, vec)) {
+      buffer = popup.record.name;
+      device = GetFromDb();
+      Validate();
+    }
   }
   ImGui::PopID();
-  if (temp.id > 0) {
-    buffer = temp.name;
-    Validate();
-  }
-  if (ImGui::IsItemDeactivated()) {
-    device = GetFromDb();
-  }
   return device;
 }
 
@@ -319,7 +313,6 @@ bool DeviceField::IsInDb() {
 template<typename SM>
 SM& SimpleModelField<SM>::Render() {
   static std::vector<SM> vec;
-  static SM model;
   ImGui::BeginValid(has_error_with_content);
   ImGui::InputTextWithHint(("##" + label).c_str(), (label + "...").c_str(), &buffer, flags);
   ImGui::EndValid(has_error_with_content);
@@ -330,18 +323,14 @@ SM& SimpleModelField<SM>::Render() {
     vec = Database::Select<SM>().From().All();
   }
   ImGui::PushID(label.c_str());
-  SM temp;
   if (ro_flags & TFFlags_HasPopup) {
-    temp = Popup::OnTextInput<SM>(buffer, vec);
+    if (popup.OnTextInput(buffer, vec)) {
+      buffer = popup.record.name;
+      model = GetFromDb();
+      Validate();
+    }
   }
   ImGui::PopID();
-  if (temp.id > 0) {
-    model = temp;
-    std::cout << model.ToString() << std::endl;
-    buffer = model.name;
-    Validate();
-    return model;
-  }
   return model;
 }
 
@@ -384,7 +373,6 @@ template struct SimpleModelField<Color>;
 template<typename SM, typename R>
 SM& RelationalField<SM, R>::Render(R& related) {
   static std::vector<SM> vec;
-  static SM model;
   static int curr_id = -1;
   ImGui::BeginValid(has_error_with_content);
   ImGui::InputTextWithHint(("##" + label).c_str(), (label + "...").c_str(), &buffer, flags);
@@ -408,18 +396,14 @@ SM& RelationalField<SM, R>::Render(R& related) {
     Validate();
   }
   ImGui::PushID(label.c_str());
-  SM temp;
   if (ro_flags & TFFlags_HasPopup) {
-    temp = Popup::OnTextInput<SM>(buffer, vec);
+    if (popup.OnTextInput(buffer, vec)) {
+      buffer = popup.record.name;
+      model = GetFromDb();
+      Validate();
+    }
   }
   ImGui::PopID();
-  if (temp.id > 0) {
-    model = temp;
-    std::cout << model.ToString() << std::endl;
-    buffer = model.name;
-    Validate();
-    return model;
-  }
   return model;
 }
 

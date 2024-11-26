@@ -38,10 +38,13 @@ template <typename T>
   static ValidatorFlags IsEmail(const std::string& buffer);
 };
 
+template <typename T>
 class Popup {
 public:
-  template <typename T>
-  static T OnTextInput(std::string& buffer, const std::vector<T>& data = {});
+  bool OnTextInput(std::string& buffer, const std::vector<T>& data = {});
+  bool closed = false;
+  int selected = -1;
+  T record;
 };
 
 class TextField {
@@ -71,6 +74,9 @@ public:
   void Validate() override;
   void Feedback() override;
   Customer GetFromDb();
+private:
+  Customer customer;
+  Popup<Customer> popup;
 };
 
 class NameField : public TextField {
@@ -79,7 +85,7 @@ public:
   int Render();
   void Validate() override;
   void Feedback() override;
-
+ 
 };
 
 class SurnameField : public TextField {
@@ -110,6 +116,7 @@ public:
   bool IsInDb();
 private:
   Device device;
+  Popup<Device> popup;
 };
 
 template <typename SM>
@@ -120,6 +127,10 @@ public:
   void Validate() override;
   void Feedback() override;
   SM GetFromDb();
+
+private:
+  SM model;
+  Popup<SM> popup;
 };
 
 // Currently it works only with <Color, DeviceField> which is suboptimal
@@ -131,4 +142,8 @@ public:
   void Validate() override;
   void Feedback() override;
   SM GetFromDb();
+
+private:
+  SM model;
+  Popup<SM> popup;
 };

@@ -99,6 +99,7 @@ void CustomerWin::FillBuffersByPhone(Customer&  _customer) {
 }
 
 void CustomerWin::InputFields() {
+  // Needs to be cleaned up we are calling GetFromDb() too many times
   Customer _customer;
   _customer = phone.Render();
   FillBuffersByPhone(_customer);
