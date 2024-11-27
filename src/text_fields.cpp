@@ -116,10 +116,10 @@ void TextField::FillBuffer(const std::string& fill) {
   buffer = fill;
 }
 
-Customer PhoneField::Render() {
+bool PhoneField::Render() {
   static std::vector<Customer> vec;
   static int autofill = -1;
-  //Customer customer;
+  bool state = false;
   ImGui::BeginValid(has_error_with_content);
   ImGui::InputTextWithHint(("##" + label).c_str(), (label + "...").c_str(), &buffer, flags);
   ImGui::EndValid(has_error_with_content);
@@ -141,10 +141,11 @@ Customer PhoneField::Render() {
       buffer = popup.record.phone;
       customer = GetFromDb();
       Validate();
+      state = true;
     }
   }
   ImGui::PopID();
-  return customer;
+  return state;
 }
 
 void PhoneField::Validate() {

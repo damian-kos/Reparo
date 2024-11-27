@@ -70,12 +70,12 @@ protected:
 class PhoneField : public TextField {
 public:
   using TextField::TextField;
-  Customer Render();
+  bool Render();
   void Validate() override;
   void Feedback() override;
   Customer GetFromDb();
-private:
   Customer customer;
+private:
   Popup<Customer> popup;
 };
 

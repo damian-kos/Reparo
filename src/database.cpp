@@ -544,16 +544,21 @@ TableCreator& TableCreator::RepairsTable() {
           REFERENCES custom_devices(id)
           ON UPDATE CASCADE
 
-);
+  );
+)";
+  Database::ExecuteTransaction(_sql);
+
+  Database::OpenDb();
+  _sql = R"(
  -- Trigger to create new custom device when new device is inserted in repair
   CREATE TRIGGER IF NOT EXISTS create_new_custom_device
       AFTER INSERT ON repairs
       WHEN NEW.model_id IS NULL
   BEGIN
-      INSERT INTO custom_device (model, brannd, color, )
+      INSERT INTO custom_device (model, brand, color)
       VALUES (NEW.model, NEW.brand, NEW.color);
   END;
-    );
+   
   )";
   Database::ExecuteTransaction(_sql);
   return *this;
@@ -711,6 +716,11 @@ Inserter& Inserter::Repair_(Repair& repair) {
         Query::InsertBillingAddress(repair.customer);
         Query::InsertShippingAddress(repair.customer);
         Query::InsertCustomer(repair.customer);
+      }
+      else {
+        Query::UpdateBillingAddress(repair.customer);
+        Query::UpdateShippingAddress(repair.customer);
+        Query::UpdateCustomer(repair.customer);
       }
       
       Query::InsertRepair(repair);

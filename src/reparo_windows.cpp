@@ -104,9 +104,8 @@ void CustomerWin::FillBuffersByPhone(Customer&  _customer) {
 
 void CustomerWin::InputFields() {
   // Needs to be cleaned up we are calling GetFromDb() too many times
-  Customer _customer;
-  _customer = phone.Render();
-  FillBuffersByPhone(_customer);
+  if(phone.Render())
+    FillBuffersByPhone(phone.customer);
   name.Render();
   surname.Render();
   email.Render();
@@ -143,14 +142,17 @@ Customer CustomerWin::CreateCustomer() {
 /// </summary>
 /// <returns></returns>
 Customer CustomerWin::GetCustomer() {
-  Customer customer = phone.GetFromDb();
-  if (customer.id > 1) {
-    return customer;
+  Customer temp = phone.GetFromDb();
+  Customer customer = CreateCustomer();
+  if (temp.id > 0) {
+    customer.id = temp.id;
+    int billing_id = temp.billing_addresses.Get().ID();
+    customer.billing_addresses.SetID(billing_id);
+    int ship_id = temp.ship_addresses.Get().ID();
+    customer.ship_addresses.SetID(ship_id);
   }
-  else {
-    customer = CreateCustomer();
-    return customer;
-  }
+  return customer;
+  
 }
 
 DeviceWin::DeviceWin() 
@@ -349,10 +351,8 @@ void RepairWin::Submit() {
     repair.price = price;
     repair.repair_state = RepairState(2);
     repair.cust_device_id = device.IsInDb() ? -1 : 1;
-    std::cout << repair.ToString() << std::endl;
     Database::Insert().Repair_(repair);
-    std::cout << repair.ToString() << std::endl;
-    // Create repair object;
+
   }
   ImGui::EndDisabled();
 }
