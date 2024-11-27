@@ -305,8 +305,7 @@ TableCreator& TableCreator::CustomDevicesTable() {
     CREATE TABLE IF NOT EXISTS custom_devices (
       id        INTEGER PRIMARY KEY,
       model     TEXT NOT NULL,
-      brand     TEXT,
-      type      TEXT
+      color     TEXT
     );
   )";
   Database::ExecuteTransaction(_sql);
@@ -722,6 +721,10 @@ Inserter& Inserter::Repair_(Repair& repair) {
         Query::UpdateShippingAddress(repair.customer);
         Query::UpdateCustomer(repair.customer);
       }
+
+      if (repair.device.id < 0) {
+        Query::InsertCustomDevice(repair);
+      }
       
       Query::InsertRepair(repair);
     
@@ -784,7 +787,10 @@ Device DBGet::Device_(const T& _value){
 
   Device device;
   T value = _value;
-  Database::sql << "SELECT * FROM devices WHERE " << query,
+  Database::sql << "SELECT devices.*, dt.type, b.brand FROM devices "
+    "LEFT JOIN device_types dt ON devices.type_id = dt.id "
+    "LEFT JOIN brands b ON devices.brand_id = b.id " 
+    "WHERE " << query,
     soci::use(_value),
     soci::into(device);
   Database::sql.close();

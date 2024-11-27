@@ -69,7 +69,7 @@ public:
   void PriceFeedback();
   void Submit();
   void RepairValidated();
-
+  Device CreateDevice();
 private:
   CustomerWin customer_section;
   bool device_section_error = true;

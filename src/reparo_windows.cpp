@@ -342,7 +342,7 @@ void RepairWin::Submit() {
     Repair repair;
     repair.customer = customer_section.GetCustomer();
     // We can change database query below if we needed to get brand and type of the device
-    repair.device = device.GetFromDb();
+    repair.device = CreateDevice();
     repair.category = category.GetFromDb();
     repair.color = color.GetFromDb();
     repair.sn_imei = sn_imei.Get();
@@ -359,5 +359,19 @@ void RepairWin::Submit() {
 
 void RepairWin::RepairValidated() {
   error = customer_section.error ||  device_section_error || notes_section_error || price_section_error;
+}
+
+Device RepairWin::CreateDevice() {
+  Device _device = device.GetFromDb();
+  if (_device.id > 0) {
+    return _device;
+  }
+  _device.name = device.Get();
+  Color _device_color =  color.GetFromDb();;
+  if (_device_color.id < 0) {
+    _device_color.name = color.Get();
+  }
+  _device.colors.push_back(_device_color);
+  return _device;
 }
 
