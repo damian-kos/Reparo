@@ -20,6 +20,8 @@ public:
   Data Get() const { return Data(*this); }
   Address& SetID(int& _id);
   Address& SetLines(std::vector<TextField>& _address);
+  Address& SetLines(std::vector<std::string>& _address);
+
 
 private:
   int id;

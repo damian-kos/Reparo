@@ -91,6 +91,10 @@ void CustomerWin::FillBuffersByPhone(Customer&  _customer) {
     name.FillBuffer(_customer.name);
     surname.FillBuffer(_customer.surname);
     email.FillBuffer(_customer.email);
+    for (int i = 0; i < billing_address.size(); ++i) {
+      billing_address[i].FillBuffer(_customer.billing_addresses.Get().Lines()[i]);
+      ship_address[i].FillBuffer(_customer.ship_addresses.Get().Lines()[i]);
+    }
     // After filling buffer, need to revalidate fields.
     name.Validate();
     surname.Validate();

@@ -55,3 +55,12 @@ Address& Address::SetLines(std::vector<TextField>& _address) {
   }
   return *this;
 }
+
+Address& Address::SetLines(std::vector<std::string>& _address) {
+  int i = 0;
+  for (auto& field : _address) {
+    address.push_back(field);
+    ++i;
+  }
+  return *this;
+}

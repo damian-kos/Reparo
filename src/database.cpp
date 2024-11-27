@@ -734,6 +734,31 @@ Customer DBGet::Customer_(const T& _value) {
   Database::sql << "SELECT * FROM customers WHERE " << query,
     soci::use(_value),
     soci::into(customer);
+
+  int billing_addr_id = customer.billing_addresses.Get().ID();
+  std::vector<std::string> vec(5);
+  Database::sql << "SELECT line1, line2, line3, line4, line5 FROM billing_addresses WHERE id = (:id)",
+    soci::use(billing_addr_id),
+    soci::into(vec[0]),
+    soci::into(vec[1]),
+    soci::into(vec[2]),
+    soci::into(vec[3]),
+    soci::into(vec[4]);
+
+  customer.billing_addresses.SetLines(vec);
+
+  int ship_addr_id = customer.ship_addresses.Get().ID();
+  std::vector<std::string> vec2(5);
+  Database::sql << "SELECT line1, line2, line3, line4, line5 FROM ship_addresses WHERE id = (:id)",
+    soci::use(ship_addr_id),
+    soci::into(vec2[0]),
+    soci::into(vec2[1]),
+    soci::into(vec2[2]),
+    soci::into(vec2[3]),
+    soci::into(vec2[4]);
+
+  customer.ship_addresses.SetLines(vec2);
+
   Database::sql.close();
   return customer;
 }
@@ -755,8 +780,6 @@ Device DBGet::Device_(const T& _value){
   Database::sql.close();
   return device;
 }
-
-
 
 template Customer DBGet::Customer_<std::string>(const std::string&);
 template Customer DBGet::Customer_<int>(const int&);

@@ -62,41 +62,41 @@ namespace soci {
       }
    };
 
-    template <>
-    struct type_conversion<Customer> {
-      typedef values base_type;
+  template <>
+  struct type_conversion<Customer> {
+    typedef values base_type;
 
-      static void from_base(const values& v, indicator ind, Customer& model) {
-        std::cout << "Converting from base for " << typeid(Customer).name() << std::endl;
+    static void from_base(const values& v, indicator ind, Customer& model) {
+      std::cout << "Converting from base for " << typeid(Customer).name() << std::endl;
 
-        if (ind == i_null) {
-          throw std::runtime_error("Null value fetched from database");
-        }
-        model.id = v.get<int>("id");
-        model.phone = v.get<std::string>("phone");
-        model.name = v.get<std::string>("name");
-        model.surname = v.get<std::string>("surname");
-        model.email = v.get<std::string>("email");      
-        int billing_addr_id = v.get<int>("billing_addr_id", -1);
-        model.billing_addresses.SetID(billing_addr_id);
-        int ship_addr_id = v.get<int>("ship_addr_id", -1);
-        model.ship_addresses.SetID(ship_addr_id);
-
+      if (ind == i_null) {
+        throw std::runtime_error("Null value fetched from database");
       }
+      model.id = v.get<int>("id");
+      model.phone = v.get<std::string>("phone");
+      model.name = v.get<std::string>("name");
+      model.surname = v.get<std::string>("surname");
+      model.email = v.get<std::string>("email");      
+      int billing_addr_id = v.get<int>("billing_addr_id", -1);
+      model.billing_addresses.SetID(billing_addr_id);
+      int ship_addr_id = v.get<int>("ship_addr_id", -1);
+      model.ship_addresses.SetID(ship_addr_id);
 
-      static void to_base(const Customer& model, values& v, indicator& ind) {
-        v.set("id", model.id);
-        v.set("phone", model.phone);
-        v.set("name", model.name);
-        v.set("surname", model.surname);
-        v.set("email", model.email);
-        v.set("billing_addr_id", model.billing_addresses.Get().ID());
-        v.set("ship_addr_id", model.ship_addresses.Get().ID());
+    }
+
+    static void to_base(const Customer& model, values& v, indicator& ind) {
+      v.set("id", model.id);
+      v.set("phone", model.phone);
+      v.set("name", model.name);
+      v.set("surname", model.surname);
+      v.set("email", model.email);
+      v.set("billing_addr_id", model.billing_addresses.Get().ID());
+      v.set("ship_addr_id", model.ship_addresses.Get().ID());
 
 
-        ind = i_ok;
-      }
-    };
+      ind = i_ok;
+    }
+  };
 
   template <>
   struct type_conversion<Device>
