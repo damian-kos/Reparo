@@ -32,23 +32,19 @@ inline void RoTable::SimpleModel(std::vector<T>& models) {
         // This modal builder is here so we can have access to specific records without returning them
         // Figure out how to put them in SimpleModalWin
         if (ImGui::Button(_("Edit record"))) {
-          BuildSimpleModelModal<T> build;
-          build.Title(_("Edit this record?"))
-            .Message(_("All the elements with this record will be changed as well."))
-            .SetSimpleModel(model);
-
-          SimpleModelModal<T> modal(build.Build());
+          ModalConfig config;
+          config.Title(_("Edit this record?"))
+            .Msg(_("All the elements with this record will be changed as well."));
+          SimpleModelModal<T> modal(model, config);
           StackModal::SetModal(modal);
         }
         // This modal builder is here so we can have access to specific records without returning them
         // Figure out how to put them in SimpleModalWin
         if (ImGui::Button("Delete")) {
-          BuildSimpleModelModal<T> build;
-          build.Title(_("Delete this record?"))
-            .Message(_("Are you sure? All records which are including this record will be set to Unknown."))
-            .SetSimpleModel(model);
-
-          SimpleModelModal<T> modal(build.Build());
+          ModalConfig config;
+          config.Title(_("Delete this record?"))
+            .Msg(_("Are you sure? All records which are including this record will be set to Unknown."));
+          SimpleModelModal<T> modal(model, config);
           StackModal::SetModal(modal);
         }
         ImGui::EndPopup();

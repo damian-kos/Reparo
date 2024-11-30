@@ -74,12 +74,11 @@ void CustomerWin::Submit() {
   ImGui::BeginDisabled(error);
   if (ImGui::Button(_("Submit Customer Details"))) {
     Customer customer = CreateCustomer();
+    ModalConfig config;
+    config.Title(_("Insert Customer?"))
+      .Msg(_("Are you sure?"));
 
-    BuildCustomerModal build;
-    build.Title(_("Insert Customer?"))
-      .Message(_("Are you sure?")).SetCustomer(customer);
-
-    CustomerModal modal(build.Build());
+    CustomerModal modal(customer, config);
     ModalManager::SetModal(modal);
   }
   ImGui::EndDisabled();

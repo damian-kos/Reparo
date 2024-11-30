@@ -18,108 +18,68 @@ enum ModalCallback {
 class TextField;
 
 // Define Modal
-class ModalData {
+struct ModalConfig {
 public:
+  ModalConfig& Title(const std::string& _title);
+  ModalConfig& Msg(const std::string& _msg);
+  ModalConfig& Callback(const ModalCallback& callback);
   std::string title;
   std::string message;
-  bool is_on;
+  bool is_on = false;
+private:
+  ModalCallback callback = ModalCallback_None;
 };
 
-class CustomerModalData : public ModalData {
-public:
-  Customer customer;
-};
 
+// Customer modal builder
 template <typename T>
-class SimpleModelModalData : public ModalData {
+class BuildSingleModal {
 public:
+  BuildSingleModal& SetData(this BuildSingleModal& self, const T& _model) {
+    model = _model;
+  }
+private:
   T model;
 };
 
-// Base modal builder using deducing this
-template<typename Derived, typename Data>
-class BuildModal {
-public:
-  // Use deducing this to return the most derived type
-  Derived& Title(this Derived& self, const std::string& _title) {
-    self.data.is_on = true;
-    self.data.title = _title;
-    return self;
-  }
-
-  Derived& Message(this Derived& self, const std::string& _msg) {
-    self.data.message = _msg;
-    return self;
-  }
-
-  Data Build(this const Derived& self) {
-    return self.data;
-  }
-
-protected:
-  Data data;
-};
-
-// Customer modal builder
-class BuildCustomerModal : public BuildModal<BuildCustomerModal, CustomerModalData> {
-public:
-  BuildCustomerModal& SetCustomer(this BuildCustomerModal& self, const Customer& _customer) {
-    self.data.customer = _customer;
-    return self;
-  }
-};
-
-/// <summary>
-///  For objects which has only [int id] and [std::string name]. Brand, Quality etc.
-/// </summary>
-/// <typeparam name="T"></typeparam>
-template <typename T>
-class BuildSimpleModelModal : public BuildModal<BuildSimpleModelModal<T>, SimpleModelModalData<T>> {
-public:
-  BuildSimpleModelModal<T>& SetSimpleModel(this BuildSimpleModelModal& self, const T& _model) {
-    self.data.model = _model; 
-    return self;             
-  }
-};
 
 class BaseModal {
 public:
   BaseModal() = default;
-  explicit BaseModal(const ModalData& _data) : data(_data) {}
+  explicit BaseModal(const ModalConfig& _config) : config(_config) {}
   virtual ~BaseModal() = default;
 
   virtual ModalCallback Render();
   virtual bool ModalContents();
-
   virtual bool const GetState();
-private:
-  ModalData data;
+
+protected:
+  ModalConfig config;
 };
 
 class CustomerModal : public BaseModal {
 public:
-  explicit CustomerModal(const CustomerModalData& _data) : data(_data) {}
+  CustomerModal(const Customer& _customer, ModalConfig& _config)
+    : customer(_customer), BaseModal(_config) {}
 
-  ModalCallback Render() override;
   bool ModalContents() override;
 
-  virtual bool const GetState();
 private:
-  CustomerModalData data;
+  Customer customer;
 };
 
 template <typename T>
 class SimpleModelModal : public BaseModal {
 public:
-  explicit SimpleModelModal(const SimpleModelModalData<T>& _data) : data(_data) {}
+  explicit SimpleModelModal(const T& _model, ModalConfig& _config) 
+    : model(_model), BaseModal(_config) {}
 
-  ModalCallback Render() override;
+  //ModalCallback Render() override;
   bool ModalContents() override;
 
-  virtual bool const GetState();
+  //virtual bool const GetState();
 private:
-  SimpleModelModalData<T> data;
-
+  T model;
 };
 
 /// <summary>
@@ -197,44 +157,20 @@ private:
 };
 
 template<typename T>
-inline ModalCallback SimpleModelModal<T>::Render() {
-  ModalCallback _callback = ModalCallback_None;
-  // It is here so we can call ImGui's CloseCurrentPopup() from nested methodes in this one.
-  // Otherwise Popup would open immediately after closing it.
-  static bool _control_open = true;
-  if(_control_open)
-    ImGui::OpenPopup(data.title.c_str());
-  if (ImGui::BeginPopupModal(data.title.c_str(), &data.is_on)) {
-    _callback = ModalContents() ? ModalCallback_SimpleModel : _callback;
-    _control_open = false;
-    ImGui::EndPopup();
-  }
-  else {
-    _control_open = true;
-  }
-  return _callback;
-}
-
-template<typename T>
 inline bool SimpleModelModal<T>::ModalContents() {
   bool _action = false;
-  ImGui::Text("%s", data.message.c_str());
-  ImGui::Text("%d |", data.model.id);
+  ImGui::Text("%s", config.message.c_str());
+  ImGui::Text("%d |", model.id);
   ImGui::SameLine();
-  ImGui::Text("%s", data.model.name.c_str());
-  if (data.title == _("Edit this record?")) {
-    _action = data.model.Edit();
+  ImGui::Text("%s", model.name.c_str());
+  if (config.title == _("Edit this record?")) {
+    _action = model.Edit();
   }
-  if (data.title == _("Delete this record?")) {
-    _action = data.model.Delete();
+  if (config.title == _("Delete this record?")) {
+    _action = model.Delete();
   }
   if (ImGui::Button("Cancel")) {
     ImGui::CloseCurrentPopup();
   }
   return _action;
-}
-
-template<typename T>
-inline bool const SimpleModelModal<T>::GetState() {
-  return data.is_on;
 }
