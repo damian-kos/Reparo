@@ -57,15 +57,15 @@ protected:
   ModalConfig config;
 };
 
-class CustomerModal : public BaseModal {
+class RepairModal : public BaseModal {
 public:
-  CustomerModal(const Customer& _customer, ModalConfig& _config)
-    : customer(_customer), BaseModal(_config) {}
+  RepairModal(const Repair& _repair, ModalConfig& _config)
+    : repair(_repair), BaseModal(_config) {}
 
   bool ModalContents() override;
 
 private:
-  Customer customer;
+  Repair repair;
 };
 
 template <typename T>
@@ -81,6 +81,18 @@ public:
 private:
   T model;
 };
+
+class CustomerModal : public BaseModal {
+public:
+  CustomerModal(const Customer& _customer, ModalConfig& _config)
+    : customer(_customer), BaseModal(_config) {}
+
+  bool ModalContents() override;
+
+private:
+  Customer customer;
+};
+
 
 /// <summary>
 /// ModalManager is running in reparo_core. If we want to use modal in modal use StackModalManager within Model's Render() methods.

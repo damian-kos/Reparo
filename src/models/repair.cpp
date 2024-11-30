@@ -1,4 +1,6 @@
 #include "repair.h"
+#include "../../src/RoLocalization.h"
+#include "../../src/database.h"
 //#include "repair.h"
 //
 //Repair::Repair() { }
@@ -15,4 +17,23 @@ const std::string Repair::ToString() const {
     + " | \n Price: " + std::to_string(price) 
     + " | \n Repair State: " + repair_state.ToString()
     + "\n";
+}
+
+void Repair::View() {
+  ImGui::SeparatorText(_("CUSTOMER"));
+  customer.View();
+  ImGui::SeparatorText(_("REPAIR DETAILS"));
+  ImGui::TextWrapped("Model:              %s", device.name.c_str());
+  ImGui::TextWrapped("Category:           %s", category.name.c_str());
+  ImGui::TextWrapped("Color:              %s", color.name.c_str());
+  ImGui::TextWrapped("SN_IMEI:            %s", sn_imei.c_str());
+  ImGui::TextWrapped("Note for customer:  %s", vis_note.c_str());
+  ImGui::TextWrapped("Note for store:     %s", hid_note.c_str());
+  ImGui::TextWrapped("State:              %s", repair_state.name.c_str());
+  ImGui::TextWrapped("Price:              %.2f", price);
+
+}
+
+void Repair::InsertToDb()  {
+  Database::Insert().Repair_(*this);
 }

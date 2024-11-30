@@ -348,9 +348,13 @@ void RepairWin::Submit() {
     repair.vis_note = vis_note.Get();
     repair.hid_note = hid_note.Get();
     repair.price = price;
-    repair.repair_state = RepairState(2);
+    repair.repair_state = Database::Get().SimpleModel_<int, RepairState>(2);
     repair.cust_device_id = device.IsInDb() ? -1 : 1;
-    Database::Insert().Repair_(repair);
+
+    ModalConfig config;
+    config.Title(_("Insert new repair?"));
+    RepairModal modal(repair, config);
+    ModalManager::SetModal(modal);
 
   }
   ImGui::EndDisabled();

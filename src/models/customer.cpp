@@ -16,7 +16,9 @@ Customer& Customer::GetCustomer() {
 }
 
 void Customer::View() {
-  ImGui::Text(_("ID: %d"), id);
+  if (id > 0) {
+    ImGui::Text(_("Customer ID: %d"), id);
+  }
   ImGui::Text(_("Phone: %s"), phone.c_str());
   ImGui::Text(_("Name: %s"), name.c_str());
   ImGui::Text(_("Surname: %s"), surname.c_str());
