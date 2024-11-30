@@ -10,9 +10,10 @@ public:
   void View();
 
   int id = -1;
-  std::string name;
+  std::string name; // in database refered as 'supplier'
 
   Address address;
   static constexpr std::string_view table = "suppliers";
-
+  // It has more columns but for simple retreive we can just use one
+  static inline const std::string column = "supplier"; 
 };

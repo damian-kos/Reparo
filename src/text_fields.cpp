@@ -6,6 +6,8 @@
 #include <vector>
 #include "models/customer.h"
 #include "models/device.h"
+#include "models/supplier.h"
+
 
 template <typename T>
 ValidatorFlags Validator::DatabaseChk(const std::string& table, const std::string& condition) {
@@ -321,7 +323,7 @@ SM& SimpleModelField<SM>::Render() {
   if (ImGui::IsItemEdited() || ImGui::IsItemActivated()) {
     Validate();
     vec.clear();
-    vec = Database::Select<SM>().From().All();
+    vec = Database::Select<SM>().From().Where(model.column).Like(buffer).All();
   }
   ImGui::PushID(label.c_str());
   if (ro_flags & TFFlags_HasPopup) {
@@ -368,7 +370,7 @@ template struct SimpleModelField<RepairCategory>;
 template struct SimpleModelField<PaymentMethod>;
 template struct SimpleModelField<DeviceType>;
 template struct SimpleModelField<Color>;
-
+template struct SimpleModelField<Supplier>;
 
 // Currently it works only with <Color, DeviceField> which is suboptimal
 template<typename SM, typename R>

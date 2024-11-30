@@ -6,7 +6,10 @@ Supplier::Supplier() { }
 
 Supplier& Supplier::GetSupplier() {
   return *this;
-  // TODO: insert return statement here
+}
+
+const std::string Supplier::ToString() const {
+  return std::to_string(id) + " | " + name;
 }
 
 void Supplier::View() {

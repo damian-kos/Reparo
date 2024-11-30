@@ -6,6 +6,7 @@
 #include "models/customer.h"
 #include "models/device.h"
 #include "models/repair.h"
+#include "models/supplier.h"
 #include <iostream>
 
 
@@ -187,6 +188,41 @@ namespace soci {
       v.set("repair_state_id", model.repair_state.id);
       v.set("sn_imei", model.sn_imei);
       v.set("cust_device_id", model.cust_device_id, model.cust_device_id == -1 ? i_null : i_ok);
+
+      ind = i_ok;
+    }
+  };
+
+  template <>
+  struct type_conversion<Supplier> {
+    typedef values base_type;
+
+    static void from_base(const values& v, indicator ind, Supplier& model) {
+      std::cout << "Converting from base for " << typeid(Supplier).name() << std::endl;
+
+      if (ind == i_null) {
+        throw std::runtime_error("Null value fetched from database");
+      }
+      model.id = v.get<int>("id");
+      model.name = v.get<std::string>("supplier");
+      std::vector<std::string> vec(5);
+      for (int i = 1; i < 6; ++i) {
+        std::string str = "line" + std::to_string(i);
+        vec.push_back(v.get<std::string>(str, ""));
+      }
+      model.address.SetLines(vec);
+
+
+    }
+
+    static void to_base(const Supplier& model, values& v, indicator& ind) {
+      v.set("id", model.id);
+      v.set("supplier", model.name);
+      std::vector<std::string> vec = model.address.Get().Lines();
+      for (int i = 0; i < 5; ++i) {
+        std::string str = "line" + std::to_string(i+1);
+        v.set(str, vec[i]);
+      }
 
       ind = i_ok;
     }

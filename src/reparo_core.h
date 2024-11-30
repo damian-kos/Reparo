@@ -22,6 +22,7 @@ private:
   SimpleModelWin<RepairCategory> categories_win;
   SimpleModelWin<RepairState> repair_states_win;
   SimpleModelWin<PaymentMethod> payments_win;
+  PartsWin parts_win;
   ModalManager modals;
   void Update() override;
 

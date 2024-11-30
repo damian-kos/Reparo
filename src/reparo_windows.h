@@ -8,9 +8,9 @@
 #include "attributes.h"
 #include "modal.h"
 #include "models/customer.h"
+#include "models/supplier.h"
 
 class Brand;
-
 
 class CustomerWin {
 public:
@@ -70,6 +70,7 @@ public:
   void Submit();
   void RepairValidated();
   Device CreateDevice();
+
 private:
   CustomerWin customer_section;
   bool device_section_error = true;
@@ -86,6 +87,16 @@ private:
   TextField hid_note;
 
   bool open = true;
+};
+
+class  PartsWin {
+  public:
+    PartsWin();
+    void Render();
+
+  private:
+    SimpleModelField<Supplier> supplier;
+    bool open = true;
 };
 
 template <typename T>

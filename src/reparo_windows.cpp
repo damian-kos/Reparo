@@ -5,7 +5,7 @@
 #include "models/simple_models.h"
 #include "database.h"
 #include "models/repair.h"
-
+#include "models/parts.h"
 
 CustomerWin::CustomerWin()
   : phone(_("Phone"), ImGuiInputTextFlags_CharsDecimal, TFFlags_HasPopup) { 
@@ -34,7 +34,6 @@ void CustomerWin::Init() {
     ship_address[i] = TextField(label);
   }
 }
-
 
 void CustomerWin::Render() {
   ImGui::Begin(_("Insert Customer"), &open);
@@ -378,3 +377,18 @@ Device RepairWin::CreateDevice() {
   return _device;
 }
 
+PartsWin::PartsWin()
+: supplier(_("Supplier"), 0, TFFlags_HasPopup)
+{ }
+
+void PartsWin::Render() {
+  // Currently in ModalPopup, possible change later
+  if (ImGui::Button(_("Parts"))) {
+    open = true;
+    ImGui::OpenPopup(_("Insert part"));
+  }
+  if (ImGui::BeginPopupModal(_("Insert part"), &open)) {
+    supplier.Render();
+    ImGui::EndPopup();
+  }
+}
