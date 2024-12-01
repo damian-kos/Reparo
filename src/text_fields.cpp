@@ -13,6 +13,7 @@ template <typename T>
 ValidatorFlags Validator::DatabaseChk(const std::string& table, const std::string& condition) {
   std::cout << "DatabaseChk is run" << std::endl;
   auto record = Database::Select<T>().From(table).Where(condition).One();
+  std::cout << Database::Select<T>().From(table).Where(condition).GetSql() << std::endl;
   if(record.id > 0)
     return ValidatorFlags_IsDuplicate;
   return ValidatorFlags_Pass;
@@ -82,14 +83,18 @@ TextField::TextField(const std::string& label, ImGuiInputTextFlags flags, TFFlag
   : label(label), flags(flags), ro_flags(ro_flags) { }
 
 int TextField::Render() {
-  ImGui::BeginValid(has_error_with_content);
-  ImGui::InputTextWithHint(("##" + label).c_str(), (label + "...").c_str(), &buffer, flags);
-  ImGui::EndValid(has_error_with_content);
+  Field();
 
   if (ImGui::IsItemEdited() || ImGui::IsItemActivated()) {
     Validate();
   }
   return -1;
+}
+
+void TextField::Field(){
+  ImGui::BeginValid(has_error_with_content);
+  ImGui::InputTextWithHint(("##" + label).c_str(), (label + "...").c_str(), &buffer, flags);
+  ImGui::EndValid(has_error_with_content);
 }
 
 void TextField::Feedback() { 
@@ -122,9 +127,7 @@ bool PhoneField::Render() {
   static std::vector<Customer> vec;
   static int autofill = -1;
   bool state = false;
-  ImGui::BeginValid(has_error_with_content);
-  ImGui::InputTextWithHint(("##" + label).c_str(), (label + "...").c_str(), &buffer, flags);
-  ImGui::EndValid(has_error_with_content);
+  Field();
 
   if (ImGui::IsItemEdited() || ImGui::IsItemActivated()) {
     Validate();
@@ -175,9 +178,7 @@ Customer PhoneField::GetFromDb() {
 }
 
 int NameField::Render() {
-  ImGui::BeginValid(has_error_with_content);
-  ImGui::InputTextWithHint(("##" + label).c_str(), (label + "...").c_str(), &buffer, flags);
-  ImGui::EndValid(has_error_with_content);
+  Field();
 
   if (ImGui::IsItemEdited()) {
     Validate();
@@ -201,9 +202,7 @@ void NameField::Feedback() {
 }
 
 int SurnameField::Render() {
-  ImGui::BeginValid(has_error_with_content);
-  ImGui::InputTextWithHint(("##" + label).c_str(), (label + "...").c_str(), &buffer, flags);
-  ImGui::EndValid(has_error_with_content);
+  Field();
 
   if (ImGui::IsItemEdited()) {
     Validate();
@@ -227,9 +226,7 @@ void SurnameField::Feedback() {
 }
 
 int EmailField::Render() {
-  ImGui::BeginValid(has_error_with_content);
-  ImGui::InputTextWithHint(("##" + label).c_str(), (label + "...").c_str(), &buffer, flags);
-  ImGui::EndValid(has_error_with_content);
+  Field();
 
   if (ImGui::IsItemEdited()) {
     Validate();
@@ -253,9 +250,7 @@ void EmailField::Feedback() {
 
 Device DeviceField::Render() {
   static std::vector<Device> vec;
-  ImGui::BeginValid(has_error_with_content);
-  ImGui::InputTextWithHint(("##" + label).c_str(), (label + "...").c_str(), &buffer, flags);
-  ImGui::EndValid(has_error_with_content);
+  Field();
  
   if (ImGui::IsItemEdited() || ImGui::IsItemActivated()) {
     device = Device();
@@ -316,9 +311,7 @@ bool DeviceField::IsInDb() {
 template<typename SM>
 SM& SimpleModelField<SM>::Render() {
   static std::vector<SM> vec;
-  ImGui::BeginValid(has_error_with_content);
-  ImGui::InputTextWithHint(("##" + label).c_str(), (label + "...").c_str(), &buffer, flags);
-  ImGui::EndValid(has_error_with_content);
+  Field();
 
   if (ImGui::IsItemEdited() || ImGui::IsItemActivated()) {
     Validate();
@@ -377,9 +370,7 @@ template<typename SM, typename R>
 SM& RelationalField<SM, R>::Render(R& related) {
   static std::vector<SM> vec;
   static int curr_id = -1;
-  ImGui::BeginValid(has_error_with_content);
-  ImGui::InputTextWithHint(("##" + label).c_str(), (label + "...").c_str(), &buffer, flags);
-  ImGui::EndValid(has_error_with_content);
+  Field();
   if (ImGui::IsItemActivated()) {
     curr_id = related.GetFromDb().id;
     vec.clear();
@@ -433,3 +424,60 @@ SM RelationalField<SM, R>::GetFromDb() {
 }
 
 template struct RelationalField<Color, DeviceField>;
+
+bool OwnSKUField::Render(){
+  static std::vector<Part> vec;
+  static int autofill = -1;
+  bool state = false;
+  Field();
+
+  if (ImGui::IsItemEdited() || ImGui::IsItemActivated()) {
+    Validate();
+    vec.clear();
+    vec = Database::Select<Part>()
+      .From("parts")
+      .Where("own_sku")
+      .Like(buffer)
+      .All();
+  }
+
+  ImGui::PushID(label.c_str());
+  Part temp;
+  if (ro_flags & TFFlags_HasPopup) {
+    if (popup.OnTextInput(buffer, vec)) {
+      buffer = popup.record.own_sku;
+      // Currently we dont need to get the whole Part objects from database
+      //part = GetFromDb();
+      Validate();
+      state = true;
+    }
+  }
+  ImGui::PopID();
+  return state;
+}
+
+void OwnSKUField::Validate() {
+  err_flags = ValidatorFlags_Pass;
+  std::string buf = "'" + buffer + "'";
+  if (!(ro_flags & TFFlags_AllowDbPresence))
+    err_flags |= Validator::DatabaseChk<Part>("parts", "own_sku = " + buf); 
+  err_flags |= Validator::StrLen(buffer, 3);
+  error = err_flags & (ValidatorFlags_StrLen | ValidatorFlags_IsDuplicate);
+  has_error_with_content = error && buffer.size() > 0;
+}
+
+void OwnSKUField::Feedback() {
+  // When input field is empty there is no point of giving feedback.
+  if (!has_error_with_content) { return; }
+  if (err_flags & ValidatorFlags_StrLen) {
+    ImGui::Text("SKU too short"); ImGui::SameLine();
+  }
+  if (err_flags & ValidatorFlags_IsDuplicate) {
+    ImGui::Text("Own SKU already exists"); ImGui::SameLine();
+  }
+}
+
+Part OwnSKUField::GetFromDb() {
+  // Currently we dont need to get the whole Part objects from database
+  return Part();
+}

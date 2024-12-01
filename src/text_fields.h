@@ -52,6 +52,7 @@ public:
   TextField();
   TextField(const std::string& label, ImGuiInputTextFlags = 0, TFFlags = 0);
   int Render();
+  void Field();
   virtual void Feedback();
   virtual void Validate();
   const std::string& Get() const;
@@ -117,6 +118,18 @@ public:
 private:
   Device device;
   Popup<Device> popup;
+};
+
+class OwnSKUField : public TextField {
+public:
+  using TextField::TextField;
+  bool Render();
+  void Validate() override;
+  void Feedback() override;
+  Part GetFromDb();
+  Part part;
+private:
+  Popup<Part> popup;
 };
 
 template <typename SM>

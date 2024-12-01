@@ -96,6 +96,7 @@ class  PartsWin {
 
   private:
     SimpleModelField<Supplier> supplier;
+    OwnSKUField own_sku_field;
     bool open = true;
 };
 

@@ -3,6 +3,7 @@
 
 class Part {
 public:
+  const std::string ToString() const;
   int id = -1;
   std::string name;
   std::string own_sku;
@@ -15,8 +16,9 @@ public:
   double purch_price_ex_vat;
   std::string location;
   int reserved_quantity;
-  std::string created_at; // date
-  std::string updated_at; // date
+  std::tm created_at; // date
+  std::tm updated_at; // date
+  static constexpr std::string_view table = "parts";
 
 private:
 

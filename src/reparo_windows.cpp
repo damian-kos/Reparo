@@ -379,6 +379,7 @@ Device RepairWin::CreateDevice() {
 
 PartsWin::PartsWin()
 : supplier(_("Supplier"), 0, TFFlags_HasPopup)
+, own_sku_field(_("Own SKU"), 0, TFFlags_HasPopup)
 { }
 
 void PartsWin::Render() {
@@ -389,6 +390,8 @@ void PartsWin::Render() {
   }
   if (ImGui::BeginPopupModal(_("Insert part"), &open)) {
     supplier.Render();
+    own_sku_field.Render();
+    own_sku_field.Feedback();
     ImGui::EndPopup();
   }
 }

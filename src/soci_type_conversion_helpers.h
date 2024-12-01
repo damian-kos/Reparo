@@ -7,6 +7,8 @@
 #include "models/device.h"
 #include "models/repair.h"
 #include "models/supplier.h"
+#include "models/parts.h"
+#include "conversion.h"
 #include <iostream>
 
 
@@ -112,9 +114,9 @@ namespace soci {
 
       try {
         // Get optional fields with defaults
-        int type_id = type_id = v.get<int>("type_id", -1);
+        int type_id  = v.get<int>("type_id", -1);
         std::string type_name = "Unknown";
-        int brand_id = brand_id = v.get<int>("brand_id", -1);
+        int brand_id = v.get<int>("brand_id", -1);
         std::string brand_name = "Unknown";
         if (columns > 4) {
           type_name = v.get<std::string>("type", "Unknown");
@@ -223,6 +225,60 @@ namespace soci {
         std::string str = "line" + std::to_string(i+1);
         v.set(str, vec[i]);
       }
+
+      ind = i_ok;
+    }
+  };
+
+  template <>
+  struct type_conversion<Part> {
+    typedef values base_type;
+
+    static void from_base(const values& v, indicator ind, Part& model) {
+      std::cout << "Converting from base for " << typeid(Part).name() << std::endl;
+
+      if (ind == i_null) {
+        throw std::runtime_error("Null value fetched from database");
+      }
+      model.id = v.get<int>("id");
+      model.name = v.get<std::string>("name");
+      model.own_sku = v.get<std::string>("own_sku");
+      model.quality.id = v.get<int>("quality_id", -1);
+      model.sell_price = v.get<double>("sell_price", 0);
+      model.sell_price_ex_vat = v.get<double>("sell_price_ex_vat", 0.0);
+      model.color.id = v.get<int>("color_id", -1);
+      model.quantity = v.get<int>("quantity", 0);
+      model.purch_price = v.get<double>("purch_price", 0);
+      model.purch_price_ex_vat = v.get<double>("purch_price_ex_vat", 0);
+      model.location = v.get<std::string>("location", "N/A");
+      model.reserved_quantity = v.get<int>("reserved_quantity", 0);
+      model.created_at = v.get<std::tm>("created_at");
+      model.updated_at = v.get<std::tm>("updated_at");
+      std::cout << Convert::TmToStr(model.updated_at) << std::endl;
+
+      // If Part retreived with joined tables
+      if (v.get_number_of_columns() > 14) {
+        model.color.name = v.get<std::string>("color", "Unknown");
+        model.quality.name = v.get<std::string>("quality", "Unknown");
+        
+      }
+    }
+
+    static void to_base(const Part& model, values& v, indicator& ind) {
+      v.set("id", model.id);
+      v.set("name", model.name);
+      v.set("own_sku", model.own_sku);
+      v.set("quality_id", model.quality.id);
+      v.set("sell_price", model.sell_price);
+      v.set("sell_price_ex_vat", model.sell_price_ex_vat);
+      v.set("color_id", model.quality.id);
+      v.set("quantity", model.quantity);
+      v.set("purch_price", model.purch_price);
+      v.set("purch_price_ex_vat", model.purch_price_ex_vat);
+      v.set("location", model.location);
+      v.set("reserved_quantity", model.reserved_quantity);
+      v.set("created_at", model.created_at);
+      v.set("updated_at", model.updated_at);
 
       ind = i_ok;
     }
