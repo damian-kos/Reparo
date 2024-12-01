@@ -19,6 +19,7 @@ public:
   std::tm created_at; // date
   std::tm updated_at; // date
   static constexpr std::string_view table = "parts";
+  static inline const std::string column = "own_sku";
 
 private:
 

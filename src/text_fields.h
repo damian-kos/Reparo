@@ -136,6 +136,7 @@ template <typename SM>
 class SimpleModelField : public TextField {
 public:
   using TextField::TextField;
+  SimpleModelField(const std::string& label, ImGuiInputTextFlags = 0, TFFlags = 0, const std::string& column = "");
   SM& Render();
   void Validate() override;
   void Feedback() override;
@@ -144,6 +145,7 @@ public:
 private:
   SM model;
   Popup<SM> popup;
+  std::string column;
 };
 
 // Currently it works only with <Color, DeviceField> which is suboptimal

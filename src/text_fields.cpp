@@ -309,14 +309,22 @@ bool DeviceField::IsInDb() {
 }
 
 template<typename SM>
+SimpleModelField<SM>::SimpleModelField(const std::string& label, ImGuiInputTextFlags flags, TFFlags ro_flags, const std::string& column)
+  : TextField(label, flags, ro_flags)
+  , column(!column.empty() ? column : model.column)
+{
+}
+
+template<typename SM>
 SM& SimpleModelField<SM>::Render() {
   static std::vector<SM> vec;
   Field();
 
   if (ImGui::IsItemEdited() || ImGui::IsItemActivated()) {
+
     Validate();
     vec.clear();
-    vec = Database::Select<SM>().From().Where(model.column).Like(buffer).All();
+    vec = Database::Select<SM>().From().Where(column).Like(buffer).All();
   }
   ImGui::PushID(label.c_str());
   if (ro_flags & TFFlags_HasPopup) {
@@ -364,6 +372,7 @@ template struct SimpleModelField<PaymentMethod>;
 template struct SimpleModelField<DeviceType>;
 template struct SimpleModelField<Color>;
 template struct SimpleModelField<Supplier>;
+template struct SimpleModelField<Part>;
 
 // Currently it works only with <Color, DeviceField> which is suboptimal
 template<typename SM, typename R>
