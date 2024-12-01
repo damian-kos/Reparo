@@ -105,3 +105,14 @@ inline bool SimpleModel<Derived>::Delete() {
   }
   return action;
 }
+
+struct Price {
+  /// <summary>
+  /// Including VAT to get ex. VAT use ExVat()
+  /// </summary>
+  double amount = 0;
+  bool ex_vat = false;
+  double vat_rate = 20;
+
+  double ExVat();
+};

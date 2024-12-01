@@ -93,11 +93,14 @@ class  PartsWin {
   public:
     PartsWin();
     void Render();
-
+    void PriceSection(const std::string& _action, Price& _price);
   private:
     SimpleModelField<Supplier> supplier;
     OwnSKUField own_sku_field;
     SimpleModelField<Part> name_field;
+    Price buy_price;
+    Price sell_price;
+    //double vat_rate   = 20;
     bool open = true;
 };
 

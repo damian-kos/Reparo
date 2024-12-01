@@ -393,7 +393,48 @@ void PartsWin::Render() {
     supplier.Render();
     own_sku_field.Render();
     name_field.Render();
+    PriceSection("buy",  buy_price);
+    PriceSection("sell", sell_price);
     own_sku_field.Feedback();
     ImGui::EndPopup();
   }
+}
+
+void PartsWin::PriceSection(const std::string& _action, Price& _price) {
+  std::string separator;
+  std::string label_1;
+  std::string label_2;
+  std::string label_3;
+  if (_action == "buy") {
+    separator = _("BUY PRICING");
+    label_1 = _("Buy price (inc. VAT)");
+    label_2 = _("Ex.VAT buy price");
+    label_3 = _("Price ex.VAT: % .2f");
+  }
+  if (_action == "sell") {
+    separator = _("SELL PRICING");
+    label_1 = _("Sell price (inc. VAT)");
+    label_2 = _("Ex.VAT sell price");
+    label_3 = _("Price ex.VAT: % .2f");
+  }
+  ImGui::PushID(_action.c_str());
+  ImGui::BeginGroup();
+  ImGui::PushItemWidth(100);
+  ImGui::SeparatorText(separator.c_str());
+  ImGui::InputDouble(label_1.c_str(), &_price.amount, 0.0f, 0.0f, "%.2f");
+  ImGui::PopItemWidth();
+  ImGui::SameLine();
+  ImGui::Checkbox(label_2.c_str(), &_price.ex_vat);
+  ImGui::EndGroup();
+
+  ImGui::BeginGroup();
+  ImGui::BeginDisabled(!_price.ex_vat);
+  ImGui::PushItemWidth(100);
+  ImGui::InputDouble(_("VAT rate"), &_price.vat_rate, 0.0f, 0.0f, "%.2f");
+  ImGui::PopItemWidth();
+  ImGui::SameLine();
+  ImGui::EndDisabled();
+  ImGui::Text((label_3 + " %.2f").c_str(), _price.ExVat());
+  ImGui::EndGroup();
+  ImGui::PopID();
 }

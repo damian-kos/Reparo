@@ -40,3 +40,7 @@ template struct SimpleModel<RepairCategory>;
 template struct SimpleModel<PaymentMethod>;
 template struct SimpleModel<DeviceType>;
 template struct SimpleModel<Color>;
+
+double Price::ExVat() {
+  return amount / (1 + (vat_rate / 100));
+}
