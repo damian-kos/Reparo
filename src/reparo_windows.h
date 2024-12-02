@@ -97,6 +97,9 @@ class  PartsWin {
     void PriceSection(const std::string& _action, Price& _price);
     void QuantitySection();
     void CompatibleTablePicker();
+    void CompatibleEntriesBox();
+    template <typename T>
+    void ListEntriesInBox(float& last_btn, float window, std::unordered_map<int, T>& entries);
     void LoadDevices();
   private:
     SimpleModelField<Supplier> supplier;

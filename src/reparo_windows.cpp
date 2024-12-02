@@ -399,7 +399,7 @@ void PartsWin::Render() {
     PriceSection("sell", sell_price);
     QuantitySection();
     CompatibleTablePicker();
-
+    CompatibleEntriesBox();
     
     own_sku_field.Feedback();
     ImGui::EndPopup();
@@ -451,6 +451,48 @@ void PartsWin::QuantitySection() {
 
 void PartsWin::CompatibleTablePicker() {
   RoTable::TableWithDevices(devices, cmptble_devices, cmptble_aliases);
+}
+
+void PartsWin::CompatibleEntriesBox() {
+  ImVec2 scrolling_child_size = ImVec2(0, ImGui::GetFrameHeightWithSpacing() * 3 + 30);
+  ImGui::BeginChild("scrolling", scrolling_child_size, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar);
+  ImGui::HelpMarker("Click to remove device from list of compatible devices.");
+  float window = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+  float last_btn = ImGui::GetCursorPosX(); // Initialize with the starting cursor position of the window
+
+  ImGui::SeparatorText(_("Devices"));
+  ListEntriesInBox<Device>(last_btn, window, cmptble_devices);
+  ImGui::SeparatorText(_("Aliases"));
+  ListEntriesInBox<Alias>(last_btn, window, cmptble_aliases);
+
+  float scroll_x = ImGui::GetScrollX();
+  float scroll_max_x = ImGui::GetScrollMaxX();
+  ImGui::EndChild();
+}
+
+template <typename T>
+void PartsWin::ListEntriesInBox(float& _last_btn, float _window, std::unordered_map<int, T>& _entries) {
+  if (_entries.empty())
+    return;
+
+  for (auto it = _entries.begin(); it != _entries.end(); ) {
+    bool should_continue = false;
+
+    if (ImGui::Button(_entries[it->first].name.c_str())) {
+      it = _entries.erase(it);
+      continue;
+    }
+
+    auto next_it = std::next(it, 1);
+    if (next_it != _entries.end()) {
+      _last_btn = ImGui::GetItemRectMax().x + (ImGui::CalcTextSize(next_it->second.name.c_str()).x * 1.2);
+
+      if (_last_btn < _window)
+        ImGui::SameLine();
+    }
+
+    ++it;
+  }
 }
 
 void PartsWin::LoadDevices() {
