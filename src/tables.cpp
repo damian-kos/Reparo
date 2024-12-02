@@ -65,20 +65,39 @@ void RoTable::TableWithDevices(const std::vector<Device>& _devices, std::unorder
 
     ImGui::TableNextColumn();
 
-    if (ImGui::Selectable(device.name.c_str()))
+    if (ImGui::Selectable(device.name.c_str())) {
+      std::erase_if(_cmptbl_aliases, [&](const auto& pair) {
+        return device.id == pair.second.link_id;
+        });
       _cmptbl_devices.emplace(device.id, device);
+    }
 
     if (!ImGui::BeginPopupContextItem())
       continue;
 
-    if (!device.aliases.empty()) {
-      static std::vector<bool> selection(device.aliases.size(), false);
+    if (device.aliases.empty()) {
+      ImGui::EndPopup();
+      continue;
+    }
 
-      for (size_t i = 0; i < device.aliases.size(); ++i) {
-        auto& alias = device.aliases[i];
-        if (ImGui::Selectable(alias.name.c_str(), selection[i], ImGuiSelectableFlags_DontClosePopups))
-          _cmptbl_aliases.emplace(alias.id, alias);
-      }
+    static std::vector<bool> selection(device.aliases.size(), false);
+
+    for (size_t i = 0; i < device.aliases.size(); ++i) {
+      auto& alias = device.aliases[i];
+
+      if (!ImGui::Selectable(alias.name.c_str(), selection[i], ImGuiSelectableFlags_DontClosePopups))
+        continue;
+
+      std::erase_if(_cmptbl_devices, [&](const auto& pair) {
+        return pair.first == alias.link_id;
+        });
+
+      // Older solution left as on above possibly caused a vector out-of-range bug ?
+      //auto link_it = _cmptbl_devices.find(alias.link_id);
+      //if (link_it != _cmptbl_devices.end())
+      //  _cmptbl_devices.erase(link_it);
+
+      _cmptbl_aliases.emplace(alias.id, alias);
     }
 
     ImGui::EndPopup();
