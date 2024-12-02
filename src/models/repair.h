@@ -8,7 +8,7 @@ public:
   int id;
   Customer customer;
   Device device;
-  RepairCategory category;
+  Category category;
   Color color;
   std::string sn_imei;
   std::string vis_note;

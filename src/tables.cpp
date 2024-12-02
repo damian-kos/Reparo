@@ -54,18 +54,17 @@ void RoTable::TableWithDevices(const std::vector<Device>& _devices, std::unorder
   if (columns <= 0)
     return;
 
-  if (!ImGui::BeginTable("split1", columns, ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit |
+  if (!ImGui::BeginTable("split1", columns,  ImGuiTableFlags_SizingFixedFit |
     ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_Borders |
     ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchSame))
     return;
 
   for (auto& device : _devices) {
+    ImGui::TableNextColumn();
     if (device.name.empty())
       continue;
 
-    ImGui::TableNextColumn();
-
-    if (ImGui::Selectable(device.name.c_str())) {
+    if (ImGui::Selectable(device.name.c_str(), false, ImGuiSelectableFlags_DontClosePopups)) {
       std::erase_if(_cmptbl_aliases, [&](const auto& pair) {
         return device.id == pair.second.link_id;
         });
@@ -80,12 +79,13 @@ void RoTable::TableWithDevices(const std::vector<Device>& _devices, std::unorder
       continue;
     }
 
-    static std::vector<bool> selection(device.aliases.size(), false);
+
+    //static std::vector<bool> selection(device.aliases.size(), false);
 
     for (size_t i = 0; i < device.aliases.size(); ++i) {
       auto& alias = device.aliases[i];
 
-      if (!ImGui::Selectable(alias.name.c_str(), selection[i], ImGuiSelectableFlags_DontClosePopups))
+      if (!ImGui::Selectable(alias.name.c_str(), false, ImGuiSelectableFlags_DontClosePopups))
         continue;
 
       std::erase_if(_cmptbl_devices, [&](const auto& pair) {

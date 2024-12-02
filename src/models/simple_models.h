@@ -60,7 +60,7 @@ struct RepairState : SimpleModel<RepairState> {
   static inline const std::string window_title = "Repair States";
 };
 
-struct RepairCategory : SimpleModel<RepairCategory> {
+struct Category : SimpleModel<Category> {
   using SimpleModel::SimpleModel;
   static constexpr std::string_view table = "repair_categories";
   static inline const std::string column = "category";

@@ -19,7 +19,7 @@ private:
   RepairWin repair_win;
   SimpleModelWin<Brand>    brand_win;
   SimpleModelWin<DeviceType> device_types_win;
-  SimpleModelWin<RepairCategory> categories_win;
+  SimpleModelWin<Category> categories_win;
   SimpleModelWin<RepairState> repair_states_win;
   SimpleModelWin<PaymentMethod> payments_win;
   PartsWin parts_win;

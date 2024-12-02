@@ -81,7 +81,7 @@ private:
   double price = 0;
   bool price_can_be_zero;
   DeviceField device;
-  SimpleModelField<RepairCategory> category;
+  SimpleModelField<Category> category;
   RelationalField<Color, DeviceField> color;
   TextField sn_imei;
   TextField vis_note;
@@ -105,6 +105,9 @@ class  PartsWin {
     SimpleModelField<Supplier> supplier;
     OwnSKUField own_sku_field;
     SimpleModelField<Part> name_field;
+    SimpleModelField<Color> color;
+    SimpleModelField<Quality> qualities;
+    SimpleModelField<Category> category;
     Price buy_price;
     Price sell_price;
     int quantity = 0;

@@ -36,10 +36,11 @@ bool SimpleModel<Derived>::Edit() {
 // Explicit instantiations for the types used
 template struct SimpleModel<Brand>;
 template struct SimpleModel<RepairState>;
-template struct SimpleModel<RepairCategory>;
+template struct SimpleModel<Category>;
 template struct SimpleModel<PaymentMethod>;
 template struct SimpleModel<DeviceType>;
 template struct SimpleModel<Color>;
+template struct SimpleModel<Quality>;
 
 double Price::ExVat() {
   return amount / (1 + (vat_rate / 100));

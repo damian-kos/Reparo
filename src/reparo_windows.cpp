@@ -381,6 +381,9 @@ PartsWin::PartsWin()
 : supplier(_("Supplier"), 0, TFFlags_HasPopup)
 , own_sku_field(_("Own SKU"), 0, TFFlags_HasPopup)
 , name_field(_("Item's name"), 0, TFFlags_HasPopup, "name")
+, color(_("Color"), 0, TFFlags_HasPopup)
+, qualities(_("Quality"), 0, TFFlags_HasPopup)
+, category(_("Category"), 0, TFFlags_HasPopup)
 { }
 
 void PartsWin::Render() {
@@ -392,16 +395,31 @@ void PartsWin::Render() {
     ImGui::OpenPopup(_("Insert part"));
   }
   if (ImGui::BeginPopupModal(_("Insert part"), &open)) {
-    supplier.Render();
-    own_sku_field.Render();
-    name_field.Render();
-    PriceSection("buy",  buy_price);
-    PriceSection("sell", sell_price);
-    QuantitySection();
+    if (ImGui::BeginTable("split2", 2, ImGuiTableFlags_SizingStretchProp)) {
+      ImGui::TableNextRow();
+      ImGui::TableNextColumn();
+
+      supplier.Render();
+      own_sku_field.Render();
+      name_field.Render();
+      PriceSection("buy", buy_price);
+      PriceSection("sell", sell_price);
+      QuantitySection();
+      //Filters
+
+      ImGui::TableNextColumn();
+
+      color.Render();
+      qualities.Render();
+      category.Render();
+      // Location
+      CompatibleEntriesBox();
+      // Submit button
+      own_sku_field.Feedback();
+
+      ImGui::EndTable();
+    }
     CompatibleTablePicker();
-    CompatibleEntriesBox();
-    
-    own_sku_field.Feedback();
     ImGui::EndPopup();
   }
 }
@@ -476,7 +494,7 @@ void PartsWin::ListEntriesInBox(float& _last_btn, float _window, std::unordered_
     return;
 
   for (auto it = _entries.begin(); it != _entries.end(); ) {
-    bool should_continue = false;
+   // bool should_continue = false;
 
     if (ImGui::Button(_entries[it->first].name.c_str())) {
       it = _entries.erase(it);

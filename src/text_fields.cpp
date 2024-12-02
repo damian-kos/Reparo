@@ -37,6 +37,7 @@ ValidatorFlags Validator::IsEmail(const std::string& buffer) {
 template <typename T>
 bool Popup<T>::OnTextInput(std::string& buffer, const std::vector<T>& data) {
     float x = ImGui::GetWindowContentRegionMax().x;
+    float x2 = ImGui::GetCursorPosX();
     int _selected = -1;
     bool state = false;
     bool is_input_active = ImGui::IsItemActive();
@@ -52,7 +53,7 @@ bool Popup<T>::OnTextInput(std::string& buffer, const std::vector<T>& data) {
       | ImGuiWindowFlags_ChildWindow))
       {
 
-        ImVec2 scrolling_child_size = ImVec2(x - 30, ImGui::GetFrameHeightWithSpacing() * 3 + 30);
+        ImVec2 scrolling_child_size = ImVec2(x - 20 - x2, ImGui::GetFrameHeightWithSpacing() * 3 + 30);
         ImGui::BeginChild("scrolling", scrolling_child_size, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar);
         ImGui::HelpMarker("Click auto fill with selection.");
         for (auto& _record : data) {
@@ -367,12 +368,13 @@ SM SimpleModelField<SM>::GetFromDb() {
 
 template struct SimpleModelField<Brand>;
 template struct SimpleModelField<RepairState>;
-template struct SimpleModelField<RepairCategory>;
+template struct SimpleModelField<Category>;
 template struct SimpleModelField<PaymentMethod>;
 template struct SimpleModelField<DeviceType>;
 template struct SimpleModelField<Color>;
 template struct SimpleModelField<Supplier>;
 template struct SimpleModelField<Part>;
+template struct SimpleModelField<Quality>;
 
 // Currently it works only with <Color, DeviceField> which is suboptimal
 template<typename SM, typename R>
