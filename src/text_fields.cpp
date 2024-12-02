@@ -36,47 +36,55 @@ ValidatorFlags Validator::IsEmail(const std::string& buffer) {
 
 template <typename T>
 bool Popup<T>::OnTextInput(std::string& buffer, const std::vector<T>& data) {
-    float x = ImGui::GetWindowContentRegionMax().x;
-    float x2 = ImGui::GetCursorPosX();
-    int _selected = -1;
-    bool state = false;
-    bool is_input_active = ImGui::IsItemActive();
-    bool is_input_activated = ImGui::IsItemActivated();
-    if (is_input_activated) {
-      ImGui::OpenPopup("Popup");
-      selected = -1;
-    }
+  float x = ImGui::GetWindowContentRegionMax().x;
+  float x2 = ImGui::GetCursorPosX();
+  bool state = false;
+  bool is_input_active = ImGui::IsItemActive();
+  bool is_input_activated = ImGui::IsItemActivated();
 
-    ImGui::SetNextWindowPos(ImVec2(ImGui::GetItemRectMin().x, ImGui::GetItemRectMax().y));
-      if (ImGui::BeginPopup("Popup", ImGuiWindowFlags_NoTitleBar
-      | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize
-      | ImGuiWindowFlags_ChildWindow))
-      {
+  if (is_input_activated) {
+    ImGui::OpenPopup("Popup");
+    selected = -1;
+  }
 
-        ImVec2 scrolling_child_size = ImVec2(x - 20 - x2, ImGui::GetFrameHeightWithSpacing() * 3 + 30);
-        ImGui::BeginChild("scrolling", scrolling_child_size, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar);
-        ImGui::HelpMarker("Click auto fill with selection.");
-        for (auto& _record : data) {
-          std::string label = _record.ToString();
-          if (ImGui::Selectable(label.c_str())) {
-            _selected = _record.id;
-            record = _record;
-            selected = _record.id;
-            state = true;
-            ImGui::CloseCurrentPopup();           
-          }
+  ImGui::SetNextWindowPos(ImVec2(ImGui::GetItemRectMin().x, ImGui::GetItemRectMax().y));
+
+  if (ImGui::BeginPopup("Popup", ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_ChildWindow)) {
+    ImVec2 scrolling_child_size = ImVec2(x - 20 - x2, ImGui::GetFrameHeightWithSpacing() * 3 + 30);
+    ImGui::BeginChild("scrolling", scrolling_child_size, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar);
+
+    ImGui::HelpMarker("Click auto fill with selection.");
+
+    for (auto& _record : data) {
+      std::string label;
+      if constexpr (!std::is_same_v<T, std::string>) {
+        label = _record.ToString();
       }
-      if (!is_input_active && !ImGui::IsWindowFocused()) {
-        std::cout << "Close current popup #2" << std::endl;
+      else {
+        label = _record;
+      }
+
+      if (ImGui::Selectable(label.c_str())) {
+          record = _record;
+        state = true;
         ImGui::CloseCurrentPopup();
       }
-      float scroll_x = ImGui::GetScrollX();
-      float scroll_max_x = ImGui::GetScrollMaxX();
-      ImGui::EndChild();
-      ImGui::EndPopup();
     }
-      return state;
+
+    if (!is_input_active && !ImGui::IsWindowFocused()) {
+      std::cout << "Close current popup #2" << std::endl;
+      ImGui::CloseCurrentPopup();
+    }
+
+    float scroll_x = ImGui::GetScrollX();
+    float scroll_max_x = ImGui::GetScrollMaxX();
+
+    ImGui::EndChild();
+    ImGui::EndPopup();
   }
+
+  return state;
+}
 
 TextField::TextField() { }
 
@@ -491,4 +499,41 @@ void OwnSKUField::Feedback() {
 Part OwnSKUField::GetFromDb() {
   // Currently we dont need to get the whole Part objects from database
   return Part();
+}
+
+QueriedTextField::QueriedTextField(const std::string& label, ImGuiInputTextFlags flags, TFFlags ro_flags
+  , const std::string& _select
+  , const std::string& _from
+  , const std::string& _where)
+  : TextField(label, flags, ro_flags)
+  , select(_select)
+  , from(_from)
+  , where(_where)
+{}
+
+void QueriedTextField::Render() {
+  static std::vector<std::string> vec;
+  Field();
+
+  if (ImGui::IsItemEdited() || ImGui::IsItemActivated()) {
+
+    Validate();
+    vec.clear();
+    vec = Database::Select<std::string>(select).From(from).Where(where).Like(buffer).All();
+  }
+  ImGui::PushID(label.c_str());
+  if (ro_flags & TFFlags_HasPopup) {
+    if (popup.OnTextInput(buffer, vec)) {
+      buffer = popup.record;
+      Validate();
+    }
+  }
+  ImGui::PopID();
+
+}
+
+void QueriedTextField::Validate() {
+}
+
+void QueriedTextField::Feedback() {
 }

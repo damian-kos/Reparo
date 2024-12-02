@@ -108,6 +108,7 @@ class  PartsWin {
     SimpleModelField<Color> color;
     SimpleModelField<Quality> qualities;
     SimpleModelField<Category> category;
+    QueriedTextField location;
     Price buy_price;
     Price sell_price;
     int quantity = 0;

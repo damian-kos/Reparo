@@ -118,9 +118,11 @@ public:
 
     Selector& From(const std::string& table = "") {
       std::string table_name = table;
-      if (table_name.empty()) {
-        T temp;
-        table_name = temp.table;  // Assuming `T` has a member `table`.
+      if constexpr (!std::is_same_v<T, std::string>) {
+        if (table_name.empty()) {
+          T temp;
+          table_name = temp.table; 
+        }
       }
       sql << " FROM " << table_name;
       return *this;

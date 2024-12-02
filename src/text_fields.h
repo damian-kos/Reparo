@@ -132,6 +132,24 @@ private:
   Popup<Part> popup;
 };
 
+class QueriedTextField : public TextField {
+public:
+  using TextField::TextField;
+  QueriedTextField(const std::string& label, ImGuiInputTextFlags = 0, TFFlags = 0
+    , const std::string& _select = "*"
+    , const std::string& _from   = "_"
+    , const std::string& _where  = "_");
+  void Render();
+  void Validate() override;
+  void Feedback() override;
+
+private:
+  Popup<std::string> popup;
+  std::string select;
+  std::string from;
+  std::string where;
+};
+
 template <typename SM>
 class SimpleModelField : public TextField {
 public:

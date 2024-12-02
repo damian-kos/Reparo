@@ -384,6 +384,7 @@ PartsWin::PartsWin()
 , color(_("Color"), 0, TFFlags_HasPopup)
 , qualities(_("Quality"), 0, TFFlags_HasPopup)
 , category(_("Category"), 0, TFFlags_HasPopup)
+, location(_("Location"), 0, TFFlags_HasPopup, "location", "parts", "location")
 { }
 
 void PartsWin::Render() {
@@ -412,6 +413,7 @@ void PartsWin::Render() {
       color.Render();
       qualities.Render();
       category.Render();
+      location.Render();
       // Location
       CompatibleEntriesBox();
       // Submit button
