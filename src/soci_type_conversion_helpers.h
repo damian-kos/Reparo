@@ -56,6 +56,7 @@ namespace soci {
         }
         model.id = v.get<int>("id");
         model.name = v.get<std::string>(model.column);
+        model.link_id = v.get<int>("model_id");
       }
 
       static void to_base(const Alias& model, values& v, indicator& ind) {
@@ -110,7 +111,7 @@ namespace soci {
       int columns = v.get_number_of_columns();
       if (columns <= 0) { return; }
       std::cout << "Converting from base for " << typeid(Device).name() << std::endl;
-        std::cout << "Column count: " << columns << std::endl;
+      std::cout << "Column count: " << columns << std::endl;
 
       try {
         // Get optional fields with defaults

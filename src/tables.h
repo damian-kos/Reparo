@@ -2,6 +2,7 @@
 #include <vector>
 #include "text_fields.h"
 #include "modal.h"
+#include "models/device.h"
 
 class RoTable {
 public:
@@ -9,6 +10,7 @@ public:
   static void Addresses(const std::vector<std::string>& first, const std::vector<std::string>& second);
   template <typename T>
   static void SimpleModel(std::vector<T>& models);
+  static void TableWithDevices(const std::vector<Device>& _devices, std::unordered_map<int, Device>& _cmptbl_devices, std::unordered_map<int, Alias>& _cmptbl_aliases);
 };
 
 template<typename T>

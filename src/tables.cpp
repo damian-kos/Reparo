@@ -45,3 +45,44 @@ void RoTable::Addresses(const std::vector<std::string>& first, const std::vector
     ImGui::EndTable();
   }
 }
+
+void RoTable::TableWithDevices(const std::vector<Device>& _devices, std::unordered_map<int, Device>& _cmptbl_devices, std::unordered_map<int, Alias>& _cmptbl_aliases) {
+  float window = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+  ImVec2 size = ImGui::CalcTextSize("Apple Watch Series 2 Aluminium 38mm");
+  int columns = window / (size.x * 1.2) - 1;
+
+  if (columns <= 0)
+    return;
+
+  if (!ImGui::BeginTable("split1", columns, ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingFixedFit |
+    ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_Borders |
+    ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchSame))
+    return;
+
+  for (auto& device : _devices) {
+    if (device.name.empty())
+      continue;
+
+    ImGui::TableNextColumn();
+
+    if (ImGui::Selectable(device.name.c_str()))
+      _cmptbl_devices.emplace(device.id, device);
+
+    if (!ImGui::BeginPopupContextItem())
+      continue;
+
+    if (!device.aliases.empty()) {
+      static std::vector<bool> selection(device.aliases.size(), false);
+
+      for (size_t i = 0; i < device.aliases.size(); ++i) {
+        auto& alias = device.aliases[i];
+        if (ImGui::Selectable(alias.name.c_str(), selection[i], ImGuiSelectableFlags_DontClosePopups))
+          _cmptbl_aliases.emplace(alias.id, alias);
+      }
+    }
+
+    ImGui::EndPopup();
+  }
+
+  ImGui::EndTable();
+}

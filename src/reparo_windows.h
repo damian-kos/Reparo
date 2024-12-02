@@ -1,4 +1,5 @@
 #pragma once
+#include <unordered_map>
 #include "text_fields.h"
 #include "models/simple_models.h"
 #include "RoLocalization.h"
@@ -94,13 +95,19 @@ class  PartsWin {
     PartsWin();
     void Render();
     void PriceSection(const std::string& _action, Price& _price);
+    void QuantitySection();
+    void CompatibleTablePicker();
+    void LoadDevices();
   private:
     SimpleModelField<Supplier> supplier;
     OwnSKUField own_sku_field;
     SimpleModelField<Part> name_field;
     Price buy_price;
     Price sell_price;
-    //double vat_rate   = 20;
+    int quantity = 0;
+    std::vector<Device> devices;
+    std::unordered_map<int, Device> cmptble_devices;
+    std::unordered_map<int, Alias> cmptble_aliases;
     bool open = true;
 };
 

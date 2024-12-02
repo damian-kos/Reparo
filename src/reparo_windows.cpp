@@ -385,8 +385,10 @@ PartsWin::PartsWin()
 
 void PartsWin::Render() {
   // Currently in ModalPopup, possible change later
+  // Also this content needs to be put in ImGui's table
   if (ImGui::Button(_("Parts"))) {
     open = true;
+    LoadDevices();
     ImGui::OpenPopup(_("Insert part"));
   }
   if (ImGui::BeginPopupModal(_("Insert part"), &open)) {
@@ -395,6 +397,10 @@ void PartsWin::Render() {
     name_field.Render();
     PriceSection("buy",  buy_price);
     PriceSection("sell", sell_price);
+    QuantitySection();
+    CompatibleTablePicker();
+
+    
     own_sku_field.Feedback();
     ImGui::EndPopup();
   }
@@ -437,4 +443,20 @@ void PartsWin::PriceSection(const std::string& _action, Price& _price) {
   ImGui::Text((label_3 + " %.2f").c_str(), _price.ExVat());
   ImGui::EndGroup();
   ImGui::PopID();
+}
+
+void PartsWin::QuantitySection() {
+  ImGui::InputInt(_("Quantity"), &quantity);
+}
+
+void PartsWin::CompatibleTablePicker() {
+  RoTable::TableWithDevices(devices, cmptble_devices, cmptble_aliases);
+}
+
+void PartsWin::LoadDevices() {
+  devices = Database::Select<Device>().From().All();
+  for (auto& device : devices) {
+    std::string _id_str = std::to_string(device.id);
+    device.aliases = std::move(Database::Select<Alias>().From().Where("model_id = " + _id_str).All());
+  }
 }
