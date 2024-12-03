@@ -100,8 +100,10 @@ class  PartsWin {
     void CompatibleEntriesBox();
     template <typename T>
     void ListEntriesInBox(float& last_btn, float window, std::unordered_map<int, T>& entries);
+    void Filters();
     void LoadDevices();
   private:
+    // Main insert input fields
     SimpleModelField<Supplier> supplier;
     OwnSKUField own_sku_field;
     SimpleModelField<Part> name_field;
@@ -112,6 +114,10 @@ class  PartsWin {
     Price buy_price;
     Price sell_price;
     int quantity = 0;
+    // Filter field
+    QueriedTextField device_filter;
+    SimpleModelField<Brand> brand_filter;
+    SimpleModelField<DeviceType> device_type_filter;
     std::vector<Device> devices;
     std::unordered_map<int, Device> cmptble_devices;
     std::unordered_map<int, Alias> cmptble_aliases;

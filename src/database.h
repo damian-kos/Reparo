@@ -112,7 +112,10 @@ private:
 template<typename T>
 class Selector {
 public:
-    Selector(const std::string& columns = "*") {
+    Selector(const std::string& _columns = "*") {
+      std::string columns = _columns;
+      if (columns.empty())
+        columns = "*";
         sql << "SELECT " << columns;
     }
 
@@ -128,9 +131,16 @@ public:
       return *this;
     }
 
-    Selector& Where(const std::string& condition) {
-        sql << " WHERE " << condition;
-        return *this;
+    Selector& Where(const std::string& _condition) {
+      if(!_condition.empty())
+        sql << " WHERE " << _condition;
+      return *this;
+    }
+
+    Selector& And(const std::string& _condition) {
+      if(!_condition.empty())
+        sql << " AND " << _condition;
+      return *this;
     }
 
     Selector& Like(const std::string& like) {

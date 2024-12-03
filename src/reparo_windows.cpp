@@ -385,6 +385,10 @@ PartsWin::PartsWin()
 , qualities(_("Quality"), 0, TFFlags_HasPopup)
 , category(_("Category"), 0, TFFlags_HasPopup)
 , location(_("Location"), 0, TFFlags_HasPopup, "location", "parts", "location")
+, device_filter(_("Device's model"), 0, TFFlags_HasPopup, "model", "devices", "model")
+, brand_filter(_("Brand"), 0, TFFlags_HasPopup)
+, device_type_filter(_("Device type"), 0, TFFlags_HasPopup)
+
 { }
 
 void PartsWin::Render() {
@@ -406,7 +410,6 @@ void PartsWin::Render() {
       PriceSection("buy", buy_price);
       PriceSection("sell", sell_price);
       QuantitySection();
-      //Filters
 
       ImGui::TableNextColumn();
 
@@ -414,13 +417,14 @@ void PartsWin::Render() {
       qualities.Render();
       category.Render();
       location.Render();
-      // Location
       CompatibleEntriesBox();
       // Submit button
       own_sku_field.Feedback();
 
       ImGui::EndTable();
     }
+
+    Filters();
     CompatibleTablePicker();
     ImGui::EndPopup();
   }
@@ -482,6 +486,7 @@ void PartsWin::CompatibleEntriesBox() {
 
   ImGui::SeparatorText(_("Devices"));
   ListEntriesInBox<Device>(last_btn, window, cmptble_devices);
+
   ImGui::SeparatorText(_("Aliases"));
   ListEntriesInBox<Alias>(last_btn, window, cmptble_aliases);
 
@@ -515,10 +520,37 @@ void PartsWin::ListEntriesInBox(float& _last_btn, float _window, std::unordered_
   }
 }
 
+void PartsWin::Filters() {
+  ImGui::Text(_("Compatible devices or devices' versions"));
+  device_filter.Render();
+  brand_filter.Render();
+  device_type_filter.Render();
+  if(ImGui::Button(_("Search"))) {
+    LoadDevices();
+  }
+}
+
 void PartsWin::LoadDevices() {
-  devices = Database::Select<Device>().From().All();
+    devices.clear();
+
+    std::string brand_id_str = "";
+    int brand_id = brand_filter.GetFromDb().id;
+    if (brand_id > 0)
+      brand_id_str = "brand_id = " + std::to_string(brand_id);
+
+    std::string type_id_str = "";
+    int type = device_type_filter.GetFromDb().id;
+    if (type > 0)
+      type_id_str = "type_id = " + std::to_string(type);
+
+    devices = Database::Select<Device>().From().Where("model").Like(device_filter.Get())
+      .And(brand_id_str)
+      .And(type_id_str)
+      .All();
+
   for (auto& device : devices) {
     std::string _id_str = std::to_string(device.id);
     device.aliases = std::move(Database::Select<Alias>().From().Where("model_id = " + _id_str).All());
   }
+
 }
