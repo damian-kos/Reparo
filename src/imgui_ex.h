@@ -1,5 +1,6 @@
 #pragma once
 #include "imgui.h"
+#include <string>
 
 namespace ImGui {
   void inline HelpMarker(const char* desc) {
@@ -45,10 +46,24 @@ namespace ImGui {
 
   }
 
-  bool inline ButtonDisabled(const char* label, bool disabled) {
+  bool inline ButtonDisabled(const std::string& label, bool disabled) {
     ImGui::BeginDisabled(disabled);
-    bool _pressed = ImGui::Button(label);
+    bool _pressed = ImGui::Button(label.c_str());
     ImGui::EndDisabled();
     return _pressed;
+  }
+
+  bool inline ColorButtonEx(const std::string& label, const float color, const bool is_disabled = false) {
+    ImGui::PushStyleColor(ImGuiCol_Button,
+                          (ImVec4)ImColor::HSV(color, 0.6f, 0.6f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered,
+                          (ImVec4)ImColor::HSV(color, 0.7f, 0.7f));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive,
+                          (ImVec4)ImColor::HSV(color, 0.8f, 0.8f));
+    ImGui::BeginDisabled(is_disabled);
+    bool pressed = ImGui::Button(label.c_str());
+    ImGui::EndDisabled();
+    ImGui::PopStyleColor(3);
+    return pressed;
   }
 }

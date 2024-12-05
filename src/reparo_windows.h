@@ -94,6 +94,7 @@ class  PartsWin {
   public:
     PartsWin();
     void Render();
+    void Feedback();
     void PriceSection(const std::string& _action, Price& _price);
     void QuantitySection();
     void CompatibleTablePicker();
@@ -103,6 +104,7 @@ class  PartsWin {
     void Submit();
     void Filters();
     void LoadDevices();
+    void FieldsValidate();
   private:
     // Main insert input fields
     SimpleModelField<Supplier> supplier;
@@ -123,6 +125,7 @@ class  PartsWin {
     std::unordered_map<int, Device> cmptble_devices;
     std::unordered_map<int, Alias> cmptble_aliases;
     bool open = true;
+    bool error = true;
 };
 
 template <typename T>

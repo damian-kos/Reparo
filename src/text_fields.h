@@ -58,7 +58,7 @@ public:
   int Render();
   void Field();
   virtual void Feedback();
-  //void FeedbackEx(const std::string args[5] = {});
+  void FeedbackEx(std::initializer_list<std::string> args = {});
   virtual void Validate();
   void EmptyBufferError();
   const std::string& Get() const;

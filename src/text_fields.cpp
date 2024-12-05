@@ -20,6 +20,9 @@ ValidatorFlags Validator::DatabaseChk(const std::string& table, const std::strin
 }
 
 ValidatorFlags Validator::StrLen(const std::string& buffer, const int& min_len){
+  if (buffer.empty()) 
+    return ValidatorFlags_Pass;
+  
   if (buffer.size() < min_len)
     return ValidatorFlags_StrLen;
   return ValidatorFlags_Pass;
@@ -120,24 +123,35 @@ void TextField::Validate() {
 }
 
 void TextField::EmptyBufferError() {
-  if (ro_flags & TFFlags_EmptyIsError)
+  if (ro_flags & TFFlags_EmptyIsError && buffer.empty()) {
+    error = true;
     has_error_with_content = error;
+  }
   else
     has_error_with_content = error && buffer.size() > 0;
 }
 
-//void TextField::FeedbackEx(const std::string args[5]) {
-//  if (ro_flags & TFFlags_EmptyIsError && buffer.empty() && !args[0].empty())
-//    ImGui::Text("%s", args[0].c_str());
-//  if (err_flags & ValidatorFlags_StrLen && !args[1].empty())
-//    ImGui::Text("%s", args[1].c_str());
-//  if (!args[2].empty())
-//    return;
-//  if (!args[3].empty())
-//    return;
-//  if (!args[4].empty())
-//    return;
-//}
+void TextField::FeedbackEx(std::initializer_list<std::string> args) {
+  // Convert initializer list to vector for easier handling
+  std::vector<std::string> _vec_args(args.begin(), args.end());
+ 
+  // Pad the vector with empty strings if fewer than 5 arguments are provided
+  _vec_args.resize(5);
+  if (ro_flags & TFFlags_EmptyIsError && buffer.empty() && !_vec_args[0].empty()) {
+    ImGui::Text("%s", _vec_args[0].c_str());
+    ImGui::SameLine();
+  }
+  if (err_flags & ValidatorFlags_StrLen && !_vec_args[1].empty()) {
+    ImGui::Text("%s", _vec_args[1].c_str());
+    ImGui::SameLine();
+  }
+  if (!_vec_args[2].empty())
+    return;
+  if (!_vec_args[3].empty())
+    return;
+  if (!_vec_args[4].empty())
+    return;
+}
 
 const std::string& TextField::Get() const {
   return buffer;

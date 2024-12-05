@@ -380,7 +380,7 @@ Device RepairWin::CreateDevice() {
 PartsWin::PartsWin()
 : supplier(_("Supplier"), 0, TFFlags_HasPopup)
 , own_sku_field(_("Own SKU"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError)
-, name_field(_("Item's name"), 0, TFFlags_HasPopup, "name")
+, name_field(_("Item's name"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError, "name")
 , color(_("Color"), 0, TFFlags_HasPopup)
 , qualities(_("Quality"), 0, TFFlags_HasPopup)
 , category(_("Category"), 0, TFFlags_HasPopup)
@@ -419,8 +419,8 @@ void PartsWin::Render() {
       location.Render();
       CompatibleEntriesBox();
       Submit();
-      //own_sku_field.FeedbackEx( "", "", "", "", "" );
-      name_field.Feedback();
+
+      Feedback();
 
       ImGui::EndTable();
     }
@@ -429,6 +429,16 @@ void PartsWin::Render() {
     CompatibleTablePicker();
     ImGui::EndPopup();
   }
+}
+
+void PartsWin::Feedback() {
+  FieldsValidate();
+  ImGui::NewLine();
+  own_sku_field.FeedbackEx(
+      {_("Own SKU can't be empty"), _("Own SKU is too short")});
+  name_field.FeedbackEx(
+      {_("Item's name can't be empty"), _("Item's name is too short")});
+  ImGui::NewLine();
 }
 
 void PartsWin::PriceSection(const std::string& _action, Price& _price) {
@@ -520,7 +530,7 @@ void PartsWin::ListEntriesInBox(float& _last_btn, float _window, std::unordered_
 }
 
 void PartsWin::Submit() {
-  if (ImGui::Button(_("Submit"))) {
+  if (ImGui::ColorButtonEx(_("Submit"), 0.2f, error)) {
 
   }
 }
@@ -559,4 +569,8 @@ void PartsWin::LoadDevices() {
     device.aliases = (Database::Select<Alias>().From().Where("model_id = " + _id_str).All());
   }
 
+}
+
+void PartsWin::FieldsValidate() {
+  error = own_sku_field.error || name_field.error;
 }
