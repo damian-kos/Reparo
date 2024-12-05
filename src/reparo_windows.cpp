@@ -246,13 +246,13 @@ void DeviceWin::FillDeviceByName(Device& autofill) {
 
 RepairWin::RepairWin()
   : customer_section(TFFlags_HasPopup | TFFlags_AllowDbPresence)
+  , price_can_be_zero(true)
   , device(_("Model"), 0, TFFlags_HasPopup | TFFlags_AllowDbPresence)
   , category(_("Category"), 0, TFFlags_HasPopup)
   , color(_("Color"), 0, TFFlags_HasPopup)
   , sn_imei(_("Serial / IMEI"))
   , vis_note(_("Notes for customer"))
   , hid_note(_("Notes hidden from customer"))
-  , price_can_be_zero(true)
 {}
 
 void RepairWin::Render() {
@@ -379,7 +379,7 @@ Device RepairWin::CreateDevice() {
 
 PartsWin::PartsWin()
 : supplier(_("Supplier"), 0, TFFlags_HasPopup)
-, own_sku_field(_("Own SKU"), 0, TFFlags_HasPopup)
+, own_sku_field(_("Own SKU"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError)
 , name_field(_("Item's name"), 0, TFFlags_HasPopup, "name")
 , color(_("Color"), 0, TFFlags_HasPopup)
 , qualities(_("Quality"), 0, TFFlags_HasPopup)
@@ -418,8 +418,9 @@ void PartsWin::Render() {
       category.Render();
       location.Render();
       CompatibleEntriesBox();
-      // Submit button
-      own_sku_field.Feedback();
+      Submit();
+      //own_sku_field.FeedbackEx( "", "", "", "", "" );
+      name_field.Feedback();
 
       ImGui::EndTable();
     }
@@ -490,8 +491,6 @@ void PartsWin::CompatibleEntriesBox() {
   ImGui::SeparatorText(_("Aliases"));
   ListEntriesInBox<Alias>(last_btn, window, cmptble_aliases);
 
-  float scroll_x = ImGui::GetScrollX();
-  float scroll_max_x = ImGui::GetScrollMaxX();
   ImGui::EndChild();
 }
 
@@ -520,8 +519,15 @@ void PartsWin::ListEntriesInBox(float& _last_btn, float _window, std::unordered_
   }
 }
 
+void PartsWin::Submit() {
+  if (ImGui::Button(_("Submit"))) {
+
+  }
+}
+
 void PartsWin::Filters() {
-  ImGui::Text(_("Compatible devices or devices' versions"));
+  ImGui::NewLine();
+  ImGui::SeparatorText(_("Compatible devices or devices' versions"));
   device_filter.Render();
   brand_filter.Render();
   device_type_filter.Render();
@@ -550,7 +556,7 @@ void PartsWin::LoadDevices() {
 
   for (auto& device : devices) {
     std::string _id_str = std::to_string(device.id);
-    device.aliases = std::move(Database::Select<Alias>().From().Where("model_id = " + _id_str).All());
+    device.aliases = (Database::Select<Alias>().From().Where("model_id = " + _id_str).All());
   }
 
 }

@@ -1,17 +1,37 @@
 #pragma once
+#include "../../src/soci_type_conversion_helpers.h"
+#include <iostream>
 #include <soci/soci.h>
 #include <soci/sqlite3/soci-sqlite3.h>
-#include <iostream>
-#include <vector>
 #include <sstream>
-#include "../../src/soci_type_conversion_helpers.h"
-
+#include <vector>
 
 class TableCreator;
 class Inserter;
+class Updater;
+class Deleter;
+template <typename T>
+class Selector;
+class DBGet;
 class Customer;
-class Brand;
 class Database;
+
+class Database {
+public:
+  Database() { OpenDb(); };
+  static soci::session sql;
+  static bool OpenDb();
+  static bool Execute(const std::string& _sql);
+  static bool ExecuteTransaction(const std::string& _sql);
+  static TableCreator Create();
+  static Inserter Insert();
+  static Updater Update();
+  static Deleter Delete();
+  template<typename T>
+  static Selector<T> Select(const std::string& columns = "*");
+  static inline bool is_initialized = false;
+  static DBGet Get();
+};
 
 
 class TableCreator {
@@ -116,7 +136,7 @@ public:
       std::string columns = _columns;
       if (columns.empty())
         columns = "*";
-        sql << "SELECT " << columns;
+      sql << "SELECT " << columns;
     }
 
     Selector& From(const std::string& table = "") {
@@ -223,22 +243,7 @@ public:
   static SM SimpleModel_(const T& _value);
 };
 
-class Database {
-public:
-  Database() { OpenDb(); };
-  static soci::session sql;
-  static bool OpenDb();
-  static bool Execute(const std::string& _sql);
-  static bool ExecuteTransaction(const std::string& _sql);
-  static TableCreator Create();
-  static Inserter Insert();
-  static Updater Update();
-  static Deleter Delete();
-  template<typename T>
-  static Selector<T> Select(const std::string& columns = "*");
-  static inline bool is_initialized = false;
-  static DBGet Get();
-};
+
 
 // After Selector class definition, add the implementation:
 template <typename T>

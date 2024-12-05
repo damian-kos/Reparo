@@ -36,7 +36,7 @@ template <typename T>
 class BuildSingleModal {
 public:
   BuildSingleModal& SetData(this BuildSingleModal& self, const T& _model) {
-    model = _model;
+    self.model = _model;
   }
 private:
   T model;
@@ -60,7 +60,7 @@ protected:
 class RepairModal : public BaseModal {
 public:
   RepairModal(const Repair& _repair, ModalConfig& _config)
-    : repair(_repair), BaseModal(_config) {}
+    : BaseModal(_config), repair(_repair)  {}
 
   bool ModalContents() override;
 
@@ -72,7 +72,7 @@ template <typename T>
 class SimpleModelModal : public BaseModal {
 public:
   explicit SimpleModelModal(const T& _model, ModalConfig& _config) 
-    : model(_model), BaseModal(_config) {}
+    : BaseModal(_config), model(_model) {}
 
   //ModalCallback Render() override;
   bool ModalContents() override;
@@ -85,7 +85,7 @@ private:
 class CustomerModal : public BaseModal {
 public:
   CustomerModal(const Customer& _customer, ModalConfig& _config)
-    : customer(_customer), BaseModal(_config) {}
+    : BaseModal(_config), customer(_customer)  {}
 
   bool ModalContents() override;
 

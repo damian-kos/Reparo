@@ -1,6 +1,7 @@
 // dear imgui, v1.91.4
 // (headers)
-
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wignored-attributes"
 // Help:
 // - See links below.
 // - Call and read ImGui::ShowDemoWindow() in imgui_demo.cpp. All applications in examples/ are doing that.
@@ -3991,3 +3992,4 @@ namespace ImGui
 #endif
 
 #endif // #ifndef IMGUI_DISABLE
+#pragma clang diagnostic pop

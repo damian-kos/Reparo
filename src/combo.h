@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-class Brand;
+
 class DeviceWin;
 
 template <typename T>

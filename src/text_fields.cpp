@@ -76,9 +76,6 @@ bool Popup<T>::OnTextInput(std::string& buffer, const std::vector<T>& data) {
       ImGui::CloseCurrentPopup();
     }
 
-    float scroll_x = ImGui::GetScrollX();
-    float scroll_max_x = ImGui::GetScrollMaxX();
-
     ImGui::EndChild();
     ImGui::EndPopup();
   }
@@ -89,7 +86,9 @@ bool Popup<T>::OnTextInput(std::string& buffer, const std::vector<T>& data) {
 TextField::TextField() { }
 
 TextField::TextField(const std::string& label, ImGuiInputTextFlags flags, TFFlags ro_flags)
-  : label(label), flags(flags), ro_flags(ro_flags) { }
+  : label(label), flags(flags), ro_flags(ro_flags) {
+  Validate();
+}
 
 int TextField::Render() {
   Field();
@@ -117,10 +116,30 @@ void TextField::Validate() {
   err_flags = ValidatorFlags_Pass;  // Reset flags
   err_flags |= Validator::StrLen(buffer, 3);
   error = err_flags & ValidatorFlags_StrLen;
-  has_error_with_content = error && buffer.size() > 0;
+  EmptyBufferError();
 }
 
-const std::string& TextField::Get() const{
+void TextField::EmptyBufferError() {
+  if (ro_flags & TFFlags_EmptyIsError)
+    has_error_with_content = error;
+  else
+    has_error_with_content = error && buffer.size() > 0;
+}
+
+//void TextField::FeedbackEx(const std::string args[5]) {
+//  if (ro_flags & TFFlags_EmptyIsError && buffer.empty() && !args[0].empty())
+//    ImGui::Text("%s", args[0].c_str());
+//  if (err_flags & ValidatorFlags_StrLen && !args[1].empty())
+//    ImGui::Text("%s", args[1].c_str());
+//  if (!args[2].empty())
+//    return;
+//  if (!args[3].empty())
+//    return;
+//  if (!args[4].empty())
+//    return;
+//}
+
+const std::string& TextField::Get() const {
   return buffer;
 }
 
@@ -134,7 +153,6 @@ void TextField::FillBuffer(const std::string& fill) {
 
 bool PhoneField::Render() {
   static std::vector<Customer> vec;
-  static int autofill = -1;
   bool state = false;
   Field();
 
@@ -168,7 +186,7 @@ void PhoneField::Validate() {
     err_flags |= Validator::DatabaseChk<Customer>("customers", "phone = " + buffer); // Edit with corresponding table once data in db exists
   err_flags |= Validator::StrLen(buffer, 7);
   error = err_flags & (ValidatorFlags_StrLen | ValidatorFlags_IsDuplicate);
-  has_error_with_content = error && buffer.size() > 0;
+  EmptyBufferError();
 }
 
 void PhoneField::Feedback() {
@@ -200,7 +218,7 @@ void NameField::Validate() {
   err_flags = ValidatorFlags_Pass;  // Reset flags
   err_flags |= Validator::StrLen(buffer, 3);
   error = err_flags & ValidatorFlags_StrLen;
-  has_error_with_content = error && buffer.size() > 0;
+  EmptyBufferError();
 }
 
 void NameField::Feedback() {
@@ -224,7 +242,7 @@ void SurnameField::Validate() {
   err_flags = ValidatorFlags_Pass;  // Reset flags
   err_flags |= Validator::StrLen(buffer, 3);
   error = err_flags & ValidatorFlags_StrLen;
-  has_error_with_content = error && buffer.size() > 0;
+  EmptyBufferError();
 }
 
 void SurnameField::Feedback() {
@@ -247,7 +265,7 @@ void EmailField::Validate() {
   err_flags = ValidatorFlags_Pass;  // Reset flags
   err_flags |= Validator::IsEmail(buffer);
   error = err_flags & ValidatorFlags_NotEmail;
-  has_error_with_content = error && buffer.size() > 0;
+  EmptyBufferError();
 }
 
 void EmailField::Feedback() {
@@ -260,7 +278,7 @@ void EmailField::Feedback() {
 Device DeviceField::Render() {
   static std::vector<Device> vec;
   Field();
- 
+
   if (ImGui::IsItemEdited() || ImGui::IsItemActivated()) {
     device = Device();
     Validate();
@@ -295,17 +313,19 @@ void DeviceField::Validate() {
     error = err_flags & (ValidatorFlags_StrLen | ValidatorFlags_IsDuplicate);
   else
     error = err_flags & ValidatorFlags_StrLen;
-  has_error_with_content = error && buffer.size() > 0;
+  EmptyBufferError();
 }
 
 void DeviceField::Feedback() {
   // When input field is empty there is no point of giving feedback.
   if (!has_error_with_content) { return; }
   if (err_flags & ValidatorFlags_StrLen) {
-    ImGui::Text(_("Device model too short")); ImGui::SameLine();
+    ImGui::Text("%s", _("Device model too short"));
+    ImGui::SameLine();
   }
   if (err_flags & ValidatorFlags_IsDuplicate) {
-    ImGui::Text(_("Device already exists")); ImGui::SameLine();
+    ImGui::Text("%s", _("Device already exists"));
+    ImGui::SameLine();
   }
 }
 
@@ -314,7 +334,7 @@ Device DeviceField::GetFromDb() {
 }
 
 bool DeviceField::IsInDb() {
-  return (err_flags & ValidatorFlags_IsDuplicate) || error ;
+  return (err_flags & ValidatorFlags_IsDuplicate) || error;
 }
 
 template<typename SM>
@@ -352,7 +372,7 @@ void SimpleModelField<SM>::Validate() {
   err_flags = ValidatorFlags_Pass;  // Reset flags
   err_flags |= Validator::StrLen(buffer, 3);
   error = err_flags & ValidatorFlags_StrLen;
-  has_error_with_content = error && buffer.size() > 0;
+  EmptyBufferError();
 }
 
 template<typename SM>
@@ -374,15 +394,15 @@ SM SimpleModelField<SM>::GetFromDb() {
   return Database::Get().SimpleModel_<std::string, SM>(buffer);
 }
 
-template struct SimpleModelField<Brand>;
-template struct SimpleModelField<RepairState>;
-template struct SimpleModelField<Category>;
-template struct SimpleModelField<PaymentMethod>;
-template struct SimpleModelField<DeviceType>;
-template struct SimpleModelField<Color>;
-template struct SimpleModelField<Supplier>;
-template struct SimpleModelField<Part>;
-template struct SimpleModelField<Quality>;
+template class SimpleModelField<Brand>;
+template class SimpleModelField<RepairState>;
+template class SimpleModelField<Category>;
+template class SimpleModelField<PaymentMethod>;
+template class SimpleModelField<DeviceType>;
+template class SimpleModelField<Color>;
+template class SimpleModelField<Supplier>;
+template class SimpleModelField<Part>;
+template class SimpleModelField<Quality>;
 
 // Currently it works only with <Color, DeviceField> which is suboptimal
 template<typename SM, typename R>
@@ -425,7 +445,7 @@ void RelationalField<SM, R>::Validate() {
   err_flags = ValidatorFlags_Pass;  // Reset flags
   err_flags |= Validator::StrLen(buffer, 3);
   error = err_flags & ValidatorFlags_StrLen;
-  has_error_with_content = error && buffer.size() > 0;
+  EmptyBufferError();
 }
 
 template<typename SM, typename R>
@@ -442,11 +462,10 @@ SM RelationalField<SM, R>::GetFromDb() {
   return Database::Get().SimpleModel_<std::string, SM>(buffer);
 }
 
-template struct RelationalField<Color, DeviceField>;
+template class RelationalField<Color, DeviceField>;
 
-bool OwnSKUField::Render(){
+bool OwnSKUField::Render() {
   static std::vector<Part> vec;
-  static int autofill = -1;
   bool state = false;
   Field();
 
@@ -479,10 +498,10 @@ void OwnSKUField::Validate() {
   err_flags = ValidatorFlags_Pass;
   std::string buf = "'" + buffer + "'";
   if (!(ro_flags & TFFlags_AllowDbPresence))
-    err_flags |= Validator::DatabaseChk<Part>("parts", "own_sku = " + buf); 
+    err_flags |= Validator::DatabaseChk<Part>("parts", "own_sku = " + buf);
   err_flags |= Validator::StrLen(buffer, 3);
   error = err_flags & (ValidatorFlags_StrLen | ValidatorFlags_IsDuplicate);
-  has_error_with_content = error && buffer.size() > 0;
+  EmptyBufferError();
 }
 
 void OwnSKUField::Feedback() {

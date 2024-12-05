@@ -17,14 +17,17 @@ enum ValidatorFlags_ {
   ValidatorFlags_NotInDb        = 1 << 4,
   ValidatorFlags_IsEmpty        = 1 << 5,
   ValidatorFlags_IsDuplicate    = 1 << 6,
+  ValidatorFlags_EmptyIsError   = 1 << 7,
+
 };
 
 enum TFFlags_ {
-  TFFlags_None = 0,                    // 
-  TFFlags_HasPopup = 1 << 0,           // Set if field is supposed to have its Popup
-  TFFlags_HasRelatedField = 1 << 1,    // Set if field data in Popup should be affected by related field
-  TFFlags_HasValidator = 1 << 2,       // Set if field is supposed to run validations
-  TFFlags_AllowDbPresence = 1 << 3,    // Set if found result in Database shouldn't result in error
+  TFFlags_None                = 0,        // 
+  TFFlags_HasPopup            = 1 << 0,   // Set if field is supposed to have its Popup
+  TFFlags_HasRelatedField     = 1 << 1,   // Set if field data in Popup should be affected by related field
+  TFFlags_HasValidator        = 1 << 2,   // Set if field is supposed to run validations
+  TFFlags_AllowDbPresence     = 1 << 3,   // Set if found result in Database shouldn't result in error
+  TFFlags_EmptyIsError        = 1 << 4,   // Empty buffer will set field to have en error if set
 };
 
 typedef int ValidatorFlags;
@@ -51,10 +54,13 @@ class TextField {
 public:
   TextField();
   TextField(const std::string& label, ImGuiInputTextFlags = 0, TFFlags = 0);
+  virtual ~TextField() {};
   int Render();
   void Field();
   virtual void Feedback();
+  //void FeedbackEx(const std::string args[5] = {});
   virtual void Validate();
+  void EmptyBufferError();
   const std::string& Get() const;
   const void Clear();
   void FillBuffer(const std::string& fill);

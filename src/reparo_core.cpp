@@ -1,4 +1,3 @@
-#pragma once
 #include "reparo_core.h"
 #include "imgui.h"
 #include "database.h"

@@ -1,4 +1,3 @@
-#pragma once
 #include "database.h"
 #include "debug.h"
 #include "models/customer.h"
@@ -745,7 +744,7 @@ Customer DBGet::Customer_(const T& _value) {
   Customer customer;
   T value = _value;
   Database::sql << "SELECT * FROM customers WHERE " << query,
-    soci::use(_value),
+    soci::use(value),
     soci::into(customer);
 
   int billing_addr_id = customer.billing_addresses.Get().ID();
@@ -791,9 +790,9 @@ Device DBGet::Device_(const T& _value){
     "LEFT JOIN device_types dt ON devices.type_id = dt.id "
     "LEFT JOIN brands b ON devices.brand_id = b.id " 
     "WHERE " << query,
-    soci::use(_value),
+    soci::use(value),
     soci::into(device);
-  Database::sql.close();
+  Database::sql.close();  
   return device;
 }
 

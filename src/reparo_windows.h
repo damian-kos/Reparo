@@ -11,7 +11,7 @@
 #include "models/customer.h"
 #include "models/supplier.h"
 
-class Brand;
+
 
 class CustomerWin {
 public:
@@ -87,7 +87,7 @@ private:
   TextField vis_note;
   TextField hid_note;
 
-  bool open = true;
+  //bool open = true; // use later
 };
 
 class  PartsWin {
@@ -100,6 +100,7 @@ class  PartsWin {
     void CompatibleEntriesBox();
     template <typename T>
     void ListEntriesInBox(float& last_btn, float window, std::unordered_map<int, T>& entries);
+    void Submit();
     void Filters();
     void LoadDevices();
   private:
@@ -152,7 +153,7 @@ inline void SimpleModelWin<T>::Render() {
   if (ImGui::BeginPopupModal(model.window_title.c_str(), &open)) {
     RoTable::SimpleModel<T>(values);
     name.Render();
-    ImGui::Text(_("Please right-click to edit or delete value"));
+    ImGui::Text("%s", _("Please right-click to edit or delete value"));
     if (ImGui::Button(_("Add"))) {
       model.name = name.Get();
       Database::Insert().OfSimpleModel(model);

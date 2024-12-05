@@ -2,7 +2,7 @@
 #include <string>
 #include <libintl.h>
 #include <locale.h>
-#include <libpq-fe.h>
+#include <cstdlib>
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -33,6 +33,7 @@ namespace Loc {
   void initLocalization();
   void renderUI();
 }
+
 class Localization {
 public:
   static Localization& getInstance() {
@@ -42,15 +43,15 @@ public:
 
   bool init(const std::string& domain, const std::string& localePath) {
 #ifdef _WIN32
-    // On Windows, we need to set the locale using native Windows API
-    // to properly handle UTF-8
+    // On Windows, set locale to UTF-8
     setlocale(LC_ALL, "");
     SetConsoleOutputCP(CP_UTF8);
 #else
-    // On Unix-like systems, this is simpler
+    // On Unix-like systems, simply set the locale
     setlocale(LC_ALL, "");
 #endif
 
+    // Bind text domain for localization
     bindtextdomain(domain.c_str(), localePath.c_str());
     bind_textdomain_codeset(domain.c_str(), "UTF-8");
     textdomain(domain.c_str());
@@ -61,16 +62,34 @@ public:
 
   bool switchLanguage(const std::string& locale) {
 #ifdef _WIN32
+    // Use _putenv_s for safer environment variable handling on Windows
     _putenv_s("LANGUAGE", locale.c_str());
 #else
+    // Use setenv on Unix-like systems
     setenv("LANGUAGE", locale.c_str(), 1);
 #endif
     return true;
   }
 
   std::string getCurrentLocale() const {
+#ifdef _WIN32
+    // Use _dupenv_s to safely get the environment variable on Windows
+    char* buffer = nullptr;
+    size_t bufferSize = 0;
+    errno_t err = _dupenv_s(&buffer, &bufferSize, "LANGUAGE");
+    if (err == 0 && buffer) {
+      std::string locale(buffer);
+      free(buffer);
+      return locale;
+    }
+    else {
+      return "eng";  // Default locale
+    }
+#else
+    // On Unix-like systems, use getenv
     const char* lang = getenv("LANGUAGE");
-    return lang ? lang : "eng";
+    return lang ? lang : "eng";  // Default to "eng" if not set
+#endif
   }
 
 private:
