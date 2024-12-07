@@ -111,8 +111,8 @@ class  PartsWin {
     OwnSKUField own_sku_field;
     SimpleModelField<Part> name_field;
     SimpleModelField<Color> color;
-    SimpleModelField<Quality> qualities;
-    SimpleModelField<Category> category;
+    RoCombo<Quality> quality;
+    RoCombo<Category> category;
     QueriedTextField location;
     Price buy_price;
     Price sell_price;

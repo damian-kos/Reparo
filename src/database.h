@@ -248,6 +248,7 @@ public:
 // After Selector class definition, add the implementation:
 template <typename T>
 inline Selector<T> Database::Select(const std::string& columns) {
+  std::cout << typeid(T).name() << std::endl;
   return Selector<T>(columns);
 }
 

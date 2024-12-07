@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-
+#include "imgui.h"
 
 class DeviceWin;
 
@@ -9,7 +9,8 @@ class RoCombo {
 public:
   //RoCombo();
   RoCombo(const std::string& label);
-  void Render();
+  void RenderFromBtn();
+  bool Render();
   T& Get();
   void SetLabel(const std::string& _label);
 private:
@@ -22,31 +23,39 @@ inline RoCombo<T>::RoCombo(const std::string& label) : label(label) {
 }
 
 template<typename T>
-inline void RoCombo<T>::Render() {
-  static std::string _choice;
-  label = _choice.empty() ? label : _choice;
+inline void RoCombo<T>::RenderFromBtn() {
+  std::string _btn;
+  _btn = model.name.empty() ? label : model.name;
   ImGui::PushID(typeid(T).name());
-  ImGui::Button(label.c_str());
-  if (ImGui::BeginPopupContextItem(typeid(T).name(), ImGuiPopupFlags_MouseButtonLeft)) {
-    static std::vector<T> _choices = Database::Select<T>().From().All();
-    static int _sel = 0;
+  if (ImGui::Button(_btn.c_str()))
+    ImGui::OpenPopup(typeid(T).name());
 
-    if (ImGui::BeginCombo(label.c_str(), _choices[_sel].name.c_str())) {
-      for (size_t i = 0; i < _choices.size(); ++i) {
-        const bool _is_sel = (_sel == i);
-        if (ImGui::Selectable(_choices[i].name.c_str(), _is_sel)) {
-          _sel = i;
-          _choice = _choices[i].name;
-          model = _choices[i];
-        }
-        if (_is_sel)
-          ImGui::SetItemDefaultFocus();
-      }
-      ImGui::EndCombo();
-    }
+  if (ImGui::BeginPopup(typeid(T).name())) {
+    if(Render())
+      ImGui::CloseCurrentPopup();
+    
     ImGui::EndPopup();
   }
+
   ImGui::PopID();
+}
+
+template <typename T> inline bool RoCombo<T>::Render() {
+  static std::vector<T> _choices = Database::Select<T>().From().All();
+  static int _sel = 0;
+  bool _set = false;
+  if (ImGui::BeginCombo(label.c_str(), _choices[_sel].name.c_str())) {
+    for (size_t i = 0; i < _choices.size(); ++i) {
+      const bool _is_sel = (_sel == i);
+      if (ImGui::Selectable(_choices[i].name.c_str(), _is_sel)) {
+        _sel = i;
+        model = _choices[i];
+        _set = true;
+      }
+    }
+    ImGui::EndCombo();
+  }
+  return _set;
 }
 
 template<typename T>

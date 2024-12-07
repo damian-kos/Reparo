@@ -184,10 +184,10 @@ void DeviceWin::Render() {
       DeviceName();
 
       ImGui::TableNextColumn();
-      type_combo.Render();
+      type_combo.RenderFromBtn();
 
       ImGui::TableNextColumn();
-      brand_combo.Render();
+      brand_combo.RenderFromBtn();
 
       ImGui::TableNextColumn();
       colors.Render();
@@ -382,8 +382,8 @@ PartsWin::PartsWin()
 , own_sku_field(_("Own SKU"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError)
 , name_field(_("Item's name"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError, "name")
 , color(_("Color"), 0, TFFlags_HasPopup)
-, qualities(_("Quality"), 0, TFFlags_HasPopup)
-, category(_("Category"), 0, TFFlags_HasPopup)
+, quality(_("Choose quality"))
+, category(_("Choose category"))
 , location(_("Location"), 0, TFFlags_HasPopup, "location", "parts", "location")
 , device_filter(_("Device's model"), 0, TFFlags_HasPopup, "model", "devices", "model")
 , brand_filter(_("Brand"), 0, TFFlags_HasPopup)
@@ -407,14 +407,14 @@ void PartsWin::Render() {
       supplier.Render();
       own_sku_field.Render();
       name_field.Render();
-      PriceSection("buy", buy_price);
+      PriceSection("purchase", purch_price);
       PriceSection("sell", sell_price);
       QuantitySection();
 
       ImGui::TableNextColumn();
 
       color.Render();
-      qualities.Render();
+      quality.Render();
       category.Render();
       location.Render();
       CompatibleEntriesBox();
@@ -446,10 +446,10 @@ void PartsWin::PriceSection(const std::string& _action, Price& _price) {
   std::string label_1;
   std::string label_2;
   std::string label_3;
-  if (_action == "buy") {
-    separator = _("BUY PRICING");
-    label_1 = _("Buy price (inc. VAT)");
-    label_2 = _("Ex.VAT buy price");
+  if (_action == "purchase") {
+    separator = _("PURCHASE PRICING");
+    label_1 = _("Purchase price (inc. VAT)");
+    label_2 = _("Ex.VAT purchase price");
     label_3 = _("Price ex.VAT: % .2f");
   }
   if (_action == "sell") {
@@ -531,7 +531,19 @@ void PartsWin::ListEntriesInBox(float& _last_btn, float _window, std::unordered_
 
 void PartsWin::Submit() {
   if (ImGui::ColorButtonEx(_("Submit"), 0.2f, error)) {
-
+    Part part;
+    part.name = name_field.Get();
+    part.own_sku = own_sku_field.Get();
+    part.quality = quality.Get();
+    part.sell_price = sell_price.amount;
+    part.sell_price_ex_vat = sell_price.ExVat();
+    part.color = color.GetFromDb();
+    part.quantity = quantity;
+    part.purch_price = purch_price.amount;
+    part.purch_price_ex_vat = purch_price.ExVat();
+    part.location = location.Get();
+    part.reserved_quantity = 0;
+    
   }
 }
 
@@ -546,7 +558,7 @@ void PartsWin::Filters() {
   }
 }
 
-void PartsWin::LoadDevices() {
+void PartsWin::LoadDevices() { // edit so we won't be looping through devices to get aliases and reduce database calls;
     devices.clear();
 
     std::string brand_id_str = "";
