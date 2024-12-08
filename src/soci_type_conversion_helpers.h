@@ -286,6 +286,29 @@ namespace soci {
       ind = i_ok;
     }
   };
+
+  template <>
+  struct type_conversion<CustomDevice> {
+    typedef values base_type;
+
+    static void from_base(const values& v, indicator ind, CustomDevice& model) {
+      if (ind == i_null) {
+        throw std::runtime_error("Null value fetched from database");
+      }
+      model.id = v.get<int>("id");
+      model.name = v.get<std::string>("model");
+      model.color.name  = v.get<std::string>("color");
+      if (v.get_number_of_columns() > 3)
+        model.color.id = v.get<int>("color_id", -1);
+    }
+
+    static void to_base(const CustomDevice& model, values& v, indicator& ind) {
+      v.set("id", model.id);
+      v.set("model", model.name);
+      v.set("color", model.color.name);
+      ind = i_ok;
+    }
+  };
 }
 
 

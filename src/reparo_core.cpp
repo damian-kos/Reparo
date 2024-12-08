@@ -20,6 +20,7 @@ void ReparoCore::Render() {
   device_win.Render();
   repair_win.Render();
   parts_win.Render();
+  custom_device_win.Render();
   if (modals.RenderModal() != ModalCallback_None) {
     modals.Notify();
   }

@@ -23,6 +23,7 @@ private:
   SimpleModelWin<RepairState> repair_states_win;
   SimpleModelWin<PaymentMethod> payments_win;
   PartsWin parts_win;
+  CustomDeviceWin custom_device_win;
   ModalManager modals;
   void Update() override;
 

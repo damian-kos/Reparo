@@ -11,8 +11,6 @@
 #include "models/customer.h"
 #include "models/supplier.h"
 
-
-
 class CustomerWin {
 public:
   CustomerWin();
@@ -126,6 +124,17 @@ class  PartsWin {
     std::unordered_map<int, Alias> cmptble_aliases;
     bool open = true;
     bool error = true;
+};
+
+class CustomDeviceWin {
+public:
+  CustomDeviceWin();
+  void Render();
+
+  bool error = true;
+private:
+  std::vector<CustomDevice> devices;
+  bool open = true;
 };
 
 template <typename T>

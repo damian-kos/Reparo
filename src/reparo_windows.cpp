@@ -594,3 +594,27 @@ void PartsWin::LoadDevices() { // edit so we won't be looping through devices to
 void PartsWin::FieldsValidate() {
   error = own_sku_field.error || name_field.error;
 }
+
+CustomDeviceWin::CustomDeviceWin() { 
+  devices = Database::Select<CustomDevice>("cd.*, c.id AS color_id")
+    .From("custom_devices cd")
+    .LeftJoin("colors c")
+    .On("cd.color = c.color")
+    .All();
+}
+
+void CustomDeviceWin::Render(){
+  if (ImGui::Button(_("Custom devices"))) {
+    open = true;
+    ImGui::OpenPopup(_("Change custom device to device"));
+  }
+  if (ImGui::BeginPopupModal(_("Change custom device to device"), &open)) {
+    if (ImGui::BeginTable("split2", 2, ImGuiTableFlags_SizingStretchProp)) {
+
+      ImGui::EndTable();
+    }
+    
+    ImGui::EndPopup();
+  }
+}
+

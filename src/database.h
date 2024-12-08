@@ -194,6 +194,10 @@ public:
       sql << " LEFT JOIN " << join;
       return *this;
     }
+    Selector& On(const std::string& _on) {
+      sql << " ON " << _on;
+      return *this;
+    }
 
     std::vector<T> All() {
         std::vector<T> results;
