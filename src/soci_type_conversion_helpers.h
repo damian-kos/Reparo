@@ -245,6 +245,7 @@ namespace soci {
       model.name = v.get<std::string>("name");
       model.own_sku = v.get<std::string>("own_sku");
       model.quality.id = v.get<int>("quality_id", -1);
+      model.category.id = v.get<int>("category_id", -1);
       model.sell_price = v.get<double>("sell_price", 0);
       model.sell_price_ex_vat = v.get<double>("sell_price_ex_vat", 0.0);
       model.color.id = v.get<int>("color_id", -1);
@@ -270,9 +271,10 @@ namespace soci {
       v.set("name", model.name);
       v.set("own_sku", model.own_sku);
       v.set("quality_id", model.quality.id);
+      v.set("category_id", model.category.id);
       v.set("sell_price", model.sell_price);
       v.set("sell_price_ex_vat", model.sell_price_ex_vat);
-      v.set("color_id", model.quality.id);
+      v.set("color_id", model.color.id);
       v.set("quantity", model.quantity);
       v.set("purch_price", model.purch_price);
       v.set("purch_price_ex_vat", model.purch_price_ex_vat);

@@ -48,6 +48,7 @@ bool Database::Execute(const std::string& _sql) {
 bool Database::ExecuteTransaction(const std::string& _sql) {
   try {
     soci::transaction tran(sql);
+    sql << "PRAGMA foreign_keys = ON";
     sql << _sql;
 
     tran.commit();
@@ -355,6 +356,7 @@ TableCreator& TableCreator::PartsTable() {
       name                TEXT NOT NULL,
       own_sku             TEXT NOT NULL UNIQUE,
       quality_id          INTEGER,
+      category_id         INTEGER,
       sell_price          REAL,
       sell_price_ex_vat   REAL,
       color_id            INTEGER,
@@ -368,6 +370,11 @@ TableCreator& TableCreator::PartsTable() {
 
       FOREIGN KEY (quality_id)
         REFERENCES qualities(id)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE, 
+
+      FOREIGN KEY (category_id)
+        REFERENCES repair_categories(id)
         ON DELETE SET NULL
         ON UPDATE CASCADE, 
      
@@ -623,11 +630,14 @@ TableCreator& TableCreator::PartModelTable() {
       model_id            INTEGER NOT NULL,
 
       FOREIGN KEY (part_id)
-          REFERENCES parts(id),
+        REFERENCES parts(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
 
       FOREIGN KEY (model_id)
-          REFERENCES devices(id)
-          ON UPDATE CASCADE
+        REFERENCES devices(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
     );
   )";
   Database::ExecuteTransaction(_sql);
@@ -641,11 +651,14 @@ TableCreator& TableCreator::PartModelAliasTable() {
       alias_id            INTEGER NOT NULL,
 
       FOREIGN KEY (part_id)
-          REFERENCES parts(id),
+        REFERENCES parts(id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
 
       FOREIGN KEY (alias_id)
-          REFERENCES aliases(id)
-          ON UPDATE CASCADE
+        REFERENCES aliases(id)
+        ON DELETE CASCADE        
+        ON UPDATE CASCADE
     );
   )";
   Database::ExecuteTransaction(_sql);
@@ -707,6 +720,8 @@ Inserter& Inserter::Device_(Device& device) {
 }
 
 Inserter& Inserter::Repair_(Repair& repair) {
+  // We call set of queries from Query namespace to make sure it is all being 
+  // run withing one transaction 
   return ExecuteTransaction(
     [&repair]() {
     
@@ -737,19 +752,38 @@ Inserter& Inserter::Part_(Part& part) {
       [&part]() {
         Part p = part;
 
-        if (part.id < 0) {
+        if (p.id < 0) {
           Database::sql << R"(INSERT INTO parts (name, own_sku, 
-            quality_id, sell_price, sell_price_ex_vat, color_id, 
+            quality_id, category_id, sell_price, sell_price_ex_vat, color_id, 
             quantity, purch_price, purch_price_ex_vat, location) 
             VALUES (:name, :own_sku, 
-            :quality_id, :sell_price, :sell_price_ex_vat, :color_id, 
+            :quality_id, :category_id, :sell_price, :sell_price_ex_vat, :color_id, 
             :quantity, :purch_price, :purch_price_ex_vat, :location) 
             RETURNING id)",
            soci::use(p), soci::into(part.id);
         }
+
+        if (!p.cmptble_devices.empty()) {
+          for (auto& [key, value] : p.cmptble_devices) {
+            Database::sql << R"(INSERT INTO part_model (part_id, model_id)
+            VALUES (:part_id, :model_id))",
+              soci::use(part.id),
+              soci::use(value.id);
+          }
+        }
+
+        if (!p.cmptble_aliases.empty()) {
+          for (auto& [key, value] : p.cmptble_aliases) {
+            Database::sql << R"(INSERT INTO part_model_alias (part_id, alias_id)
+        VALUES (:part_id, :alias_id))",
+              soci::use(part.id),
+              soci::use(value.id);
+          }
+        }
+
       },
-      "Part insertion (part name: " + part.name + ")");
-      
+      "Part insertion (part name: " + part.name + ")"
+  );     
 }
 
 template<typename T>
