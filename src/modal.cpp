@@ -79,3 +79,17 @@ bool RepairModal::ModalContents() {
   }
   return action;
 }
+
+bool PartModal::ModalContents() { 
+  bool action = false;
+  part.View();
+  if (ImGui::Button("Confirm")) {
+    action = true;
+    part.InsertToDb();
+    ImGui::CloseCurrentPopup();
+  }
+  if (ImGui::Button("Cancel")) {
+    ImGui::CloseCurrentPopup();
+  }
+  return action;
+}

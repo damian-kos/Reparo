@@ -3,6 +3,7 @@
 #include <string>
 #include <imgui.h>
 #include "models/customer.h"
+#include "models/parts.h"
 #include <functional>
 #include "RoLocalization.h"
 #include "database.h"
@@ -29,7 +30,6 @@ public:
 private:
   ModalCallback callback = ModalCallback_None;
 };
-
 
 // Customer modal builder
 template <typename T>
@@ -93,6 +93,16 @@ private:
   Customer customer;
 };
 
+class PartModal : public BaseModal {
+ public:
+    PartModal(const Part& _part, ModalConfig& _config)
+    : BaseModal(_config), part(_part)  {}
+
+     bool ModalContents() override;
+
+ private:
+  Part part;
+};
 
 /// <summary>
 /// ModalManager is running in reparo_core. If we want to use modal in modal use StackModalManager within Model's Render() methods.

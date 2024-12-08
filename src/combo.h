@@ -15,11 +15,15 @@ public:
   void SetLabel(const std::string& _label);
 private:
   T model;
+  std::vector<T> models;
   std::string label;
 };
 
 template<typename T>
 inline RoCombo<T>::RoCombo(const std::string& label) : label(label) {
+  models = Database::Select<T>().From().All();
+  if(!models.empty())
+    model = models[0];
 }
 
 template<typename T>
@@ -41,15 +45,14 @@ inline void RoCombo<T>::RenderFromBtn() {
 }
 
 template <typename T> inline bool RoCombo<T>::Render() {
-  static std::vector<T> _choices = Database::Select<T>().From().All();
   static int _sel = 0;
   bool _set = false;
-  if (ImGui::BeginCombo(label.c_str(), _choices[_sel].name.c_str())) {
-    for (size_t i = 0; i < _choices.size(); ++i) {
+  if (ImGui::BeginCombo(label.c_str(), models[_sel].name.c_str())) {
+    for (size_t i = 0; i < models.size(); ++i) {
       const bool _is_sel = (_sel == i);
-      if (ImGui::Selectable(_choices[i].name.c_str(), _is_sel)) {
+      if (ImGui::Selectable(models[i].name.c_str(), _is_sel)) {
         _sel = i;
-        model = _choices[i];
+        model = models[i];
         _set = true;
       }
     }

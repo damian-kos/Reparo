@@ -25,7 +25,7 @@ enum TFFlags_ {
   TFFlags_None                = 0,        // 
   TFFlags_HasPopup            = 1 << 0,   // Set if field is supposed to have its Popup
   TFFlags_HasRelatedField     = 1 << 1,   // Set if field data in Popup should be affected by related field
-  TFFlags_HasValidator        = 1 << 2,   // Set if field is supposed to run validations
+  TFFlags_HasLenValidator     = 1 << 2,   // Set if field is supposed to run validation on buffer length
   TFFlags_AllowDbPresence     = 1 << 3,   // Set if found result in Database shouldn't result in error
   TFFlags_EmptyIsError        = 1 << 4,   // Empty buffer will set field to have en error if set
 };

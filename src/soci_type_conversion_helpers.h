@@ -276,7 +276,7 @@ namespace soci {
       v.set("quantity", model.quantity);
       v.set("purch_price", model.purch_price);
       v.set("purch_price_ex_vat", model.purch_price_ex_vat);
-      v.set("location", model.location);
+      v.set("location", model.location, model.location.empty() ? i_null : i_ok);
       v.set("reserved_quantity", model.reserved_quantity);
       v.set("created_at", model.created_at);
       v.set("updated_at", model.updated_at);

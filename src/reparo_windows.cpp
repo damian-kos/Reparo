@@ -380,12 +380,12 @@ Device RepairWin::CreateDevice() {
 PartsWin::PartsWin()
 : supplier(_("Supplier"), 0, TFFlags_HasPopup)
 , own_sku_field(_("Own SKU"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError)
-, name_field(_("Item's name"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError, "name")
+, name_field(_("Item's name"), 0, TFFlags_HasPopup | TFFlags_HasLenValidator | TFFlags_EmptyIsError, "DISTINCT name", "parts", "name")
 , color(_("Color"), 0, TFFlags_HasPopup)
 , quality(_("Choose quality"))
 , category(_("Choose category"))
-, location(_("Location"), 0, TFFlags_HasPopup, "location", "parts", "location")
-, device_filter(_("Device's model"), 0, TFFlags_HasPopup, "model", "devices", "model")
+, location(_("Location"), 0, TFFlags_HasPopup, "DISTINCT location", "parts", "location")
+, device_filter(_("Device's model"), 0, TFFlags_HasPopup, "DISTINCT model", "devices", "model")
 , brand_filter(_("Brand"), 0, TFFlags_HasPopup)
 , device_type_filter(_("Device type"), 0, TFFlags_HasPopup)
 
@@ -535,6 +535,7 @@ void PartsWin::Submit() {
     part.name = name_field.Get();
     part.own_sku = own_sku_field.Get();
     part.quality = quality.Get();
+    part.category = category.Get();
     part.sell_price = sell_price.amount;
     part.sell_price_ex_vat = sell_price.ExVat();
     part.color = color.GetFromDb();
@@ -543,7 +544,12 @@ void PartsWin::Submit() {
     part.purch_price_ex_vat = purch_price.ExVat();
     part.location = location.Get();
     part.reserved_quantity = 0;
-    
+    part.cmptble_devices = std::move(cmptble_devices);
+    part.cmptble_aliases = std::move(cmptble_aliases);
+    ModalConfig config;
+    config.Title(_("Insert new item?"));
+    PartModal modal(part, config);
+    ModalManager::SetModal(modal);
   }
 }
 

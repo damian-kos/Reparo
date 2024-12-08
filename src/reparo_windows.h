@@ -109,12 +109,12 @@ class  PartsWin {
     // Main insert input fields
     SimpleModelField<Supplier> supplier;
     OwnSKUField own_sku_field;
-    SimpleModelField<Part> name_field;
+    QueriedTextField name_field;
     SimpleModelField<Color> color;
     RoCombo<Quality> quality;
     RoCombo<Category> category;
     QueriedTextField location;
-    Price buy_price;
+    Price purch_price;
     Price sell_price;
     int quantity = 0;
     // Filter field

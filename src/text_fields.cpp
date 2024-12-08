@@ -566,6 +566,11 @@ void QueriedTextField::Render() {
 }
 
 void QueriedTextField::Validate() {
+  err_flags = ValidatorFlags_Pass;  // Reset flags
+  if (ro_flags & TFFlags_HasLenValidator)
+    err_flags |= Validator::StrLen(buffer, 3);
+  error = err_flags & ValidatorFlags_StrLen;
+  EmptyBufferError();
 }
 
 void QueriedTextField::Feedback() {
