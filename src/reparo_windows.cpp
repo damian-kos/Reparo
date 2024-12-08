@@ -549,8 +549,10 @@ void PartsWin::Submit() {
     ModalConfig config;
     config.Title(_("Insert new item?"));
     PartModal modal(part, config);
-    ModalManager::SetModal(modal);
+    StackModal::SetModal(modal);
   }
+  // Since we are running this window as modal, we use StackModal
+  StackModal::RenderModal();
 }
 
 void PartsWin::Filters() {
