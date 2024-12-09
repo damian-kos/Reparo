@@ -29,34 +29,16 @@ inline void RoTable::SimpleModel(std::vector<T>& models) {
     ImGui::TableHeadersRow();
     ImGui::TableNextRow();
     for (auto& model : models) {
-      static int selected = -1;
-      const bool is_selected = (selected == model.id);
 
       ImGui::TableNextColumn();
       char label[32];
       sprintf_s(label, "%d", model.id);
-      if (ImGui::Selectable(label, is_selected, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_DontClosePopups)) {
-      }
-
+      if (ImGui::Selectable(label, false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_DontClosePopups));
       if (ImGui::BeginPopupContextItem()) {
-        // This modal builder is here so we can have access to specific records without returning them
-        // Figure out how to put them in SimpleModalWin
-        if (ImGui::Button(_("Edit record"))) {
-          ModalConfig config;
-          config.Title(_("Edit this record?"))
-            .Msg(_("All the elements with this record will be changed as well."));
-          SimpleModelModal<T> modal(model, config);
-          StackModal::SetModal(modal);
-        }
-        // This modal builder is here so we can have access to specific records without returning them
-        // Figure out how to put them in SimpleModalWin
-        if (ImGui::Button("Delete")) {
-          ModalConfig config;
-          config.Title(_("Delete this record?"))
-            .Msg(_("Are you sure? All records which are including this record will be set to Unknown."));
-          SimpleModelModal<T> modal(model, config);
-          StackModal::SetModal(modal);
-        }
+
+        model.EditModal();
+        model.DeleteModal();
+
         ImGui::EndPopup();
       }
       ImGui::TableNextColumn();

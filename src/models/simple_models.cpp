@@ -2,12 +2,15 @@
 #include "../../src/text_fields.h"
 #include "../../src/database.h"
 
+#include "../../src/modal.h"
+#include "../../src/RoLocalization.h"
 // We have these methods here because of the problem of circular dependency of header files
 
 template<typename Derived>
 const std::string SimpleModel<Derived>::ToString() const {
   return std::to_string(id) + " | " + name;
 }
+
 
 template <typename Derived>
 void SimpleModel<Derived>::UpdateInDb() {
@@ -20,6 +23,17 @@ void SimpleModel<Derived>::DeleteInDb() {
 }
 
 template<typename Derived>
+void SimpleModel<Derived>::EditModal() {
+  if (ImGui::Button(_("Edit record"))) {
+    ModalConfig config;
+    config.Title(_("Edit this record?"))
+      .Msg(_("All the elements with this record will be changed as well."));
+    SimpleModelModal modal(*this, config);
+    StackModal::SetModal(modal);
+  }
+}
+
+template<typename Derived>
 bool SimpleModel<Derived>::Edit() {
   bool action = false;
   static TextField field;
@@ -28,6 +42,28 @@ bool SimpleModel<Derived>::Edit() {
     action = true;
     name = field.Get();
     UpdateInDb();
+    ImGui::CloseCurrentPopup();
+  }
+  return action;
+}
+
+template<typename Derived>
+void SimpleModel<Derived>::DeleteModal() {
+  if (ImGui::Button("Delete")) {
+    ModalConfig config;
+    config.Title(_("Delete this record?"))
+      .Msg(_("Are you sure? All records which are including this record will be set to Unknown."));
+    SimpleModelModal modal(*this, config);
+    StackModal::SetModal(modal);
+  }
+}
+
+template<typename Derived>
+bool SimpleModel<Derived>::Delete() {
+  bool action = false;
+  if (ImGui::Button("Confirm")) {
+    action = true;
+    DeleteInDb();
     ImGui::CloseCurrentPopup();
   }
   return action;

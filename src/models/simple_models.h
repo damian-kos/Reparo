@@ -40,7 +40,9 @@ public:
   const std::string ToString() const;
   void UpdateInDb();
   void DeleteInDb();
+  void EditModal();
   bool Edit();
+  void DeleteModal();
   bool Delete();
 
 };
@@ -94,17 +96,6 @@ struct Color : SimpleModel<Color> {
   static inline const std::string column = "color";
   static inline const std::string window_title = "Colors";
 };
-
-template<typename Derived>
-inline bool SimpleModel<Derived>::Delete() {
-  bool action = false;
-  if (ImGui::Button("Confirm")) {
-    action = true;
-    DeleteInDb();
-    ImGui::CloseCurrentPopup();
-  }
-  return action;
-}
 
 struct Price {
   /// <summary>
