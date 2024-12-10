@@ -2,14 +2,13 @@
 #include <unordered_map>
 #include "text_fields.h"
 #include "models/simple_models.h"
-#include "RoLocalization.h"
-#include "tables.h"
 #include "database.h"
 #include "combo.h"
 #include "attributes.h"
-#include "modal.h"
 #include "models/customer.h"
 #include "models/supplier.h"
+
+class StackModal;
 
 class CustomerWin {
 public:
@@ -42,6 +41,7 @@ class DeviceWin {
 public:
   DeviceWin();
   DeviceWin(CustomDevice _custom);
+  ~DeviceWin();
   void Init();
   void Render();
   void DeviceName();
@@ -156,26 +156,6 @@ private:
 template<typename T>
 inline SimpleModelWin<T>::SimpleModelWin() {
   LoadData();
-}
-
-template<typename T>
-inline void SimpleModelWin<T>::Render() {
-  if(ImGui::Button(model.column.c_str())){
-    open = true;
-    ImGui::OpenPopup(model.window_title.c_str());
-  }
-  if (ImGui::BeginPopupModal(model.window_title.c_str(), &open)) {
-    RoTable::SimpleModel<T>(values);
-    name.Render();
-    ImGui::Text("%s", _("Please right-click to edit or delete value"));
-    if (ImGui::Button(_("Add"))) {
-      model.name = name.Get();
-      Database::Insert().OfSimpleModel(model);
-      LoadData();
-    }
-    StackModal::RenderModal();
-    ImGui::EndPopup();
-  }
 }
 
 template<typename T>

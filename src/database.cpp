@@ -566,19 +566,6 @@ TableCreator& TableCreator::RepairsTable() {
 )";
   Database::ExecuteTransaction(_sql);
 
- // Database::OpenDb();
- // _sql = R"(
- //-- Trigger to create new custom device when new device is inserted in repair
- // CREATE TRIGGER IF NOT EXISTS create_new_custom_device
- //     AFTER INSERT ON repairs
- //     WHEN NEW.model_id IS NULL
- // BEGIN
- //     INSERT INTO custom_devices (model, color)
- //     VALUES (NEW.model, NEW.color);
- // END;
- //  
- // )";
- // Database::ExecuteTransaction(_sql);
   return *this;
 }
 

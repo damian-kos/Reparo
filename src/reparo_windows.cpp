@@ -6,6 +6,7 @@
 #include "database.h"
 #include "models/repair.h"
 #include "models/parts.h"
+#include "modal.h"
 
 CustomerWin::CustomerWin()
   : phone(_("Phone"), ImGuiInputTextFlags_CharsDecimal, TFFlags_HasPopup) { 
@@ -36,6 +37,9 @@ void CustomerWin::Init() {
 }
 
 void CustomerWin::Render() {
+  if (!open) 
+    return;
+
   ImGui::Begin(_("Insert Customer"), &open);
   ImGui::SeparatorColor(_("CUSTOMER"), error);
   Feedback();
@@ -159,6 +163,7 @@ DeviceWin::DeviceWin() {
 
 DeviceWin::DeviceWin(CustomDevice _custom) {
   Init();
+  open = true;
   name.FillBuffer(_custom.name);
   std::string _where = "cd.model = '" + _custom.name + "'";
   auto _device_colors = Database::Select<Color>("c.id, cd.color")
@@ -171,6 +176,10 @@ DeviceWin::DeviceWin(CustomDevice _custom) {
     colors.Insert(color.id, color.name);
 }
 
+DeviceWin::~DeviceWin() {
+  std::cout << "Device window destroyed" << std::endl;
+}
+
 void DeviceWin::Init() {
   name = DeviceField(_("Model"), 0);
   brand_combo = RoCombo<Brand>(_("Choose brand"));
@@ -178,11 +187,11 @@ void DeviceWin::Init() {
 }
 
 void DeviceWin::Render() { 
-// It is suppposed to be a modal window so change ImGui::Begin() to BeginPopupModal later on.
-  //if (ImGui::Button(_("Device"))) {
-    ImGui::OpenPopup(_("Insert new device"), ImGuiPopupFlags_NoReopen);
-    //open = true;
-  //}
+  if (!open)  
+    return;
+
+  ImGui::OpenPopup(_("Insert new device"));
+
   if (ImGui::BeginPopupModal(_("Insert new device"), &open)) {
 
     static ImGuiTableFlags _flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_BordersInnerV |
@@ -630,4 +639,32 @@ void CustomDeviceWin::Render(){
     ImGui::EndPopup();
   }
 }
+
+template<typename T>
+void SimpleModelWin<T>::Render() {
+  if (ImGui::Button(model.column.c_str())) {
+    open = true;
+    ImGui::OpenPopup(model.window_title.c_str());
+  }
+  if (ImGui::BeginPopupModal(model.window_title.c_str(), &open)) {
+    RoTable::SimpleModel<T>(values);
+    name.Render();
+    ImGui::Text("%s", _("Please right-click to edit or delete value"));
+    if (ImGui::Button(_("Add"))) {
+      model.name = name.Get();
+      Database::Insert().OfSimpleModel(model);
+      LoadData();
+    }
+    StackModal::RenderModal();
+    ImGui::EndPopup();
+  }
+}
+
+template class SimpleModelWin<Brand>;
+template class SimpleModelWin<RepairState>;
+template class SimpleModelWin<Category>;
+template class SimpleModelWin<PaymentMethod>;
+template class SimpleModelWin<DeviceType>;
+template class SimpleModelWin<Color>;
+template class SimpleModelWin<Quality>;
 

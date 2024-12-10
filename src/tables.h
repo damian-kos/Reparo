@@ -1,7 +1,6 @@
 #pragma once
 #include <vector>
 #include "text_fields.h"
-#include "modal.h"
 #include "models/device.h"
 
 class RoTable {
