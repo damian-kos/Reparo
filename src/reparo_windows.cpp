@@ -377,10 +377,7 @@ void RepairWin::Submit() {
     _repair.repair_state = Database::Get().SimpleModel_<int, RepairState>(2);
     _repair.cust_device_id = device.IsInDb() ? -1 : 1;
 
-    ModalConfig _config;
-    _config.Title(_("Insert new repair?"));
-    RepairModal _modal(_repair, _config);
-    ModalManager::SetModal(_modal);
+    _repair.InsertModal();
 
   }
   ImGui::EndDisabled();

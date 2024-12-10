@@ -19,5 +19,6 @@ public:
   static constexpr std::string_view table = "repairs";
   const std::string ToString() const;
   void View();
+  void InsertModal();
   void InsertToDb();
 };

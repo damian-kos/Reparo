@@ -472,7 +472,10 @@ void RelationalField<SM, R>::Feedback() {
 template<typename SM, typename R>
 SM RelationalField<SM, R>::GetFromDb() {
   if (buffer.empty()) { return SM(); }
-  return Database::Get().SimpleModel_<std::string, SM>(buffer);
+  SM _model = Database::Get().SimpleModel_<std::string, SM>(buffer);
+  if (_model.id < 0)
+    _model.name = buffer;
+  return _model;
 }
 
 template class RelationalField<Color, DeviceField>;

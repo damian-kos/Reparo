@@ -2,7 +2,6 @@
 #include "debug.h"
 #include "models/customer.h"
 #include "models/simple_models.h"
-#include "queries.h"
 
 
 soci::session Database::sql;
@@ -734,6 +733,10 @@ Inserter& Inserter::Repair_(Repair& repair) {
         Query::UpdateBillingAddress(repair.customer);
         Query::UpdateShippingAddress(repair.customer);
         Query::UpdateCustomer(repair.customer);
+      }
+
+      if (repair.color.id < 0) {
+        Query::InsertSimpleModel<Color>(repair.color);
       }
 
       if (repair.device.id < 0) {

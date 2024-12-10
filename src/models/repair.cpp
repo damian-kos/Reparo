@@ -1,9 +1,7 @@
 #include "repair.h"
 #include "../../src/RoLocalization.h"
 #include "../../src/database.h"
-//#include "repair.h"
-//
-//Repair::Repair() { }
+#include "../../src/modal.h"
 
 const std::string Repair::ToString() const {
   return std::to_string(id) 
@@ -32,6 +30,13 @@ void Repair::View() {
   ImGui::TextWrapped("State:              %s", repair_state.name.c_str());
   ImGui::TextWrapped("Price:              %.2f", price);
 
+}
+
+void Repair::InsertModal() {
+  ModalConfig _config;
+  _config.Title(_("Insert new repair?"));
+  RepairModal _modal(*this, _config);
+  ModalManager::SetModal(_modal);
 }
 
 void Repair::InsertToDb()  {

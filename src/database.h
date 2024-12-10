@@ -5,6 +5,8 @@
 #include <soci/sqlite3/soci-sqlite3.h>
 #include <sstream>
 #include <vector>
+#include "queries.h"
+
 
 class TableCreator;
 class Inserter;
@@ -261,16 +263,7 @@ template<typename T>
 inline Inserter& Inserter::OfSimpleModel(T& model) {
   return ExecuteTransaction(
     [&model]() {
-      int id = 0;
-      std::string column = " (" + model.column + ") ";
-      std::string value = "(:" + model.column + ")";
-      Database::sql << "INSERT INTO " << model.table << column
-      << "VALUES " << value << " RETURNING id",
-      soci::use(model.name)
-      , soci::into(id);
-
-      // Set the model's ID if needed
-      model.id = id;
+      Query::InsertSimpleModel(model);
     },
       "SimpleModel insertion (Simple Model Name: " + model.name + " Type: " + typeid(T).name() + ")"
     );

@@ -26,7 +26,7 @@ struct simple_type_conversion_helper {
 
   static void to_base(const T& model, soci::values& v, soci::indicator& ind) {
     v.set("id", model.id);
-    v.set("name", model.name);
+    v.set("name", model.name, model.name.empty() ? soci::i_null : soci::i_ok);
     ind = soci::i_ok;
   }
 };
