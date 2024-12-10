@@ -196,8 +196,8 @@ void DeviceWin::Render() {
 
   if (ImGui::BeginPopupModal(_("Insert new device"), &open)) {
 
-    static ImGuiTableFlags _flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_BordersInnerV |
-      ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_Reorderable;
+    static ImGuiTableFlags _flags =  ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingStretchProp |
+      ImGuiTableFlags_RowBg  | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Resizable;
 
     static std::vector<std::string> _col_names = { _("Model"), _("Type"), _("Brand"), _("Colors"), _("Aliases") };
 
@@ -241,8 +241,8 @@ void DeviceWin::Render() {
 }
 
 void DeviceWin::DeviceName() {
-  static std::string _model;
-  std::string _label = name.Get().empty() ? _("Add model") : name.Get();
+  static std::string _model = name.Get();
+  std::string _label = _model.empty() ? _("Add model") : _model;
   bool _focus = false;
   _focus = ImGui::Button(_label.c_str());
   if (ImGui::BeginPopupContextItem("Name edit", ImGuiPopupFlags_MouseButtonLeft)) {
@@ -257,7 +257,6 @@ void DeviceWin::DeviceName() {
     }
     ImGui::SameLine();
     if (ImGui::Button(_("Cancel"))) {
-      //name.Clear();
       ImGui::CloseCurrentPopup();
     }
     ImGui::EndPopup();

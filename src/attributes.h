@@ -60,7 +60,7 @@ inline void Attributes<T>::Render() {
     for (auto& _attr : attrs) {
       std::string name = _attr.name;
 
-      if (ImGui::BeginTable("Attrs", 2, ImGuiTableFlags_None, ImVec2(150, 20))) {
+      if (ImGui::BeginTable("Attrs", 2, ImGuiTableFlags_SizingFixedFit)) {
 
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
