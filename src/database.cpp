@@ -297,6 +297,19 @@ TableCreator& TableCreator::DevicesTable() {
     );
   )";
   Database::ExecuteTransaction(_sql);
+
+  Database::OpenDb();
+  std::string create_trigger_sql = R"(
+    CREATE TRIGGER IF NOT EXISTS delete_from_custom_devices
+    BEFORE INSERT ON devices
+    FOR EACH ROW
+    BEGIN
+      DELETE FROM custom_devices
+      WHERE model = NEW.model;
+    END;
+)";
+  Database::ExecuteTransaction(create_trigger_sql);
+
   return *this;
 }
 
@@ -553,19 +566,19 @@ TableCreator& TableCreator::RepairsTable() {
 )";
   Database::ExecuteTransaction(_sql);
 
-  Database::OpenDb();
-  _sql = R"(
- -- Trigger to create new custom device when new device is inserted in repair
-  CREATE TRIGGER IF NOT EXISTS create_new_custom_device
-      AFTER INSERT ON repairs
-      WHEN NEW.model_id IS NULL
-  BEGIN
-      INSERT INTO custom_device (model, brand, color)
-      VALUES (NEW.model, NEW.brand, NEW.color);
-  END;
-   
-  )";
-  Database::ExecuteTransaction(_sql);
+ // Database::OpenDb();
+ // _sql = R"(
+ //-- Trigger to create new custom device when new device is inserted in repair
+ // CREATE TRIGGER IF NOT EXISTS create_new_custom_device
+ //     AFTER INSERT ON repairs
+ //     WHEN NEW.model_id IS NULL
+ // BEGIN
+ //     INSERT INTO custom_devices (model, color)
+ //     VALUES (NEW.model, NEW.color);
+ // END;
+ //  
+ // )";
+ // Database::ExecuteTransaction(_sql);
   return *this;
 }
 

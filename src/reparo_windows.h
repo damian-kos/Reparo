@@ -41,6 +41,8 @@ private:
 class DeviceWin {
 public:
   DeviceWin();
+  DeviceWin(CustomDevice _custom);
+  void Init();
   void Render();
   void DeviceName();
   void FillDeviceByName(Device& autofill);

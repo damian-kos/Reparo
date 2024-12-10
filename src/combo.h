@@ -8,7 +8,7 @@ template <typename T>
 class RoCombo {
 public:
   //RoCombo();
-  RoCombo(const std::string& label);
+  RoCombo(const std::string& label = "Empty Combo");
   void RenderFromBtn();
   bool Render();
   T& Get();

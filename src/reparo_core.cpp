@@ -17,7 +17,7 @@ void ReparoCore::Render() {
   categories_win.Render();
   repair_states_win.Render();
   payments_win.Render();
-  device_win.Render();
+  //device_win.Render();
   repair_win.Render();
   parts_win.Render();
   custom_device_win.Render();

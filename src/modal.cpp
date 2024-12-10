@@ -1,4 +1,5 @@
 #include "modal.h"
+#include "reparo_windows.h"
 
 ModalConfig& ModalConfig::Title(const std::string& _title) {
   is_on = true;
@@ -92,4 +93,24 @@ bool PartModal::ModalContents() {
     ImGui::CloseCurrentPopup();
   }
   return action;
+}
+
+ModalCallback CustomDeviceModal::Render() {
+  auto callback = ModalCallback_None;
+  //static bool _control_open = true;
+  //if (_control_open)
+  /*  ImGui::OpenPopup(config.title.c_str(), ImGuiPopupFlags_NoReopen);
+  if (ImGui::BeginPopupModal(config.title.c_str(), &config.is_on)) {*/
+    static DeviceWin device_win(device);
+    device_win.Render();
+
+  //  ImGui::EndPopup();
+  //}
+  //  callback = ModalContents() ? ModalCallback_Customer : callback;
+
+  return callback;
+}
+
+bool CustomDeviceModal::ModalContents() {
+  return false;
 }

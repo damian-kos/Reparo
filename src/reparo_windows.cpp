@@ -153,19 +153,36 @@ Customer CustomerWin::GetCustomer() {
   
 }
 
-DeviceWin::DeviceWin() 
-  : name(_("Model"), 0, TFFlags_HasPopup)
-  , brand_combo(_("Choose brand"))
-  , type_combo(_("Choose type"))
-{
+DeviceWin::DeviceWin() {
+  Init();
+}
+
+DeviceWin::DeviceWin(CustomDevice _custom) {
+  Init();
+  name.FillBuffer(_custom.name);
+  std::string _where = "cd.model = '" + _custom.name + "'";
+  auto _device_colors = Database::Select<Color>("c.id, cd.color")
+    .From("custom_devices cd")
+    .LeftJoin("colors c")
+    .On("c.color = cd.color")
+    .Where(_where)
+    .All();
+  for (auto& color : _device_colors) 
+    colors.Insert(color.id, color.name);
+}
+
+void DeviceWin::Init() {
+  name = DeviceField(_("Model"), 0);
+  brand_combo = RoCombo<Brand>(_("Choose brand"));
+  type_combo = RoCombo<DeviceType>(_("Choose type"));
 }
 
 void DeviceWin::Render() { 
 // It is suppposed to be a modal window so change ImGui::Begin() to BeginPopupModal later on.
-  if (ImGui::Button(_("Device"))) {
-    ImGui::OpenPopup(_("Insert new device"));
-    open = true;
-  }
+  //if (ImGui::Button(_("Device"))) {
+    ImGui::OpenPopup(_("Insert new device"), ImGuiPopupFlags_NoReopen);
+    //open = true;
+  //}
   if (ImGui::BeginPopupModal(_("Insert new device"), &open)) {
 
     static ImGuiTableFlags _flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_BordersInnerV |
@@ -214,7 +231,7 @@ void DeviceWin::Render() {
 
 void DeviceWin::DeviceName() {
   static std::string _model;
-  std::string _label = _model.empty() ? _("Add model") : _model;
+  std::string _label = name.Get().empty() ? _("Add model") : name.Get();
   bool _focus = false;
   _focus = ImGui::Button(_label.c_str());
   if (ImGui::BeginPopupContextItem("Name edit", ImGuiPopupFlags_MouseButtonLeft)) {
@@ -229,7 +246,7 @@ void DeviceWin::DeviceName() {
     }
     ImGui::SameLine();
     if (ImGui::Button(_("Cancel"))) {
-      name.Clear();
+      //name.Clear();
       ImGui::CloseCurrentPopup();
     }
     ImGui::EndPopup();
@@ -596,10 +613,8 @@ void PartsWin::FieldsValidate() {
 }
 
 CustomDeviceWin::CustomDeviceWin() { 
-  devices = Database::Select<CustomDevice>("cd.*, c.id AS color_id")
-    .From("custom_devices cd")
-    .LeftJoin("colors c")
-    .On("cd.color = c.color")
+  devices = Database::Select<CustomDevice>("DISTINCT model")
+    .From()
     .All();
 }
 
@@ -609,11 +624,9 @@ void CustomDeviceWin::Render(){
     ImGui::OpenPopup(_("Change custom device to device"));
   }
   if (ImGui::BeginPopupModal(_("Change custom device to device"), &open)) {
-    if (ImGui::BeginTable("split2", 2, ImGuiTableFlags_SizingStretchProp)) {
 
-      ImGui::EndTable();
-    }
-    
+    RoTable::SimpleModel(devices);
+    StackModal::RenderModal();
     ImGui::EndPopup();
   }
 }

@@ -20,6 +20,8 @@ struct CustomDevice {
   int id = -1;
   std::string name;
   Color color;
+  void EditModal();
+  void DeleteModal();
   static constexpr std::string_view table = "custom_devices";
 
 };

@@ -1,7 +1,10 @@
 #pragma once
 #include <vector>
+#include "RoLocalization.h"
 
 class TextField;
+template <typename T>
+class SimpleModelField;
 
 template <typename T>
 class Attributes {
@@ -10,16 +13,18 @@ public:
   Attributes(const int& _id);
   void Render();
   std::vector<T>& Get();
-
+  void Insert(int _id, std::string _value);
 private:
-  TextField input;
+  //TextField input;
+  SimpleModelField<T> input;
   std::vector<T> attrs;
   bool loaded = false;
 };
 
 template<typename T>
-inline Attributes<T>::Attributes() { 
-  attrs = Database::Select<T>().From().All();
+inline Attributes<T>::Attributes() 
+  : input(_("Color"), 0, TFFlags_HasPopup) { 
+  //attrs = Database::Select<T>().From().All();
 }
 
 template<typename T>
@@ -78,9 +83,10 @@ inline void Attributes<T>::Render() {
   if (ImGui::BeginPopupContextItem("Attrs", ImGuiPopupFlags_MouseButtonLeft)) {
     input.Render();
     if (ImGui::Button(_("Save"))) {
-      T _new_attr{ 0, input.Get() };
-      attrs.emplace_back(_new_attr);
-      ;
+      Insert(0, input.Get());
+      //T _new_attr{ 0, input.Get() };
+      //attrs.emplace_back(_new_attr);
+      
     }
     ImGui::EndPopup();
   }
@@ -90,4 +96,10 @@ inline void Attributes<T>::Render() {
 template<typename T>
 inline std::vector<T>& Attributes<T>::Get() {
   return attrs;
+}
+
+template<typename T>
+inline void Attributes<T>::Insert(int _id, std::string _value) {
+  T _new_attr{ _id, _value };
+  attrs.emplace_back(_new_attr);
 }

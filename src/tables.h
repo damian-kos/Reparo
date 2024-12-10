@@ -28,12 +28,14 @@ inline void RoTable::SimpleModel(std::vector<T>& models) {
     ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_NoHide);
     ImGui::TableHeadersRow();
     ImGui::TableNextRow();
+    int i = 1;
     for (auto& model : models) {
 
       ImGui::TableNextColumn();
       char label[32];
-      sprintf_s(label, "%d", model.id);
-      if (ImGui::Selectable(label, false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_DontClosePopups));
+      int _id = model.id > 0 ? model.id : i;
+      sprintf_s(label, "%d", _id);
+      ImGui::Selectable(label, false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_DontClosePopups);
       if (ImGui::BeginPopupContextItem()) {
 
         model.EditModal();
@@ -43,6 +45,7 @@ inline void RoTable::SimpleModel(std::vector<T>& models) {
       }
       ImGui::TableNextColumn();
       ImGui::Text("%s", model.name.c_str());
+      ++i;
     }
   ImGui::EndTable();
   }

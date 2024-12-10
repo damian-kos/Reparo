@@ -4,6 +4,7 @@
 #include <imgui.h>
 #include "models/customer.h"
 #include "models/parts.h"
+#include "models/device.h"
 #include <functional>
 #include "RoLocalization.h"
 #include "database.h"
@@ -41,7 +42,6 @@ public:
 private:
   T model;
 };
-
 
 class BaseModal {
 public:
@@ -102,6 +102,19 @@ class PartModal : public BaseModal {
 
  private:
   Part part;
+};
+
+class CustomDeviceModal : public BaseModal {
+public:
+  CustomDeviceModal(const CustomDevice& _device, ModalConfig& _config)
+    : BaseModal(_config), device(_device) {
+  }
+
+  ModalCallback Render() override;
+  bool ModalContents() override;
+
+private:
+  CustomDevice device;
 };
 
 /// <summary>

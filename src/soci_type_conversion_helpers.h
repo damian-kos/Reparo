@@ -20,7 +20,7 @@ concept IsSimple = std::is_convertible_v<T&, SimpleModel<T>&>;
 template<IsSimple T>
 struct simple_type_conversion_helper {
   static void from_base(soci::values const& v, soci::indicator ind, T& model) {
-    model.id = v.get<int>("id");
+    model.id = v.get<int>("id", -1);
     model.name = v.get<std::string>(model.column);
   }
 
@@ -295,9 +295,11 @@ namespace soci {
       if (ind == i_null) {
         throw std::runtime_error("Null value fetched from database");
       }
-      model.id = v.get<int>("id");
+      if (v.get_number_of_columns() > 1)
+        model.id = v.get<int>("id");
       model.name = v.get<std::string>("model");
-      model.color.name  = v.get<std::string>("color");
+      if (v.get_number_of_columns() > 2)
+        model.color.name  = v.get<std::string>("color");
       if (v.get_number_of_columns() > 3)
         model.color.id = v.get<int>("color_id", -1);
     }
