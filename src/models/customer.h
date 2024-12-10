@@ -9,6 +9,7 @@ public:
   Customer& GetCustomer();
   void View();
   const std::string ToString() const;
+  void InsertModal();
   void InsertToDb();
 
   int id = -1;

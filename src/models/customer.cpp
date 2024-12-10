@@ -4,6 +4,7 @@
 #include "../../src/RoLocalization.h"
 #include "../../src/tables.h"
 #include "../../src/database.h"
+#include "../../src/modal.h"
 
 Customer::Customer() {}
 
@@ -27,6 +28,15 @@ void Customer::View() {
 
 const std::string Customer::ToString() const {
   return std::to_string(id) + " | " + phone + " | " + name + " | " + surname + " | " + email;
+}
+
+void Customer::InsertModal() {
+  ModalConfig config;
+  config.Title(_("Insert Customer?"))
+    .Msg(_("Are you sure?"));
+
+  CustomerModal modal(*this, config);
+  ModalManager::SetModal(modal);
 }
 
 void Customer::InsertToDb() {

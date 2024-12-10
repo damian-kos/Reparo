@@ -1,6 +1,6 @@
 #include "parts.h"
 #include "../../src/RoLocalization.h"
-#include "device.h"
+#include "../../src/modal.h"
 #include "../../src/database.h"
 #include "../../src/tables.h"
 
@@ -24,6 +24,13 @@ void Part::View() {
   ImGui::Text("%s:", _("Location       ")); ImGui::SameLine(); ImGui::Text("%s", location.c_str());
   RoTable::TableWrapped(cmptble_devices);
   RoTable::TableWrapped(cmptble_aliases);
+}
+
+void Part::InsertModal() {
+  ModalConfig _config;
+  _config.Title(_("Insert new item?"));
+  PartModal _modal(*this, _config);
+  StackModal::SetModal(_modal);
 }
 
 void Part::InsertToDb() { 

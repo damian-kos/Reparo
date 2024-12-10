@@ -29,6 +29,7 @@ public:
   static inline const std::string column = "own_sku";
 
   void View();
+  void InsertModal();
   void InsertToDb();
  
 private:

@@ -79,12 +79,9 @@ void CustomerWin::Submit() {
   ImGui::BeginDisabled(error);
   if (ImGui::Button(_("Submit Customer Details"))) {
     Customer customer = CreateCustomer();
-    ModalConfig config;
-    config.Title(_("Insert Customer?"))
-      .Msg(_("Are you sure?"));
 
-    CustomerModal modal(customer, config);
-    ModalManager::SetModal(modal);
+    customer.InsertModal();
+
   }
   ImGui::EndDisabled();
 
@@ -573,10 +570,9 @@ void PartsWin::Submit() {
     _part.reserved_quantity = 0;
     _part.cmptble_devices = std::move(cmptble_devices);
     _part.cmptble_aliases = std::move(cmptble_aliases);
-    ModalConfig _config;
-    _config.Title(_("Insert new item?"));
-    PartModal _modal(_part, _config);
-    StackModal::SetModal(_modal);
+
+    _part.InsertModal();
+
   }
   // Since we are running this window as modal, we use StackModal
   StackModal::RenderModal();
