@@ -7,9 +7,10 @@
 #include "models/repair.h"
 #include "models/parts.h"
 #include "modal.h"
+#include "tables.h"
 
 CustomerWin::CustomerWin()
-  : phone(_("Phone"), ImGuiInputTextFlags_CharsDecimal, TFFlags_HasPopup) { 
+  : phone(_("Phone"), ImGuiInputTextFlags_CharsDecimal, TFFlags_HasPopup | TFFlags_EmptyIsError) { 
   Init();
 }
 
@@ -19,9 +20,10 @@ CustomerWin::CustomerWin(TFFlags phoneFlags)
 }
 
 void CustomerWin::Init() {
-  name = NameField(_("Name"));
-  surname = SurnameField(_("Surname"));
-  email = EmailField(_("Email"));
+  open = true;
+  name = NameField(_("Name"), ImGuiBackendFlags_None, TFFlags_EmptyIsError);
+  surname = SurnameField(_("Surname"), ImGuiBackendFlags_None, TFFlags_EmptyIsError);
+  email = EmailField(_("Email"), ImGuiBackendFlags_None, TFFlags_EmptyIsError);
 
   billing_address.resize(5);
   ship_address.resize(5);

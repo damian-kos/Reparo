@@ -123,12 +123,10 @@ void TextField::Validate() {
 }
 
 void TextField::EmptyBufferError() {
-  if (ro_flags & TFFlags_EmptyIsError && buffer.empty()) {
+  if (ro_flags & TFFlags_EmptyIsError && buffer.empty())
     error = true;
-    has_error_with_content = error;
-  }
-  else
-    has_error_with_content = error && buffer.size() > 0;
+
+  has_error_with_content = error && buffer.size() > 0;
 }
 
 void TextField::FeedbackEx(std::initializer_list<std::string> args) {
