@@ -415,17 +415,20 @@ PartsWin::PartsWin()
 , device_filter(_("Device's model"), 0, TFFlags_HasPopup, "DISTINCT model", "devices", "model")
 , brand_filter(_("Brand"), 0, TFFlags_HasPopup)
 , device_type_filter(_("Device type"), 0, TFFlags_HasPopup)
-
 { }
 
 void PartsWin::Render() {
-  // Currently in ModalPopup, possible change later
-  // Also this content needs to be put in ImGui's table
-  if (ImGui::Button(_("Parts"))) {
-    open = true;
+  // Currently in BeginPopupModal, possible change later
+
+  if (ImGui::Button(_("Parts"))) { // this button will be moved to menu top bar
+    open = !open;
     LoadDevices();
     ImGui::OpenPopup(_("Insert part"));
   }
+
+  if (!open)
+    return;
+
   if (ImGui::BeginPopupModal(_("Insert part"), &open)) {
     if (ImGui::BeginTable("split2", 2, ImGuiTableFlags_SizingStretchProp)) {
       ImGui::TableNextRow();
@@ -469,30 +472,30 @@ void PartsWin::Feedback() {
 }
 
 void PartsWin::PriceSection(const std::string& _action, Price& _price) {
-  std::string separator;
-  std::string label_1;
-  std::string label_2;
-  std::string label_3;
+  std::string _separator;
+  std::string _label_1;
+  std::string _label_2;
+  std::string _label_3;
   if (_action == "purchase") {
-    separator = _("PURCHASE PRICING");
-    label_1 = _("Purchase price (inc. VAT)");
-    label_2 = _("Ex.VAT purchase price");
-    label_3 = _("Price ex.VAT: % .2f");
+    _separator = _("PURCHASE PRICING");
+    _label_1 = _("Purchase price (inc. VAT)");
+    _label_2 = _("Ex.VAT purchase price");
+    _label_3 = _("Price ex.VAT: % .2f");
   }
   if (_action == "sell") {
-    separator = _("SELL PRICING");
-    label_1 = _("Sell price (inc. VAT)");
-    label_2 = _("Ex.VAT sell price");
-    label_3 = _("Price ex.VAT: % .2f");
+    _separator = _("SELL PRICING");
+    _label_1 = _("Sell price (inc. VAT)");
+    _label_2 = _("Ex.VAT sell price");
+    _label_3 = _("Price ex.VAT: % .2f");
   }
   ImGui::PushID(_action.c_str());
   ImGui::BeginGroup();
   ImGui::PushItemWidth(100);
-  ImGui::SeparatorText(separator.c_str());
-  ImGui::InputDouble(label_1.c_str(), &_price.amount, 0.0f, 0.0f, "%.2f");
+  ImGui::SeparatorText(_separator.c_str());
+  ImGui::InputDouble(_label_1.c_str(), &_price.amount, 0.0f, 0.0f, "%.2f");
   ImGui::PopItemWidth();
   ImGui::SameLine();
-  ImGui::Checkbox(label_2.c_str(), &_price.ex_vat);
+  ImGui::Checkbox(_label_2.c_str(), &_price.ex_vat);
   ImGui::EndGroup();
 
   ImGui::BeginGroup();
@@ -502,7 +505,7 @@ void PartsWin::PriceSection(const std::string& _action, Price& _price) {
   ImGui::PopItemWidth();
   ImGui::SameLine();
   ImGui::EndDisabled();
-  ImGui::Text((label_3 + " %.2f").c_str(), _price.ExVat());
+  ImGui::Text((_label_3 + " %.2f").c_str(), _price.ExVat());
   ImGui::EndGroup();
   ImGui::PopID();
 }
@@ -516,17 +519,17 @@ void PartsWin::CompatibleTablePicker() {
 }
 
 void PartsWin::CompatibleEntriesBox() {
-  ImVec2 scrolling_child_size = ImVec2(0, ImGui::GetFrameHeightWithSpacing() * 3 + 30);
-  ImGui::BeginChild("scrolling", scrolling_child_size, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar);
-  ImGui::HelpMarker("Click to remove device from list of compatible devices.");
-  float window = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
-  float last_btn = ImGui::GetCursorPosX(); // Initialize with the starting cursor position of the window
+  ImVec2 _scrolling_child_size = ImVec2(0, ImGui::GetFrameHeightWithSpacing() * 3 + 30);
+  ImGui::BeginChild("scrolling", _scrolling_child_size, ImGuiChildFlags_Border, ImGuiWindowFlags_HorizontalScrollbar);
+  ImGui::HelpMarker(_("Click to remove device from list of compatible devices."));
+  float _window = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
+  float _last_btn = ImGui::GetCursorPosX(); // Initialize with the starting cursor position of the _window
 
   ImGui::SeparatorText(_("Devices"));
-  ListEntriesInBox<Device>(last_btn, window, cmptble_devices);
+  ListEntriesInBox<Device>(_last_btn, _window, cmptble_devices);
 
   ImGui::SeparatorText(_("Aliases"));
-  ListEntriesInBox<Alias>(last_btn, window, cmptble_aliases);
+  ListEntriesInBox<Alias>(_last_btn, _window, cmptble_aliases);
 
   ImGui::EndChild();
 }
@@ -558,25 +561,25 @@ void PartsWin::ListEntriesInBox(float& _last_btn, float _window, std::unordered_
 
 void PartsWin::Submit() {
   if (ImGui::ColorButtonEx(_("Submit"), 0.2f, error)) {
-    Part part;
-    part.name = name_field.Get();
-    part.own_sku = own_sku_field.Get();
-    part.quality = quality.Get();
-    part.category = category.Get();
-    part.sell_price = sell_price.amount;
-    part.sell_price_ex_vat = sell_price.ExVat();
-    part.color = color.GetFromDb();
-    part.quantity = quantity;
-    part.purch_price = purch_price.amount;
-    part.purch_price_ex_vat = purch_price.ExVat();
-    part.location = location.Get();
-    part.reserved_quantity = 0;
-    part.cmptble_devices = std::move(cmptble_devices);
-    part.cmptble_aliases = std::move(cmptble_aliases);
-    ModalConfig config;
-    config.Title(_("Insert new item?"));
-    PartModal modal(part, config);
-    StackModal::SetModal(modal);
+    Part _part;
+    _part.name = name_field.Get();
+    _part.own_sku = own_sku_field.Get();
+    _part.quality = quality.Get();
+    _part.category = category.Get();
+    _part.sell_price = sell_price.amount;
+    _part.sell_price_ex_vat = sell_price.ExVat();
+    _part.color = color.GetFromDb();
+    _part.quantity = quantity;
+    _part.purch_price = purch_price.amount;
+    _part.purch_price_ex_vat = purch_price.ExVat();
+    _part.location = location.Get();
+    _part.reserved_quantity = 0;
+    _part.cmptble_devices = std::move(cmptble_devices);
+    _part.cmptble_aliases = std::move(cmptble_aliases);
+    ModalConfig _config;
+    _config.Title(_("Insert new item?"));
+    PartModal _modal(_part, _config);
+    StackModal::SetModal(_modal);
   }
   // Since we are running this window as modal, we use StackModal
   StackModal::RenderModal();
@@ -596,19 +599,19 @@ void PartsWin::Filters() {
 void PartsWin::LoadDevices() { // edit so we won't be looping through devices to get aliases and reduce database calls;
     devices.clear();
 
-    std::string brand_id_str = "";
-    int brand_id = brand_filter.GetFromDb().id;
-    if (brand_id > 0)
-      brand_id_str = "brand_id = " + std::to_string(brand_id);
+    std::string _brand_id_str = "";
+    int _brand_id = brand_filter.GetFromDb().id;
+    if (_brand_id > 0)
+      _brand_id_str = "brand_id = " + std::to_string(_brand_id);
 
-    std::string type_id_str = "";
-    int type = device_type_filter.GetFromDb().id;
-    if (type > 0)
-      type_id_str = "type_id = " + std::to_string(type);
+    std::string _type_id_str = "";
+    int _type = device_type_filter.GetFromDb().id;
+    if (_type > 0)
+      _type_id_str = "type_id = " + std::to_string(_type);
 
     devices = Database::Select<Device>().From().Where("model").Like(device_filter.Get())
-      .And(brand_id_str)
-      .And(type_id_str)
+      .And(_brand_id_str)
+      .And(_type_id_str)
       .All();
 
   for (auto& device : devices) {
