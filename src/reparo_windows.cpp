@@ -272,14 +272,14 @@ void DeviceWin::FillDeviceByName(Device& autofill) {
 }
 
 RepairWin::RepairWin()
-  : customer_section(TFFlags_HasPopup | TFFlags_AllowDbPresence)
+  : customer_section(TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence)
   , price_can_be_zero(true)
-  , device(_("Model"), 0, TFFlags_HasPopup | TFFlags_AllowDbPresence)
-  , category(_("Category"), 0, TFFlags_HasPopup)
-  , color(_("Color"), 0, TFFlags_HasPopup)
-  , sn_imei(_("Serial / IMEI"))
-  , vis_note(_("Notes for customer"))
-  , hid_note(_("Notes hidden from customer"))
+  , device(_("Model"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence)
+  , category(_("Category"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError)
+  , color(_("Color"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError)
+  , sn_imei(_("Serial / IMEI"),0 , TFFlags_EmptyIsError)
+  , vis_note(_("Notes for customer"), 0, TFFlags_EmptyIsError)
+  , hid_note(_("Notes hidden from customer"), 0, TFFlags_EmptyIsError)
 {}
 
 void RepairWin::Render() {
@@ -364,23 +364,23 @@ void RepairWin::Submit() {
   ImGui::SeparatorColor(_("SUBMIT"), error);
   ImGui::BeginDisabled(error);
   if (ImGui::Button(_("Submit Repair"))) {
-    Repair repair;
-    repair.customer = customer_section.GetCustomer();
+    Repair _repair;
+    _repair.customer = customer_section.GetCustomer();
     // We can change database query below if we needed to get brand and type of the device
-    repair.device = CreateDevice();
-    repair.category = category.GetFromDb();
-    repair.color = color.GetFromDb();
-    repair.sn_imei = sn_imei.Get();
-    repair.vis_note = vis_note.Get();
-    repair.hid_note = hid_note.Get();
-    repair.price = price;
-    repair.repair_state = Database::Get().SimpleModel_<int, RepairState>(2);
-    repair.cust_device_id = device.IsInDb() ? -1 : 1;
+    _repair.device = CreateDevice();
+    _repair.category = category.GetFromDb();
+    _repair.color = color.GetFromDb();
+    _repair.sn_imei = sn_imei.Get();
+    _repair.vis_note = vis_note.Get();
+    _repair.hid_note = hid_note.Get();
+    _repair.price = price;
+    _repair.repair_state = Database::Get().SimpleModel_<int, RepairState>(2);
+    _repair.cust_device_id = device.IsInDb() ? -1 : 1;
 
-    ModalConfig config;
-    config.Title(_("Insert new repair?"));
-    RepairModal modal(repair, config);
-    ModalManager::SetModal(modal);
+    ModalConfig _config;
+    _config.Title(_("Insert new repair?"));
+    RepairModal _modal(_repair, _config);
+    ModalManager::SetModal(_modal);
 
   }
   ImGui::EndDisabled();
