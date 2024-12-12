@@ -4,6 +4,7 @@
 #include "reparo_windows.h"
 #include "modal.h"
 #include "observer.h"
+#include "views.h"
 
 class Database;
 class TableCreator;

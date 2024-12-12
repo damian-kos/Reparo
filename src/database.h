@@ -196,8 +196,14 @@ public:
       sql << " LEFT JOIN " << join;
       return *this;
     }
+
     Selector& On(const std::string& _on) {
       sql << " ON " << _on;
+      return *this;
+    }
+
+    Selector& GroupBy(const std::string& _group_by) {
+      sql << " GROUP BY " << _group_by;
       return *this;
     }
 

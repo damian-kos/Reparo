@@ -39,4 +39,10 @@ public:
   bool operator!=(const Customer& other) const {
     return !(*this == other);
   }
+
+  void SetRepairs(const int& _count);
+  bool HasRepairs() const;
+
+private:
+  bool has_repairs = false;
 };

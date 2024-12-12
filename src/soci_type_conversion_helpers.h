@@ -80,12 +80,16 @@ namespace soci {
       model.phone = v.get<std::string>("phone");
       model.name = v.get<std::string>("name");
       model.surname = v.get<std::string>("surname");
-      model.email = v.get<std::string>("email");      
+      model.email = v.get<std::string>("email");
       int billing_addr_id = v.get<int>("billing_addr_id", -1);
       model.billing_addresses.SetID(billing_addr_id);
       int ship_addr_id = v.get<int>("ship_addr_id", -1);
       model.ship_addresses.SetID(ship_addr_id);
 
+      if (v.get_number_of_columns() > 7) {
+        int _repair_count = std::stoi(v.get<std::string>("has_repairs"));
+        model.SetRepairs(_repair_count);
+      }
     }
 
     static void to_base(const Customer& model, values& v, indicator& ind) {
@@ -96,7 +100,6 @@ namespace soci {
       v.set("email", model.email);
       v.set("billing_addr_id", model.billing_addresses.Get().ID());
       v.set("ship_addr_id", model.ship_addresses.Get().ID());
-
 
       ind = i_ok;
     }

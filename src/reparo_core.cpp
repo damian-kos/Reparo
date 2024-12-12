@@ -27,6 +27,15 @@ void ReparoCore::Render() {
   if (modals.RenderModal() != ModalCallback_None) {
     modals.Notify();
   }
+  static std::vector<Customer> customers = Database::Select<Customer>("c.*, COUNT(repairs.id) AS has_repairs")
+    .From("customers c")
+    .LeftJoin("repairs")
+    .On("c.id = repairs.customer_id")
+    .GroupBy("c.id")
+    .All();
+
+  static CustomerView customer_view(customers);
+  customer_view.Render();
   //ModalManager::RenderModal();
 }
 

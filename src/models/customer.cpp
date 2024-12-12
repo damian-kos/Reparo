@@ -42,3 +42,14 @@ void Customer::InsertModal() {
 void Customer::InsertToDb() {
   Database::Insert().Customer_(*this);
 }
+
+void Customer::SetRepairs(const int& _count) {
+  if (_count > 0) 
+    has_repairs = true;
+  else
+    has_repairs = false;
+}
+
+bool Customer::HasRepairs() const {
+  return has_repairs;
+}
