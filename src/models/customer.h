@@ -3,6 +3,7 @@
 #include "address.h"
 
 
+
 class Customer{
 public:
   Customer();
@@ -11,6 +12,8 @@ public:
   const std::string ToString() const;
   void InsertModal();
   void InsertToDb();
+  void RemoveModal() const;
+  void RemoveFromDb();
 
   int id = -1;
   std::string phone;

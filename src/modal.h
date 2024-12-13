@@ -13,6 +13,13 @@
 
 class TextField;
 
+enum ModalEvent {
+  ModalEvent_None,
+  ModalEvent_Insert,
+  ModalEvent_Update,
+  ModalEvent_Remove,
+};
+
 enum ModalCallback {
   ModalCallback_None,
   ModalCallback_Customer,
@@ -60,7 +67,8 @@ protected:
 class RepairModal : public BaseModal {
 public:
   RepairModal(const Repair& _repair, ModalConfig& _config)
-    : BaseModal(_config), repair(_repair)  {}
+    : BaseModal(_config), repair(_repair) {
+  }
 
   bool ModalContents() override;
 
@@ -71,8 +79,9 @@ private:
 template <typename T>
 class SimpleModelModal : public BaseModal {
 public:
-  explicit SimpleModelModal(const T& _model, ModalConfig& _config) 
-    : BaseModal(_config), model(_model) {}
+  explicit SimpleModelModal(const T& _model, ModalConfig& _config)
+    : BaseModal(_config), model(_model) {
+  }
 
   //ModalCallback Render() override;
   bool ModalContents() override;
@@ -84,13 +93,15 @@ private:
 
 class CustomerModal : public BaseModal {
 public:
-  CustomerModal(const Customer& _customer, ModalConfig& _config)
-    : BaseModal(_config), customer(_customer)  {}
+  CustomerModal(const Customer& _customer, ModalConfig& _config, ModalEvent _event)
+    : BaseModal(_config), customer(_customer), event(_event) {
+  }
 
   bool ModalContents() override;
 
 private:
   Customer customer;
+  ModalEvent event = ModalEvent_None;
 };
 
 class PartModal : public BaseModal {

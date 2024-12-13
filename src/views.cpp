@@ -1,5 +1,6 @@
 #include "views.h"
 #include <iostream> 
+#include "RoLocalization.h"
 
 void CustomerView::DefaultRenderItem(const Customer& customer) {
   ImGui::TableNextColumn();
@@ -19,6 +20,11 @@ void CustomerView::DefaultRenderItem(const Customer& customer) {
   }
   else {
     if (ImGui::BeginPopupContextItem()) {
+
+
+      if (ImGui::Button(_("Remove customer?")))
+        customer.RemoveModal();
+
       ImGui::EndPopup();
     }
   }

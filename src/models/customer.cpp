@@ -35,12 +35,25 @@ void Customer::InsertModal() {
   config.Title(_("Insert Customer?"))
     .Msg(_("Are you sure?"));
 
-  CustomerModal modal(*this, config);
+  CustomerModal modal(*this, config, ModalEvent_Insert);
   ModalManager::SetModal(modal);
 }
 
 void Customer::InsertToDb() {
   Database::Insert().Customer_(*this);
+}
+
+void Customer::RemoveModal() const {
+  ModalConfig config;
+  config.Title(_("Remove Customer?"))
+    .Msg(_("Are you sure?"));
+
+  CustomerModal modal(*this, config, ModalEvent_Remove);
+  ModalManager::SetModal(modal);
+}
+
+void Customer::RemoveFromDb() {
+  Database::Delete().Customer_(id);
 }
 
 void Customer::SetRepairs(const int& _count) {

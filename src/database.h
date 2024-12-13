@@ -126,6 +126,8 @@ public:
   Deleter() = default;
   template <typename T>
   Deleter& OfSimpleModel(T& model);
+  template <typename T>
+  Deleter& Customer_(const T& _value);
 
 private:
   template<typename Func>
@@ -256,8 +258,6 @@ public:
   static SM SimpleModel_(const T& _value);
 };
 
-
-
 // After Selector class definition, add the implementation:
 template <typename T>
 inline Selector<T> Database::Select(const std::string& columns) {
@@ -349,6 +349,25 @@ inline Deleter& Deleter::OfSimpleModel(T& model) {
         soci::use(model.id);
     },
     "SimpleModel update (Simple Model Name: " + model.name + " Type: " + typeid(T).name() + ")"
+  );
+}
+
+template<typename T>
+inline Deleter& Deleter::Customer_(const T& _value) {
+  return ExecuteTransaction(
+    [&_value]() {
+
+      std::string query;
+      if (std::is_same_v<T, int>)
+        query = "id = (:id) ";
+      else
+        query = "phone = (:phone)";
+
+      Database::sql << "DELETE FROM customers WHERE " << query,
+      soci::use(_value);
+
+    },
+    "Customer hass been removed with value " + std::to_string(_value ) + ""
   );
 }
 

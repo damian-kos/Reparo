@@ -56,10 +56,20 @@ bool CustomerModal::ModalContents() {
   customer.View();
   if (ImGui::Button("Confirm")) {
     action = true;
-    customer.InsertToDb();
+    switch (event) {
+      case ModalEvent_Insert:
+        customer.InsertToDb();
+        break;
+      case ModalEvent_Remove:
+        customer.RemoveFromDb();
+        break;
+      default:
+        break;
+    }
     ImGui::CloseCurrentPopup();
   }
   if (ImGui::Button("Cancel")) {
+    event = ModalEvent_None;
     ImGui::CloseCurrentPopup();
   }
   return action;
