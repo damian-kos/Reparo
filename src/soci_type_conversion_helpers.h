@@ -187,6 +187,10 @@ namespace soci {
       model.repair_state.id = v.get<int>("repair_state_id");
       model.sn_imei = v.get<std::string>("sn_imei");
       model.cust_device_id = v.get<int>("cust_device_id", -1);
+      model.created_at = v.get<std::tm>("created_at");
+      model.updated_at = v.get<std::tm>("updated_at");
+      model.finished_at = v.get<std::tm>("finished_at", std::tm{});
+
 
       if (v.get_number_of_columns() > 8) {
         // Non standard, safe_get as we hvae more columns because of JOINs
@@ -211,6 +215,9 @@ namespace soci {
       v.set("repair_state_id", model.repair_state.id);
       v.set("sn_imei", model.sn_imei);
       v.set("cust_device_id", model.cust_device_id, model.cust_device_id == -1 ? i_null : i_ok);
+      v.set("created_at", model.created_at);
+      v.set("updated_at", model.updated_at);
+      v.set("finished_at", model.finished_at);
 
       ind = i_ok;
     }

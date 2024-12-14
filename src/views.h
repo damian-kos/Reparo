@@ -81,8 +81,8 @@ public:
   RepairView(std::vector<Repair> _repairs)
     : BaseTableView<Repair>(
       "Repairs view",
-      10,
-      { "ID", "Cust. Phone", "Cust. Name", "Device", "Category", "Notes", "Hidden note", "Price", "State", "SN / IMEI"},
+      13,
+      { "ID", "Cust. Phone", "Cust. Name", "Device", "Category", "Notes", "Hidden note", "Price", "State", "SN / IMEI", "Created at", "Updated at", "Finished at"},
       std::move(_repairs)
       ) { }
 

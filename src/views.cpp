@@ -1,6 +1,7 @@
 #include "views.h"
 #include <iostream> 
 #include "RoLocalization.h"
+#include "conversion.h"
 
 void CustomerView::DefaultRenderItem(const Customer& customer) {
   ImGui::TableNextColumn();
@@ -41,7 +42,8 @@ void CustomerView::DefaultRenderItem(const Customer& customer) {
 
 void RepairView::DefaultRenderItem(const Repair& _repair) {
   ImGui::TableNextColumn();
-  ImGui::Text("%d", _repair.id);
+  std::string _id_str = std::to_string(_repair.id);
+  ImGui::Selectable(_id_str.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap);
 
   ImGui::TableNextColumn();
   ImGui::Text("%s", _repair.customer.phone.c_str());
@@ -70,7 +72,16 @@ void RepairView::DefaultRenderItem(const Repair& _repair) {
   ImGui::TableNextColumn();
   ImGui::Text("%s", _repair.sn_imei.c_str());
 
-  //ImGui::TableNextColumn();
-  //ImGui::Text("%s", _repair.created_at);
+  ImGui::TableNextColumn();
+  std::string _created_at = Convert::TmToStr(_repair.created_at);
+  ImGui::Text("%s", _created_at.c_str());
+
+  ImGui::TableNextColumn();
+  std::string _updated_at = Convert::TmToStr(_repair.updated_at);
+  ImGui::Text("%s", _updated_at.c_str());
+
+  ImGui::TableNextColumn();
+  std::string _finished_at = Convert::TmToStr(_repair.finished_at);
+  ImGui::Text("%s", _finished_at.c_str());
 
 }

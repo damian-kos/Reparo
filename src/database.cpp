@@ -534,6 +534,7 @@ TableCreator& TableCreator::RepairsTable() {
       sn_imei            TEXT,
       cust_device_id     INTEGER DEFAULT NULL,
       created_at         DATE DEFAULT CURRENT_TIMESTAMP,
+      updated_at         DATE DEFAULT CURRENT_TIMESTAMP,
       finished_at        DATE,
 
     
