@@ -39,3 +39,38 @@ void CustomerView::DefaultRenderItem(const Customer& customer) {
 
 }
 
+void RepairView::DefaultRenderItem(const Repair& _repair) {
+  ImGui::TableNextColumn();
+  ImGui::Text("%d", _repair.id);
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _repair.customer.phone.c_str());
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _repair.customer.name.c_str());
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _repair.device.name.c_str());
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _repair.category.name.c_str());
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _repair.vis_note.c_str());
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _repair.hid_note.c_str());
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%.2f", _repair.price);
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _repair.repair_state.name.c_str());
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _repair.sn_imei.c_str());
+
+  //ImGui::TableNextColumn();
+  //ImGui::Text("%s", _repair.created_at);
+
+}

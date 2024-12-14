@@ -209,6 +209,11 @@ public:
       return *this;
     }
 
+    Selector& Coalesce(const std::string& _coalesce) {
+      sql << " COALESCE" << _coalesce;
+      return *this;
+    }
+
     std::vector<T> All() {
         std::vector<T> results;
         try {

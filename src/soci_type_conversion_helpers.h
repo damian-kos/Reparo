@@ -32,6 +32,18 @@ struct simple_type_conversion_helper {
 };
 
 namespace soci {
+
+  template <typename T>
+  T safe_get(const soci::values& v, const std::string& column_name, T default_value) {
+    try {
+      return v.get<T>(column_name, default_value);
+    }
+    catch (const std::exception& ex) {
+      std::cerr << "Warning: Unable to fetch column '" << column_name << "'. Error: " << ex.what() << std::endl;
+      return default_value;
+    }
+  }
+
   template<typename T>
     requires IsSimple<T>
   struct type_conversion<T> {
@@ -167,18 +179,23 @@ namespace soci {
       }
       model.id = v.get<int>("id");
       model.customer.id = v.get<int>("customer_id");
-      //model.customer = Database::Get().Customer_(model.customer.id);
       model.device.id = v.get<int>("model_id", -1);
-      //model.device = Database::Get().Device_(model.device.id);
       model.color.id = v.get<int>("color_id", -1);
-      //model.color = Database::Get().SimpleModel_<int, Color>(model.color.id);
       model.vis_note = v.get<std::string>("visible_desc");
       model.hid_note = v.get<std::string>("hidden_desc");
       model.price = v.get<double>("price");
       model.repair_state.id = v.get<int>("repair_state_id");
-      //model.repair_state = Database::Get().SimpleModel_<int, RepairState>(model.repair_state.id);
       model.sn_imei = v.get<std::string>("sn_imei");
       model.cust_device_id = v.get<int>("cust_device_id", -1);
+
+      if (v.get_number_of_columns() > 8) {
+        // Non standard, safe_get as we hvae more columns because of JOINs
+        model.customer.phone = safe_get<std::string>(v, "phone", "N/A");
+        model.customer.name = safe_get<std::string>(v, "name", "N/A");
+        model.device.name = safe_get<std::string>(v, "model", "N/A");
+        model.category.name = safe_get<std::string>(v, "category", "N/A");
+        model.repair_state.name = safe_get<std::string>(v, "state", "N/A");
+      }
 
     }
 

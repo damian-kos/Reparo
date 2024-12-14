@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include "models/customer.h"
+#include "models/repair.h"
 #include "imgui.h"
 
 class View {
@@ -60,7 +61,6 @@ protected:
 
 };
 
-
 class CustomerView : public BaseTableView<Customer> {
 public:
   CustomerView(std::vector<Customer> customers)
@@ -73,4 +73,20 @@ public:
 
 protected:
   void DefaultRenderItem(const Customer& customer) override;
+
+};
+
+class RepairView : public BaseTableView<Repair> {
+public:
+  RepairView(std::vector<Repair> _repairs)
+    : BaseTableView<Repair>(
+      "Repairs view",
+      10,
+      { "ID", "Cust. Phone", "Cust. Name", "Device", "Category", "Notes", "Hidden note", "Price", "State", "SN / IMEI"},
+      std::move(_repairs)
+      ) { }
+
+protected:
+  void DefaultRenderItem(const Repair& _repair) override;
+
 };
