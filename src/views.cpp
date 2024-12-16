@@ -50,6 +50,31 @@ void CustomerView::LoadData(const std::string& _orderby, const int& _direction) 
     .All();
 }
 
+RepairView::RepairView(std::vector<Repair> _repairs)
+  : BaseTableView<Repair>(
+    "Repairs view",
+    13,
+    {
+      { "id", "ID"},
+      { "phone", "Cust. Phone"},
+      { "name", "Cust. Name"},
+      { "device", "Device"},
+      { "category", "Category"},
+      { "visible_desc", "Notes"},
+      { "hidden_desc", "Hidden note"},
+      { "price", "Price"},
+      { "state", "State"},
+      { "sn_imei", "SN / IMEI"},
+      { "created_at", "Created at"},
+      { "updated_at", "Updated at"},
+      { "finished_at", "Finished at"}
+    },
+    std::move(_repairs)
+  ),
+  phone(_("Search by phone"), ImGuiInputTextFlags_CharsDecimal, TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence),
+  id_filter(_("Search by ID"), ImGuiInputTextFlags_CharsHexadecimal, TFFlags_HasPopup, "id", "repairs", "id")
+  { }
+
 void RepairView::DefaultRenderItem(const Repair& _repair) {
   ImGui::TableNextColumn();
   std::string _id_str = std::to_string(_repair.id);
@@ -105,6 +130,18 @@ void RepairView::LoadData(const std::string& _orderby, const int& _direction) {
     .LeftJoin("custom_devices cd").On("cd.id = r.cust_device_id")
     .LeftJoin("repair_categories rc").On("rc.id = r.category_id")
     .LeftJoin("repair_states rs").On("rs.id = r.repair_state_id")
+    .Where("c.phone")
+    .Like(phone.Get())
+    .And("r.id")
+    .Like(id_filter.Get())
     .OrderBy(_orderby, _direction)
     .All();
+}
+
+void RepairView::Filters() {
+  if (phone.Render())
+    LoadData();
+  if (id_filter.Render()) {
+    LoadData();
+  }
 }

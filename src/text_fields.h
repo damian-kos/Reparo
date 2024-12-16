@@ -28,6 +28,8 @@ enum TFFlags_ {
   TFFlags_HasLenValidator     = 1 << 2,   // Set if field is supposed to run validation on buffer length
   TFFlags_AllowDbPresence     = 1 << 3,   // Set if found result in Database shouldn't result in error
   TFFlags_EmptyIsError        = 1 << 4,   // Empty buffer will set field to have en error if set
+  TFFlags_NeverAnError        = 1 << 5,   // Prevents to highlight field as an error
+
 };
 
 typedef int ValidatorFlags;
@@ -145,7 +147,7 @@ public:
     , const std::string& _select = "*"
     , const std::string& _from   = "_"
     , const std::string& _where  = "_");
-  void Render();
+  bool Render();
   void Validate() override;
   void Feedback() override;
 

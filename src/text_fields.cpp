@@ -103,6 +103,10 @@ int TextField::Render() {
 }
 
 void TextField::Field(){
+  if (ro_flags & TFFlags_NeverAnError) {
+    error = false;
+    has_error_with_content = false;
+  }
   ImGui::BeginValid(has_error_with_content);
   ImGui::InputTextWithHint(("##" + label).c_str(), (label + "...").c_str(), &buffer, flags);
   ImGui::EndValid(has_error_with_content);
@@ -176,6 +180,7 @@ bool PhoneField::Render() {
       .Where("phone")
       .Like(buffer)
       .All();
+    state = true;
   }
 
   ImGui::PushID(label.c_str());
@@ -546,7 +551,8 @@ QueriedTextField::QueriedTextField(const std::string& label, ImGuiInputTextFlags
   , where(_where)
 {}
 
-void QueriedTextField::Render() {
+bool QueriedTextField::Render() {
+  bool _state = false;
   static std::vector<std::string> vec;
   Field();
 
@@ -555,16 +561,18 @@ void QueriedTextField::Render() {
     Validate();
     vec.clear();
     vec = Database::Select<std::string>(select).From(from).Where(where).Like(buffer).All();
+    _state = true;
   }
   ImGui::PushID(label.c_str());
   if (ro_flags & TFFlags_HasPopup) {
     if (popup.OnTextInput(buffer, vec)) {
       buffer = popup.record;
       Validate();
+      _state = true;
     }
   }
   ImGui::PopID();
-
+  return _state;
 }
 
 void QueriedTextField::Validate() {

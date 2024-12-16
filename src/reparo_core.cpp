@@ -1,8 +1,6 @@
 #include "reparo_core.h"
 #include "imgui.h"
 #include "database.h"
-#include "RoLocalization.h"
-#include "text_fields.h"
 
 std::vector<ReparoCore::TableCreationInfo> ReparoCore::table_config;
 

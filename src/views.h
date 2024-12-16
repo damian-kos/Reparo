@@ -4,6 +4,7 @@
 #include "models/customer.h"
 #include "models/repair.h"
 #include "imgui.h"
+#include "text_fields.h"
 
 class View {
 public:
@@ -34,7 +35,7 @@ public:
 
   void Render() override {
     ImGui::Begin(config.window_id.c_str());
-
+    Filters();
     if (ImGui::BeginTable(config.window_id.c_str(), config.max_columns, ImGuiTableFlags_RowBg  | ImGuiTableFlags_Borders | ImGuiTableFlags_Sortable | ImGuiTableFlags_Hideable  | ImGuiTableFlags_Reorderable)) {
       for (const auto& header : config.headers) {
         ImGui::TableSetupColumn(header.second.c_str());
@@ -65,6 +66,7 @@ protected:
   std::vector<T> data;
   virtual void LoadData(const std::string& _orderby = "", const int& _direction = 0);
   virtual void Sort();
+  virtual void Filters();
 
 };
 
@@ -92,31 +94,17 @@ protected:
 
 class RepairView : public BaseTableView<Repair> {
 public:
-  RepairView(std::vector<Repair> _repairs)
-    : BaseTableView<Repair>(
-      "Repairs view",
-      13,
-      { 
-        { "id", "ID"},
-        { "phone", "Cust. Phone"},
-        { "name", "Cust. Name"},
-        { "device", "Device"},
-        { "category", "Category"},
-        { "visible_desc", "Notes"},
-        { "hidden_desc", "Hidden note"},
-        { "price", "Price"},
-        { "state", "State"},
-        { "sn_imei", "SN / IMEI"},
-        { "created_at", "Created at"},
-        { "updated_at", "Updated at"},
-        { "finished_at", "Finished at"}
-      },
-      std::move(_repairs)
-      ) { }
+  explicit RepairView(std::vector<Repair> _repairs); 
 
 protected:
   void DefaultRenderItem(const Repair& _repair) override;
   void LoadData(const std::string& _orderby = "", const int& _direction = 0) override;
+  void Filters() override;
+
+private:
+  PhoneField phone;
+  QueriedTextField id_filter;
+
 };
 
 template<typename T>
@@ -132,5 +120,9 @@ inline void BaseTableView<T>::Sort() {
       sort_specs->SpecsDirty = false;
     }
   }
+}
+
+template<typename T>
+inline void BaseTableView<T>::Filters() {
 }
 
