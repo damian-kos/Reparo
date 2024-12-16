@@ -153,6 +153,7 @@ public:
         }
       }
       sql << " FROM " << table_name;
+      
       return *this;
     }
 
@@ -211,6 +212,14 @@ public:
 
     Selector& Coalesce(const std::string& _coalesce) {
       sql << " COALESCE" << _coalesce;
+      return *this;
+    }
+
+    Selector& OrderBy(const std::string& _orderby = "", const int& _direction = 0) {
+      if (_orderby.empty())
+        return *this;
+      std::string _direction_str = _direction == 1 ? " ASC" : " DESC";
+      sql << " ORDER BY " << _orderby << _direction_str;
       return *this;
     }
 

@@ -1,7 +1,7 @@
 #include "views.h"
-#include <iostream> 
 #include "RoLocalization.h"
 #include "conversion.h"
+#include "database.h"
 
 void CustomerView::DefaultRenderItem(const Customer& customer) {
   ImGui::TableNextColumn();
@@ -38,6 +38,16 @@ void CustomerView::DefaultRenderItem(const Customer& customer) {
   ImGui::TableNextColumn();
   ImGui::Text("%s", customer.email.c_str());
 
+}
+
+void CustomerView::LoadData(const std::string& _orderby, const int& _direction) {
+  data = Database::Select<Customer>("c.*, COUNT(repairs.id) AS has_repairs")
+    .From("customers c")
+    .LeftJoin("repairs")
+    .On("c.id = repairs.customer_id")
+    .GroupBy("c.id")
+    .OrderBy(_orderby, _direction)
+    .All();
 }
 
 void RepairView::DefaultRenderItem(const Repair& _repair) {
@@ -84,4 +94,17 @@ void RepairView::DefaultRenderItem(const Repair& _repair) {
   std::string _finished_at = Convert::TmToStr(_repair.finished_at);
   ImGui::Text("%s", _finished_at.c_str());
 
+}
+
+void RepairView::LoadData(const std::string& _orderby, const int& _direction) {
+  data = Database::Select<Repair>("r.*, c.phone, c.name, rc.category, rs.state, ")
+    .Coalesce(" (d.model, cd.model) AS model")
+    .From("repairs r")
+    .LeftJoin("customers c").On("c.id = r.customer_id")
+    .LeftJoin("devices d").On("d.id = r.model_id")
+    .LeftJoin("custom_devices cd").On("cd.id = r.cust_device_id")
+    .LeftJoin("repair_categories rc").On("rc.id = r.category_id")
+    .LeftJoin("repair_states rs").On("rs.id = r.repair_state_id")
+    .OrderBy(_orderby, _direction)
+    .All();
 }

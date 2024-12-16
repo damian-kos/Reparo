@@ -14,7 +14,8 @@ protected:
   struct Config {
     std::string window_id;
     int max_columns;
-    std::vector<std::string> headers;
+    // Column header name in SQL query table - Header name in imgui table
+    std::vector<std::pair<std::string, std::string>> headers;
   };
   Config config;
 };
@@ -22,7 +23,7 @@ protected:
 template <typename T>
 class BaseTableView : public View {
 public:
-  BaseTableView(std::string _window_id, int _max_columns, const std::vector<std::string>& _headers,
+  BaseTableView(std::string _window_id, int _max_columns, const std::vector<std::pair<std::string, std::string>>& _headers,
     std::vector<T> data) {  
     config.window_id = _window_id;
     config.max_columns = _max_columns;
@@ -33,11 +34,15 @@ public:
 
   void Render() override {
     ImGui::Begin(config.window_id.c_str());
-    if (ImGui::BeginTable(config.window_id.c_str(), config.max_columns, ImGuiTableFlags_RowBg  | ImGuiTableFlags_Borders)) {
+
+    if (ImGui::BeginTable(config.window_id.c_str(), config.max_columns, ImGuiTableFlags_RowBg  | ImGuiTableFlags_Borders | ImGuiTableFlags_Sortable | ImGuiTableFlags_Hideable  | ImGuiTableFlags_Reorderable)) {
       for (const auto& header : config.headers) {
-        ImGui::TableSetupColumn(header.c_str());
+        ImGui::TableSetupColumn(header.second.c_str());
       }
+
       ImGui::TableHeadersRow();
+
+      Sort();
 
       for (const auto& item : data) {
         ImGui::TableNextRow();
@@ -58,6 +63,8 @@ protected:
     // This is a placeholder and should be specialized for different data types
   }
   std::vector<T> data;
+  virtual void LoadData(const std::string& _orderby = "", const int& _direction = 0);
+  virtual void Sort();
 
 };
 
@@ -67,12 +74,19 @@ public:
     : BaseTableView<Customer>(
       "Customers view",
       5, 
-      { "ID", "Phone", "Surname", "Name", "Email"},
+      { 
+        {"id", "ID"},
+        {"phone", "Phone"},
+        {"name", "Name"},
+        {"surname", "Surname"},
+        {"email", "Email"}
+      },
       std::move(customers)
     ) { }
 
 protected:
   void DefaultRenderItem(const Customer& customer) override;
+  void LoadData(const std::string& _orderby = "", const int& _direction = 0) override;
 
 };
 
@@ -82,11 +96,41 @@ public:
     : BaseTableView<Repair>(
       "Repairs view",
       13,
-      { "ID", "Cust. Phone", "Cust. Name", "Device", "Category", "Notes", "Hidden note", "Price", "State", "SN / IMEI", "Created at", "Updated at", "Finished at"},
+      { 
+        { "id", "ID"},
+        { "phone", "Cust. Phone"},
+        { "name", "Cust. Name"},
+        { "device", "Device"},
+        { "category", "Category"},
+        { "visible_desc", "Notes"},
+        { "hidden_desc", "Hidden note"},
+        { "price", "Price"},
+        { "state", "State"},
+        { "sn_imei", "SN / IMEI"},
+        { "created_at", "Created at"},
+        { "updated_at", "Updated at"},
+        { "finished_at", "Finished at"}
+      },
       std::move(_repairs)
       ) { }
 
 protected:
   void DefaultRenderItem(const Repair& _repair) override;
-
+  void LoadData(const std::string& _orderby = "", const int& _direction = 0) override;
 };
+
+template<typename T>
+inline void BaseTableView<T>::LoadData(const std::string & _orderby, const int& _direction) {
+}
+
+template<typename T>
+inline void BaseTableView<T>::Sort() {
+  if (ImGuiTableSortSpecs* sort_specs = ImGui::TableGetSortSpecs()) {
+    if (sort_specs->SpecsDirty) {
+      LoadData(config.headers[sort_specs->Specs->ColumnIndex].first,
+        sort_specs->Specs->SortDirection);
+      sort_specs->SpecsDirty = false;
+    }
+  }
+}
+

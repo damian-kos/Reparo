@@ -46,6 +46,7 @@ void ReparoCore::Render() {
     .LeftJoin("custom_devices cd").On("cd.id = r.cust_device_id")
     .LeftJoin("repair_categories rc").On("rc.id = r.category_id")
     .LeftJoin("repair_states rs").On("rs.id = r.repair_state_id")
+    .OrderBy()
     .All();
 
   static RepairView repair_view(repairs);

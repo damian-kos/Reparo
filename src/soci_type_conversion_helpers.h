@@ -191,7 +191,6 @@ namespace soci {
       model.updated_at = v.get<std::tm>("updated_at");
       model.finished_at = v.get<std::tm>("finished_at", std::tm{});
 
-
       if (v.get_number_of_columns() > 8) {
         // Non standard, safe_get as we hvae more columns because of JOINs
         model.customer.phone = safe_get<std::string>(v, "phone", "N/A");
