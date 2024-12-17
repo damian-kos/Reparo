@@ -223,6 +223,11 @@ public:
       return *this;
     }
 
+    Selector& Date(const std::string& _date) {
+      sql << _date;
+      return *this;
+    }
+
     std::vector<T> All() {
         std::vector<T> results;
         try {

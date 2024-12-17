@@ -5,6 +5,7 @@
 #include "models/repair.h"
 #include "imgui.h"
 #include "text_fields.h"
+#include "filters.h"
 
 class View {
 public:
@@ -36,7 +37,7 @@ public:
   void Render() override {
     ImGui::Begin(config.window_id.c_str());
     Filters();
-    if (ImGui::BeginTable(config.window_id.c_str(), config.max_columns, ImGuiTableFlags_RowBg  | ImGuiTableFlags_Borders | ImGuiTableFlags_Sortable | ImGuiTableFlags_Hideable  | ImGuiTableFlags_Reorderable)) {
+    if (ImGui::BeginTable(config.window_id.c_str(), config.max_columns, ImGuiTableFlags_RowBg  | ImGuiTableFlags_Borders | ImGuiTableFlags_Sortable | ImGuiTableFlags_Hideable  | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Resizable )) {
       for (const auto& header : config.headers) {
         ImGui::TableSetupColumn(header.second.c_str());
       }
@@ -104,7 +105,7 @@ protected:
 private:
   PhoneField phone;
   QueriedTextField id_filter;
-
+  DateFilter date;
 };
 
 template<typename T>

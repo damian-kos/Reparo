@@ -122,6 +122,7 @@ void RepairView::DefaultRenderItem(const Repair& _repair) {
 }
 
 void RepairView::LoadData(const std::string& _orderby, const int& _direction) {
+
   data = Database::Select<Repair>("r.*, c.phone, c.name, rc.category, rs.state, ")
     .Coalesce(" (d.model, cd.model) AS model")
     .From("repairs r")
@@ -134,6 +135,8 @@ void RepairView::LoadData(const std::string& _orderby, const int& _direction) {
     .Like(phone.Get())
     .And("r.id")
     .Like(id_filter.Get())
+    .And("created_at")
+    .Date(date.GetForSQL())
     .OrderBy(_orderby, _direction)
     .All();
 }
@@ -142,6 +145,9 @@ void RepairView::Filters() {
   if (phone.Render())
     LoadData();
   if (id_filter.Render()) {
+    LoadData();
+  }
+  if (date.Render()) {
     LoadData();
   }
 }
