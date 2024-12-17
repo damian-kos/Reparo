@@ -6,6 +6,7 @@
 #include "imgui.h"
 #include "text_fields.h"
 #include "filters.h"
+#include "combo.h"
 
 class View {
 public:
@@ -106,6 +107,12 @@ private:
   PhoneField phone;
   QueriedTextField id_filter;
   DateFilter date;
+  struct Timeline {
+    std::string column;
+    std::string name;
+  };
+  std::vector<Timeline> timelines;
+  RoCombo<Timeline> timeline_combo;
 };
 
 template<typename T>

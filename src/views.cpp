@@ -55,24 +55,41 @@ RepairView::RepairView(std::vector<Repair> _repairs)
     "Repairs view",
     13,
     {
-      { "id", "ID"},
-      { "phone", "Cust. Phone"},
-      { "name", "Cust. Name"},
-      { "device", "Device"},
-      { "category", "Category"},
-      { "visible_desc", "Notes"},
-      { "hidden_desc", "Hidden note"},
-      { "price", "Price"},
-      { "state", "State"},
-      { "sn_imei", "SN / IMEI"},
-      { "created_at", "Created at"},
-      { "updated_at", "Updated at"},
-      { "finished_at", "Finished at"}
+        {"id", "ID"},
+        {"phone", "Cust. Phone"},
+        {"name", "Cust. Name"},
+        {"device", "Device"},
+        {"category", "Category"},
+        {"visible_desc", "Notes"},
+        {"hidden_desc", "Hidden note"},
+        {"price", "Price"},
+        {"state", "State"},
+        {"sn_imei", "SN / IMEI"},
+        {"created_at", "Created at"},
+        {"updated_at", "Updated at"},
+        {"finished_at", "Finished at"}
     },
     std::move(_repairs)
   ),
-  phone(_("Search by phone"), ImGuiInputTextFlags_CharsDecimal, TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence),
-  id_filter(_("Search by ID"), ImGuiInputTextFlags_CharsHexadecimal, TFFlags_HasPopup, "id", "repairs", "id")
+  phone(
+    _("Search by phone"),
+    ImGuiInputTextFlags_CharsDecimal,
+    TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence
+  ),
+  id_filter(
+    _("Search by ID"),
+    ImGuiInputTextFlags_CharsHexadecimal,
+    TFFlags_HasPopup,
+    "id",
+    "repairs",
+    "id"
+  ),
+  timelines{
+      {"created_at", "Created at"},
+      {"updated_at", "Updated at"},
+      {"finished_at", "Finished at"}
+  },
+  timeline_combo(timelines)
   { }
 
 void RepairView::DefaultRenderItem(const Repair& _repair) {
@@ -122,7 +139,6 @@ void RepairView::DefaultRenderItem(const Repair& _repair) {
 }
 
 void RepairView::LoadData(const std::string& _orderby, const int& _direction) {
-
   data = Database::Select<Repair>("r.*, c.phone, c.name, rc.category, rs.state, ")
     .Coalesce(" (d.model, cd.model) AS model")
     .From("repairs r")
@@ -135,19 +151,25 @@ void RepairView::LoadData(const std::string& _orderby, const int& _direction) {
     .Like(phone.Get())
     .And("r.id")
     .Like(id_filter.Get())
-    .And("created_at")
+    .And(timeline_combo.Get().column)
     .Date(date.GetForSQL())
     .OrderBy(_orderby, _direction)
     .All();
 }
 
 void RepairView::Filters() {
+  ImGui::SeparatorText(_("Filter by details"));
   if (phone.Render())
     LoadData();
   if (id_filter.Render()) {
     LoadData();
   }
+  ImGui::SeparatorText(_("Filter by dates"));
   if (date.Render()) {
     LoadData();
   }
+  if (timeline_combo.Render()) {
+    LoadData();
+  }
+  ImGui::SeparatorText(_("Results"));
 }

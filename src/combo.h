@@ -8,7 +8,8 @@ template <typename T>
 class RoCombo {
 public:
   //RoCombo();
-  RoCombo(const std::string& label = "Empty Combo");
+  RoCombo(const std::string& _label = "Empty Combo");
+  RoCombo(const std::vector<T> _models);
   void RenderFromBtn();
   bool Render();
   T& Get();
@@ -20,9 +21,18 @@ private:
 };
 
 template<typename T>
-inline RoCombo<T>::RoCombo(const std::string& label) : label(label) {
+inline RoCombo<T>::RoCombo(const std::string& _label) : label(_label) {
   models = Database::Select<T>().From().All();
   if(!models.empty())
+    model = models[0];
+}
+
+template<typename T>
+inline RoCombo<T>::RoCombo(const std::vector<T> _models) : models(_models) {
+  // Currently there is no need to have this described with label.
+  // Combos are self explanatory
+  label = "##combo";
+  if (!models.empty())
     model = models[0];
 }
 
