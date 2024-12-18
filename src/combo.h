@@ -81,3 +81,42 @@ inline void RoCombo<T>::SetLabel(const std::string& _label) {
   if (_label.empty()) { return; }
   label = _label;
 }
+
+template <typename T>
+class RoTabBar {
+public:
+  RoTabBar(const std::vector<T> _models);
+  bool Render();
+  T Get();
+private:
+  std::vector<T> models;
+  std::string label = "TabBar";
+  T model;
+};
+
+template<typename T>
+inline RoTabBar<T>::RoTabBar(const std::vector<T> _models) :models(_models) { }
+
+template<typename T>
+inline bool RoTabBar<T>::Render() {
+  bool _state = false;
+  static ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_Reorderable | ImGuiTabBarFlags_AutoSelectNewTabs | ImGuiTabBarFlags_TabListPopupButton | ImGuiTabBarFlags_FittingPolicyScroll;
+  if (ImGui::BeginTabBar(label.c_str(), tab_bar_flags)) {
+    for (auto& item : models) {
+      if (ImGui::BeginTabItem(item.name.c_str())) {
+        ImGui::EndTabItem();
+      }
+      if (ImGui::IsItemClicked()) {
+        model = item;
+        _state = true;
+      }
+    }
+    ImGui::EndTabBar();
+  }
+  return _state;
+}
+
+template<typename T>
+inline T RoTabBar<T>::Get() {
+  return model;
+}

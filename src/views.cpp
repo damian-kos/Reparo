@@ -89,7 +89,8 @@ RepairView::RepairView(std::vector<Repair> _repairs)
       {"updated_at", "Updated at"},
       {"finished_at", "Finished at"}
   },
-  timeline_combo(timelines)
+  timeline_combo(timelines),
+  states(Database::Select<RepairState>().From().All())
   { }
 
 void RepairView::DefaultRenderItem(const Repair& _repair) {
@@ -151,6 +152,7 @@ void RepairView::LoadData(const std::string& _orderby, const int& _direction) {
     .Like(phone.Get())
     .And("r.id")
     .Like(id_filter.Get())
+    .And(state_query)
     .And(timeline_combo.Get().column)
     .Date(date.GetForSQL())
     .OrderBy(_orderby, _direction)
@@ -172,4 +174,14 @@ void RepairView::Filters() {
     LoadData();
   }
   ImGui::SeparatorText(_("Results"));
+  if (states.Render()) {
+    int _id = states.Get().id;
+    if (_id <= 1) {
+      state_query = "";
+    }
+    else {
+      state_query = "r.repair_state_id =" + std::to_string(_id);
+    }
+    LoadData();
+  }
 }

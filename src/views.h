@@ -113,6 +113,8 @@ private:
   };
   std::vector<Timeline> timelines;
   RoCombo<Timeline> timeline_combo;
+  RoTabBar<RepairState> states;
+  std::string state_query = "";
 };
 
 template<typename T>
