@@ -185,3 +185,89 @@ void RepairView::Filters() {
     LoadData();
   }
 }
+
+InventoryView::InventoryView(std::vector<Part> _parts) 
+  : BaseTableView<Part>(
+    "Inventory view",
+    15,
+    {
+        { "id", "ID"},
+        { "name", "Name"},
+        { "own_sku", "Own SKU"},
+        { "quality", "Quality"},
+        { "category", "Category"},
+        { "sell_price", "Sell Price"},
+        { "sell_price_ex_vat", "Sell Price ex.VAT"},
+        { "color", "Color"},
+        { "quantity", "Quantity"},
+        { "purch_price", "Purchase price"},
+        { "purch_price_ex_vat", "Purchase price ex.VAT"},
+        { "location", "Location"},
+        { "reserved_quantity", "Reserved Quantity"},
+        { "created_at", "Created at" },
+        { "updated_at", "Updated at" }
+    },
+    std::move(_parts)
+  )
+  {}
+
+void InventoryView::DefaultRenderItem(const Part & _part) {
+  ImGui::TableNextColumn();
+  std::string _id_str = std::to_string(_part.id);
+  ImGui::Selectable(_id_str.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap);
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _part.name.c_str());
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _part.own_sku.c_str());
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _part.quality.name.c_str());
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _part.category.name.c_str());
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%.2f", _part.sell_price);
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%.2f", _part.sell_price_ex_vat);
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _part.color.name.c_str());
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%d", _part.quantity);
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%.2f", _part.purch_price);
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%.2f", _part.purch_price_ex_vat);
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _part.location.c_str());
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%d", _part.reserved_quantity);
+
+  ImGui::TableNextColumn();
+  std::string _created_at = Convert::TmToStr(_part.created_at);
+  ImGui::Text("%s", _created_at.c_str());
+
+  ImGui::TableNextColumn();
+  std::string _updated_at = Convert::TmToStr(_part.updated_at);
+  ImGui::Text("%s", _updated_at.c_str());
+
+}
+
+void InventoryView::LoadData(const std::string& _orderby, const int& _direction) {
+  data = Database::Select<Part>("p.*, q.quality , rc.category , c.color  ")
+    .From("parts p")
+    .LeftJoin("qualities q").On("q.id = p.quality_id")
+    .LeftJoin("repair_categories rc").On("rc.id = p.category_id")
+    .LeftJoin("colors c").On("c.id = p.color_id")
+    .OrderBy(_orderby, _direction)
+    .All();
+}

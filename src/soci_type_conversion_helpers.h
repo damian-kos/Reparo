@@ -288,7 +288,8 @@ namespace soci {
       if (v.get_number_of_columns() > 15) {
         model.color.name = v.get<std::string>("color", "Unknown");
         model.quality.name = v.get<std::string>("quality", "Unknown");
-        
+        model.category.name = v.get<std::string>("category", "Unknown");
+
       }
     }
 

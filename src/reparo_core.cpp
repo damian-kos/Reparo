@@ -1,4 +1,4 @@
-#include "reparo_core.h"
+  #include "reparo_core.h"
 #include "imgui.h"
 #include "database.h"
 
@@ -50,6 +50,8 @@ void ReparoCore::Render() {
   static RepairView repair_view(repairs);
   repair_view.Render();
 
+  static InventoryView inventory_view({});
+  inventory_view.Render();
   //ModalManager::RenderModal();
 }
 

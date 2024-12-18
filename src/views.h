@@ -3,6 +3,7 @@
 #include <vector>
 #include "models/customer.h"
 #include "models/repair.h"
+#include "models/parts.h"
 #include "imgui.h"
 #include "text_fields.h"
 #include "filters.h"
@@ -115,6 +116,15 @@ private:
   RoCombo<Timeline> timeline_combo;
   RoTabBar<RepairState> states;
   std::string state_query = "";
+};
+
+class InventoryView : public BaseTableView<Part> {
+public:
+  explicit InventoryView(std::vector<Part> _parts);
+
+private:
+  void DefaultRenderItem(const Part& _part) override;
+  void LoadData(const std::string& _orderby = "", const int& _direction = 0) override;
 };
 
 template<typename T>
