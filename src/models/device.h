@@ -14,6 +14,10 @@ struct Device {
   static constexpr std::string_view table = "devices";
 
   const std::string ToString() const;
+
+  operator bool() const {
+    return id > 0;
+  }
 };
 
 struct CustomDevice {

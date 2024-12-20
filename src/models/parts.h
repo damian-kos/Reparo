@@ -32,6 +32,10 @@ public:
   void InsertModal();
   void InsertToDb();
  
+  operator bool() const {
+    return id > 0;
+  }
+
 private:
 
 };

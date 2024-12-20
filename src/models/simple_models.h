@@ -45,6 +45,10 @@ public:
   void DeleteModal();
   bool Delete();
 
+  operator bool() const {
+    return id > 0 && !name.empty();
+  }
+
 };
 
 // Derived structs

@@ -15,4 +15,8 @@ public:
   static inline const std::string column = "alias";
   const std::string ToString() const;
 
+  operator bool() const {
+    return id > 0 && !name.empty() && link_id > 0;
+  }
+
 };

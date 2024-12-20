@@ -125,6 +125,14 @@ public:
 private:
   void DefaultRenderItem(const Part& _part) override;
   void LoadData(const std::string& _orderby = "", const int& _direction = 0) override;
+  void Filters() override;
+  OwnSKUField own_sku_filter;
+  QueriedTextField name_filter;
+  DeviceField device_filter;
+  SimpleModelField<Alias> alias_filter;
+  QueriedTextField quality_filter;
+  QueriedTextField category_filter;
+
 };
 
 template<typename T>

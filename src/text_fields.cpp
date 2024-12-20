@@ -486,33 +486,33 @@ SM RelationalField<SM, R>::GetFromDb() {
 template class RelationalField<Color, DeviceField>;
 
 bool OwnSKUField::Render() {
-  static std::vector<Part> vec;
-  bool state = false;
+  static std::vector<Part> _vec;
+  bool _state = false;
   Field();
 
   if (ImGui::IsItemEdited() || ImGui::IsItemActivated()) {
     Validate();
-    vec.clear();
-    vec = Database::Select<Part>()
+    _vec.clear();
+    _vec = Database::Select<Part>()
       .From("parts")
       .Where("own_sku")
       .Like(buffer)
       .All();
+    _state = true;
   }
 
   ImGui::PushID(label.c_str());
-  Part temp;
   if (ro_flags & TFFlags_HasPopup) {
-    if (popup.OnTextInput(buffer, vec)) {
+    if (popup.OnTextInput(buffer, _vec)) {
       buffer = popup.record.own_sku;
       // Currently we dont need to get the whole Part objects from database
       //part = GetFromDb();
       Validate();
-      state = true;
+      _state = true;
     }
   }
   ImGui::PopID();
-  return state;
+  return _state;
 }
 
 void OwnSKUField::Validate() {

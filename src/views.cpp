@@ -208,6 +208,36 @@ InventoryView::InventoryView(std::vector<Part> _parts)
         { "updated_at", "Updated at" }
     },
     std::move(_parts)
+  ), 
+  own_sku_filter(
+    _("Own SKU"),
+    0,
+    TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence
+  ),
+  name_filter(
+    _("Item's name"),
+    0,
+    TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence, "name", "parts", "name"
+  ),
+  device_filter(
+    _("Compatible with device"),
+    0,
+    TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence
+  ),
+  alias_filter(
+    _("Compatible with alias"),
+    0,
+    TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence
+  ),
+  quality_filter(
+    _("Choose quality"),
+    0,
+    TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence, "quality", "qualities", "quality"
+  ), 
+  category_filter(
+    _("Choose category"),
+    0,
+    TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence, "category", "repair_categories", "category"
   )
   {}
 
@@ -259,15 +289,40 @@ void InventoryView::DefaultRenderItem(const Part & _part) {
   ImGui::TableNextColumn();
   std::string _updated_at = Convert::TmToStr(_part.updated_at);
   ImGui::Text("%s", _updated_at.c_str());
-
 }
 
 void InventoryView::LoadData(const std::string& _orderby, const int& _direction) {
-  data = Database::Select<Part>("p.*, q.quality , rc.category , c.color  ")
+  Device _device = device_filter.GetFromDb();
+  std::string _device_cmpbl = _device ? "pm.model_id = " + std::to_string(_device.id) : "";
+  Alias _alias = alias_filter.GetFromDb();
+  std::string _alias_cmpbl = _alias ? "pma.alias_id = " + std::to_string(_alias.id) : "";
+  data = Database::Select<Part>("DISTINCT p.*, q.quality , rc.category , c.color  ")
     .From("parts p")
     .LeftJoin("qualities q").On("q.id = p.quality_id")
     .LeftJoin("repair_categories rc").On("rc.id = p.category_id")
     .LeftJoin("colors c").On("c.id = p.color_id")
+    .LeftJoin("part_model pm").On("pm.part_id = p.id")
+    .LeftJoin("part_model_alias pma").On("pma.part_id = p.id")
+    .Where("p.own_sku")
+    .Like(own_sku_filter.Get())
+    .And("p.name").Like(name_filter.Get())
+    .And("q.quality").Like(quality_filter.Get())
+    .And("rc.category").Like(category_filter.Get())
+    .And(_device_cmpbl)
+    .And(_alias_cmpbl)
+    
     .OrderBy(_orderby, _direction)
     .All();
+
+}
+
+void InventoryView::Filters() {
+  own_sku_filter.Render();
+  name_filter.Render();
+  device_filter.Render();
+  alias_filter.Render();
+  quality_filter.Render();
+  category_filter.Render();
+  if (ImGui::Button(_("Search")))
+    LoadData();
 }
