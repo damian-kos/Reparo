@@ -143,6 +143,9 @@ private:
   void DefaultRenderItem(const Device& _device);
   void LoadData(const std::string& _orderby = "", const int& _direction = 0);
   void Filters();
+  QueriedTextField device_filter;
+  RoCombo<DeviceType> device_type_filter;
+  RoCombo<Brand> brand_filter;
 };
 
 template<typename T>

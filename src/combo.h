@@ -2,14 +2,19 @@
 #include <string>
 #include "imgui.h"
 
-class DeviceWin;
+enum RoComboFlags_ {
+  RoComboFlags_None = 0,
+  RoComboFlags_HasNone = 1 << 0,
+};
+
+typedef int RoComboFlags;
 
 template <typename T>
 class RoCombo {
 public:
   //RoCombo();
-  RoCombo(const std::string& _label = "Empty Combo");
-  RoCombo(const std::vector<T> _models);
+  RoCombo(const std::string& _label = "Empty Combo", RoComboFlags _flags = 0);
+  RoCombo(const std::vector<T> _models, RoComboFlags _flags = 0);
   void RenderFromBtn();
   bool Render();
   T& Get();
@@ -18,17 +23,24 @@ private:
   T model;
   std::vector<T> models;
   std::string label;
+  RoComboFlags flags;
 };
 
 template<typename T>
-inline RoCombo<T>::RoCombo(const std::string& _label) : label(_label) {
+inline RoCombo<T>::RoCombo(const std::string& _label, RoComboFlags _flags) : label(_label), flags(_flags) {
   models = Database::Select<T>().From().All();
+  if (flags & RoComboFlags_HasNone) {
+    T _none;
+    _none.id = -1;
+    _none.name = "None";
+    models.insert(models.begin(), _none);
+  }
   if(!models.empty())
     model = models[0];
 }
 
 template<typename T>
-inline RoCombo<T>::RoCombo(const std::vector<T> _models) : models(_models) {
+inline RoCombo<T>::RoCombo(const std::vector<T> _models, RoComboFlags _flags) : models(_models), flags(_flags) {
   // Currently there is no need to have this described with label.
   // Combos are self explanatory
   label = "##combo";

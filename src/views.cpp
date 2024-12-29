@@ -337,11 +337,19 @@ DevicesView::DevicesView(std::vector<Device> _devices)
         { "type", "Type"},
     },
     std::move(_devices)
-    ) {
+    ),
+  device_filter(
+    _("Model"),
+    0,
+    TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence, "model ", "devices", "model "),
+  device_type_filter(_("Device type"), RoComboFlags_HasNone),
+  brand_filter(_("Brand"), RoComboFlags_HasNone)
+{
   LoadData();
 }
 
 void DevicesView::DefaultRenderItem(const Device& _device) {
+
   ImGui::TableNextColumn();
   bool _open = ImGui::TreeNodeEx(_device.name.c_str(), ImGuiTreeNodeFlags_SpanFullWidth);
   if (_open) {
@@ -372,10 +380,16 @@ void DevicesView::DefaultRenderItem(const Device& _device) {
 }
 
 void DevicesView::LoadData(const std::string& _orderby, const int& _direction) {
+  std::string _device_type = device_type_filter.Get() ? "dt.id = " + std::to_string(device_type_filter.Get().id) : "";
+  std::string _brand = brand_filter.Get() ? "b.id = " + std::to_string(brand_filter.Get().id) : "";
   data = Database::Select<Device>("d.*, b.brand, dt.type")
     .From("devices d")
     .LeftJoin("brands b").On("b.id = d.brand_id")
     .LeftJoin("device_types dt").On("dt.id = d.type_id")
+    .Where("model")
+    .Like(device_filter.Get())
+    .And(_device_type)
+    .And(_brand)
     .OrderBy(_orderby, _direction)
     .All();
 
@@ -386,10 +400,19 @@ void DevicesView::LoadData(const std::string& _orderby, const int& _direction) {
       .From("colors c")
       .InnerJoin("model_colors mc").On("c.id = mc.color_id")
       .Where("mc.model_id = " + _id_str)
+
       .All());
   }
 }
 
 void DevicesView::Filters() {
+  if(device_filter.Render())
+    LoadData();
+  if (device_type_filter.Render()) {
+    LoadData();
+  }
+  if (brand_filter.Render()) {
+    LoadData();
+  }
 }
 
