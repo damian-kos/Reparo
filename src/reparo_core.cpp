@@ -52,6 +52,9 @@ void ReparoCore::Render() {
 
   static InventoryView inventory_view({});
   inventory_view.Render();
+
+  static DevicesView devices_view({});
+  devices_view.Render();
   //ModalManager::RenderModal();
 }
 

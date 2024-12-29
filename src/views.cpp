@@ -326,3 +326,70 @@ void InventoryView::Filters() {
   if (ImGui::Button(_("Search")))
     LoadData();
 }
+
+DevicesView::DevicesView(std::vector<Device> _devices)
+  : BaseTableView<Device>(
+    "Devices view",
+    3,
+    {
+        { "name", "Name"},
+        { "brand", "Brand"},
+        { "type", "Type"},
+    },
+    std::move(_devices)
+    ) {
+  LoadData();
+}
+
+void DevicesView::DefaultRenderItem(const Device& _device) {
+  ImGui::TableNextColumn();
+  bool _open = ImGui::TreeNodeEx(_device.name.c_str(), ImGuiTreeNodeFlags_SpanFullWidth);
+  if (_open) {
+    // Render Colors
+    std::string _colors_node = std::string(_("Colors")) + "(" + std::to_string(_device.colors.size()) + ")";
+    if (ImGui::TreeNode(_colors_node.c_str())) {
+      for (const auto& color : _device.colors) {
+        ImGui::BulletText("%s", color.name.c_str());
+      }
+      ImGui::TreePop();
+    }
+
+    // Render Aliases
+    std::string _aliases_node = std::string(_("Aliases")) + "(" + std::to_string(_device.aliases.size()) + ")";
+    if (ImGui::TreeNode(_aliases_node.c_str())) {
+      for (const auto& alias : _device.aliases) {
+        ImGui::BulletText("%s", alias.name.c_str());
+      }
+      ImGui::TreePop();
+    }
+
+    ImGui::TreePop();
+  }
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _device.brand.name.c_str());
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _device.type.name.c_str());
+}
+
+void DevicesView::LoadData(const std::string& _orderby, const int& _direction) {
+  data = Database::Select<Device>("d.*, b.brand, dt.type")
+    .From("devices d")
+    .LeftJoin("brands b").On("b.id = d.brand_id")
+    .LeftJoin("device_types dt").On("dt.id = d.type_id")
+    .OrderBy(_orderby, _direction)
+    .All();
+
+  for (auto& _device : data) {
+    std::string _id_str = std::to_string(_device.id);
+    _device.aliases = (Database::Select<Alias>().From().Where("model_id = " + _id_str).All());
+    _device.colors = (Database::Select<Color>("c.*")
+      .From("colors c")
+      .InnerJoin("model_colors mc").On("c.id = mc.color_id")
+      .Where("mc.model_id = " + _id_str)
+      .All());
+  }
+}
+
+void DevicesView::Filters() {
+}
+

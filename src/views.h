@@ -135,6 +135,16 @@ private:
 
 };
 
+class DevicesView : public BaseTableView<Device> {
+public:
+  explicit DevicesView(std::vector<Device> _devices);
+
+private:
+  void DefaultRenderItem(const Device& _device);
+  void LoadData(const std::string& _orderby = "", const int& _direction = 0);
+  void Filters();
+};
+
 template<typename T>
 inline void BaseTableView<T>::LoadData(const std::string & _orderby, const int& _direction) {
 }
