@@ -5,6 +5,8 @@
 #include "modal.h"
 #include "observer.h"
 #include "views.h"
+#include "menu_bar.h"
+
 
 class Database;
 class TableCreator;
@@ -15,6 +17,7 @@ public:
   void Render();
 
 private:
+  RoMenuBar menu_bar;
   CustomerWin customer_win;
   DeviceWin device_win;
   RepairWin repair_win;

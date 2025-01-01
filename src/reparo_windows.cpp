@@ -8,6 +8,7 @@
 #include "models/parts.h"
 #include "modal.h"
 #include "tables.h"
+#include <map>
 
 CustomerWin::CustomerWin()
   : phone(_("Phone"), ImGuiInputTextFlags_CharsDecimal, TFFlags_HasPopup | TFFlags_EmptyIsError) { 
@@ -19,7 +20,12 @@ CustomerWin::CustomerWin(TFFlags phoneFlags)
   Init();
 }
 
+CustomerWin::~CustomerWin() { 
+  std::cout << "Customer window destroyed" << std::endl;
+}
+
 void CustomerWin::Init() {
+  std::cout << "Customer window initialized" << std::endl;
   open = true;
   name = NameField(_("Name"), ImGuiBackendFlags_None, TFFlags_EmptyIsError);
   surname = SurnameField(_("Surname"), ImGuiBackendFlags_None, TFFlags_EmptyIsError);
@@ -664,4 +670,33 @@ template class SimpleModelWin<PaymentMethod>;
 template class SimpleModelWin<DeviceType>;
 template class SimpleModelWin<Color>;
 template class SimpleModelWin<Quality>;
+
+std::map<std::string, std::unique_ptr<RoWindow>> WindowFactory::windows;
+
+void WindowFactory::AddWindow(const std::string& _window) {
+  // Check if a window of the requested type is already open
+  auto it = windows.find(_window);
+  if (it != windows.end() && it->second->open) {
+    return; // Do not create a new window if one of the same type is already open
+  }
+
+  // Create a new window based on the _window type
+  if (_window == "customer") {
+    windows[_window] = std::make_unique<CustomerWin>();
+  }
+ 
+  // Add other window types here as needed
+}
+
+void WindowFactory::Render() {
+  for (auto it = windows.begin(); it != windows.end(); ) {
+    if (!it->second->open) {
+      it = windows.erase(it); // Remove the window from the map if it's not open
+    }
+    else {
+      it->second->Render(); // Render the window if it's open
+      ++it;
+    }
+  }
+}
 

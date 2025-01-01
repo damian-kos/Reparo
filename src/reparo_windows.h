@@ -10,10 +10,18 @@
 
 class StackModal;
 
-class CustomerWin {
+class RoWindow {
+public:
+  virtual void Render() = 0;
+  virtual ~RoWindow() = default;
+  bool open = false;
+};
+
+class CustomerWin : public RoWindow {
 public:
   CustomerWin();
   CustomerWin(TFFlags phone_flags);
+  ~CustomerWin();
   void Init();
   void Render();
   void Debug();
@@ -34,7 +42,7 @@ private:
   std::vector<TextField> billing_address;
   std::vector<TextField> ship_address;
 
-  bool open = true;
+  //bool open = true;
 };
 
 class DeviceWin {
@@ -164,3 +172,12 @@ inline void SimpleModelWin<T>::LoadData() {
   std::cout << text << std::endl;
   values = Database::Select<T>().From().All();
 }
+
+class WindowFactory {
+public:
+  static void AddWindow(const std::string& _window);
+  static void Render();
+
+private:
+  static std::map<std::string, std::unique_ptr<RoWindow>> windows;
+};

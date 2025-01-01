@@ -9,7 +9,8 @@ ReparoCore::ReparoCore() {
 }
 
 void ReparoCore::Render() {
-  customer_win.Render();
+  menu_bar.Render();
+  WindowFactory::Render();
   brand_win.Render();
   device_types_win.Render();
   categories_win.Render();

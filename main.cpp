@@ -34,7 +34,7 @@
 int main(int, char**)
 {
     ReparoCore reparo_core;
-    Loc::initLocalization();
+    //Loc::initLocalization();
 
     // Setup SDL
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
@@ -203,7 +203,7 @@ int main(int, char**)
             ImGui::End();
         }
         
-        Loc::renderUI();
+        //Loc::renderUI();
         reparo_core.Render();
         ReparoCore::RenderDebug();
       
