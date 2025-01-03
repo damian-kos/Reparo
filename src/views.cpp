@@ -3,6 +3,28 @@
 #include "conversion.h"
 #include "database.h"
 
+CustomerView::CustomerView() 
+  : BaseTableView<Customer>(
+    "Customers view",
+    5,
+    {
+      {"id", "ID"},
+      {"phone", "Phone"},
+      {"name", "Name"},
+      {"surname", "Surname"},
+      {"email", "Email"}
+    }
+  ) 
+  {
+  std::cout << "Customers view created" << std::endl;
+  LoadData();
+  }
+
+CustomerView::~CustomerView() {
+  std::cout << "Customers view destroyed" << std::endl;
+}
+
+
 void CustomerView::DefaultRenderItem(const Customer& customer) {
   ImGui::TableNextColumn();
   ImGui::Text("%d", customer.id);
@@ -50,7 +72,7 @@ void CustomerView::LoadData(const std::string& _orderby, const int& _direction) 
     .All();
 }
 
-RepairView::RepairView(std::vector<Repair> _repairs)
+RepairView::RepairView()
   : BaseTableView<Repair>(
     "Repairs view",
     13,
@@ -68,8 +90,7 @@ RepairView::RepairView(std::vector<Repair> _repairs)
         {"created_at", "Created at"},
         {"updated_at", "Updated at"},
         {"finished_at", "Finished at"}
-    },
-    std::move(_repairs)
+    }
   ),
   phone(
     _("Search by phone"),
@@ -186,7 +207,7 @@ void RepairView::Filters() {
   }
 }
 
-InventoryView::InventoryView(std::vector<Part> _parts) 
+InventoryView::InventoryView() 
   : BaseTableView<Part>(
     "Inventory view",
     15,
@@ -206,8 +227,7 @@ InventoryView::InventoryView(std::vector<Part> _parts)
         { "reserved_quantity", "Reserved Quantity"},
         { "created_at", "Created at" },
         { "updated_at", "Updated at" }
-    },
-    std::move(_parts)
+    }
   ), 
   own_sku_filter(
     _("Own SKU"),
@@ -327,7 +347,7 @@ void InventoryView::Filters() {
     LoadData();
 }
 
-DevicesView::DevicesView(std::vector<Device> _devices)
+DevicesView::DevicesView()
   : BaseTableView<Device>(
     "Devices view",
     3,
@@ -335,8 +355,7 @@ DevicesView::DevicesView(std::vector<Device> _devices)
         { "name", "Name"},
         { "brand", "Brand"},
         { "type", "Type"},
-    },
-    std::move(_devices)
+    }
     ),
   device_filter(
     _("Model"),

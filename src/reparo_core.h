@@ -6,7 +6,7 @@
 #include "observer.h"
 #include "views.h"
 #include "menu_bar.h"
-
+#include "window_manager.h"
 
 class Database;
 class TableCreator;
@@ -18,16 +18,11 @@ public:
 
 private:
   RoMenuBar menu_bar;
-  CustomerWin customer_win;
-  DeviceWin device_win;
-  RepairWin repair_win;
   SimpleModelWin<Brand>    brand_win;
   SimpleModelWin<DeviceType> device_types_win;
   SimpleModelWin<Category> categories_win;
   SimpleModelWin<RepairState> repair_states_win;
   SimpleModelWin<PaymentMethod> payments_win;
-  PartsWin parts_win;
-  CustomDeviceWin custom_device_win;
   ModalManager modals;
   void Update() override;
 

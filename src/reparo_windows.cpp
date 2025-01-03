@@ -168,7 +168,6 @@ DeviceWin::DeviceWin() {
 
 DeviceWin::DeviceWin(CustomDevice _custom) {
   Init();
-  open = true;
   name.FillBuffer(_custom.name);
   std::string _where = "cd.model = '" + _custom.name + "'";
   auto _device_colors = Database::Select<Color>("c.id, cd.color")
@@ -186,6 +185,7 @@ DeviceWin::~DeviceWin() {
 }
 
 void DeviceWin::Init() {
+  open = true;
   name = DeviceField(_("Model"), 0);
   brand_combo = RoCombo<Brand>(_("Choose brand"));
   type_combo = RoCombo<DeviceType>(_("Choose type"));
@@ -244,7 +244,7 @@ void DeviceWin::Render() {
 }
 
 void DeviceWin::DeviceName() {
-  static std::string _model = name.Get();
+  std::string _model = name.Get();
   std::string _label = _model.empty() ? _("Add model") : _model;
   bool _focus = false;
   _focus = ImGui::Button(_label.c_str());
@@ -280,13 +280,19 @@ RepairWin::RepairWin()
   , device(_("Model"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence)
   , category(_("Category"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError)
   , color(_("Color"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError)
-  , sn_imei(_("Serial / IMEI"),0 , TFFlags_EmptyIsError)
+  , sn_imei(_("Serial / IMEI"), 0, TFFlags_EmptyIsError)
   , vis_note(_("Notes for customer"), 0, TFFlags_EmptyIsError)
   , hid_note(_("Notes hidden from customer"), 0, TFFlags_EmptyIsError)
-{}
+{
+  Init();
+}
+
+void RepairWin::Init() {
+  open = true;
+}
 
 void RepairWin::Render() {
-  ImGui::Begin(_("Repair"));
+  ImGui::Begin(_("Repair"), &open);
   FieldsValidate();
   RepairValidated();
   CustomerSection();
@@ -405,29 +411,29 @@ Device RepairWin::CreateDevice() {
 }
 
 PartsWin::PartsWin()
-: supplier(_("Supplier"), 0, TFFlags_HasPopup)
-, own_sku_field(_("Own SKU"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError)
-, name_field(_("Item's name"), 0, TFFlags_HasPopup | TFFlags_HasLenValidator | TFFlags_EmptyIsError, "DISTINCT name", "parts", "name")
-, color(_("Color"), 0, TFFlags_HasPopup)
-, quality(_("Choose quality"))
-, category(_("Choose category"))
-, location(_("Location"), 0, TFFlags_HasPopup, "DISTINCT location", "parts", "location")
-, device_filter(_("Device's model"), 0, TFFlags_HasPopup, "DISTINCT model", "devices", "model")
-, brand_filter(_("Brand"), 0, TFFlags_HasPopup)
-, device_type_filter(_("Device type"), 0, TFFlags_HasPopup)
-{ }
+  : supplier(_("Supplier"), 0, TFFlags_HasPopup)
+  , own_sku_field(_("Own SKU"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError)
+  , name_field(_("Item's name"), 0, TFFlags_HasPopup | TFFlags_HasLenValidator | TFFlags_EmptyIsError, "DISTINCT name", "parts", "name")
+  , color(_("Color"), 0, TFFlags_HasPopup)
+  , quality(_("Choose quality"))
+  , category(_("Choose category"))
+  , location(_("Location"), 0, TFFlags_HasPopup, "DISTINCT location", "parts", "location")
+  , device_filter(_("Device's model"), 0, TFFlags_HasPopup, "DISTINCT model", "devices", "model")
+  , brand_filter(_("Brand"), 0, TFFlags_HasPopup)
+  , device_type_filter(_("Device type"), 0, TFFlags_HasPopup)
+{
+  Init();
+}
+
+void PartsWin::Init() {
+  open = true;
+}
 
 void PartsWin::Render() {
-  // Currently in BeginPopupModal, possible change later
-
-  if (ImGui::Button(_("Parts"))) { // this button will be moved to menu top bar
-    open = !open;
-    LoadDevices();
-    ImGui::OpenPopup(_("Insert part"));
-  }
-
   if (!open)
     return;
+
+  ImGui::OpenPopup(_("Insert part"));
 
   if (ImGui::BeginPopupModal(_("Insert part"), &open)) {
     if (ImGui::BeginTable("split2", 2, ImGuiTableFlags_SizingStretchProp)) {
@@ -625,16 +631,21 @@ void PartsWin::FieldsValidate() {
 }
 
 CustomDeviceWin::CustomDeviceWin() { 
+  Init();
+}
+
+void CustomDeviceWin::Init() {
   devices = Database::Select<CustomDevice>("DISTINCT model")
     .From()
     .All();
+  open = true;
 }
 
 void CustomDeviceWin::Render(){
-  if (ImGui::Button(_("Custom devices"))) {
-    open = true;
-    ImGui::OpenPopup(_("Change custom device to device"));
-  }
+  if (!open)
+    return;
+
+  ImGui::OpenPopup(_("Change custom device to device"));
   if (ImGui::BeginPopupModal(_("Change custom device to device"), &open)) {
 
     RoTable::SimpleModel(devices);
@@ -670,33 +681,3 @@ template class SimpleModelWin<PaymentMethod>;
 template class SimpleModelWin<DeviceType>;
 template class SimpleModelWin<Color>;
 template class SimpleModelWin<Quality>;
-
-std::map<std::string, std::unique_ptr<RoWindow>> WindowFactory::windows;
-
-void WindowFactory::AddWindow(const std::string& _window) {
-  // Check if a window of the requested type is already open
-  auto it = windows.find(_window);
-  if (it != windows.end() && it->second->open) {
-    return; // Do not create a new window if one of the same type is already open
-  }
-
-  // Create a new window based on the _window type
-  if (_window == "customer") {
-    windows[_window] = std::make_unique<CustomerWin>();
-  }
- 
-  // Add other window types here as needed
-}
-
-void WindowFactory::Render() {
-  for (auto it = windows.begin(); it != windows.end(); ) {
-    if (!it->second->open) {
-      it = windows.erase(it); // Remove the window from the map if it's not open
-    }
-    else {
-      it->second->Render(); // Render the window if it's open
-      ++it;
-    }
-  }
-}
-

@@ -16,46 +16,39 @@ void ReparoCore::Render() {
   categories_win.Render();
   repair_states_win.Render();
   payments_win.Render();
-  static bool show_device_win;
-  ImGui::Checkbox("Device Win", &show_device_win);
-  if(show_device_win)
-    device_win.Render();
-  repair_win.Render();
-  parts_win.Render();
-  custom_device_win.Render();
   if (modals.RenderModal() != ModalCallback_None) {
     modals.Notify();
   }
 
-  static std::vector<Customer> customers = Database::Select<Customer>("c.*, COUNT(repairs.id) AS has_repairs")
-    .From("customers c")
-    .LeftJoin("repairs")
-    .On("c.id = repairs.customer_id")
-    .GroupBy("c.id")
-    .All();
+  //static std::vector<Customer> customers = Database::Select<Customer>("c.*, COUNT(repairs.id) AS has_repairs")
+  //  .From("customers c")
+  //  .LeftJoin("repairs")
+  //  .On("c.id = repairs.customer_id")
+  //  .GroupBy("c.id")
+  //  .All();
 
-  static CustomerView customer_view(customers);
-  customer_view.Render();
+  //static CustomerView customer_view(customers);
+  //customer_view.Render();
 
-  static std::vector<Repair> repairs = Database::Select<Repair>("r.*, c.phone, c.name, rc.category, rs.state, ")
-    .Coalesce(" (d.model, cd.model) AS model")
-    .From("repairs r")
-    .LeftJoin("customers c").On("c.id = r.customer_id")
-    .LeftJoin("devices d").On("d.id = r.model_id")
-    .LeftJoin("custom_devices cd").On("cd.id = r.cust_device_id")
-    .LeftJoin("repair_categories rc").On("rc.id = r.category_id")
-    .LeftJoin("repair_states rs").On("rs.id = r.repair_state_id")
-    .OrderBy()
-    .All();
+  //static std::vector<Repair> repairs = Database::Select<Repair>("r.*, c.phone, c.name, rc.category, rs.state, ")
+  //  .Coalesce(" (d.model, cd.model) AS model")
+  //  .From("repairs r")
+  //  .LeftJoin("customers c").On("c.id = r.customer_id")
+  //  .LeftJoin("devices d").On("d.id = r.model_id")
+  //  .LeftJoin("custom_devices cd").On("cd.id = r.cust_device_id")
+  //  .LeftJoin("repair_categories rc").On("rc.id = r.category_id")
+  //  .LeftJoin("repair_states rs").On("rs.id = r.repair_state_id")
+  //  .OrderBy()
+  //  .All();
 
-  static RepairView repair_view(repairs);
-  repair_view.Render();
+  //static RepairView repair_view(repairs);
+  //repair_view.Render();
 
-  static InventoryView inventory_view({});
-  inventory_view.Render();
+  //static InventoryView inventory_view({});
+  //inventory_view.Render();
 
-  static DevicesView devices_view({});
-  devices_view.Render();
+  //static DevicesView devices_view({});
+  //devices_view.Render();
   //ModalManager::RenderModal();
 }
 

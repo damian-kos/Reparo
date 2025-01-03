@@ -9,7 +9,10 @@ DateFilter::DateFilter()
     { 2, "After"},
     { 3, "Between"}
   }
-  {}
+  {
+  ImGui::SetDateZero(&from);
+  ImGui::SetDateZero(&to);
+}
 
 bool DateFilter::Render() {
   bool _state = false;

@@ -7,15 +7,9 @@
 #include "attributes.h"
 #include "models/customer.h"
 #include "models/supplier.h"
+#include "base_window.h"
 
 class StackModal;
-
-class RoWindow {
-public:
-  virtual void Render() = 0;
-  virtual ~RoWindow() = default;
-  bool open = false;
-};
 
 class CustomerWin : public RoWindow {
 public:
@@ -45,7 +39,7 @@ private:
   //bool open = true;
 };
 
-class DeviceWin {
+class DeviceWin : public RoWindow {
 public:
   DeviceWin();
   DeviceWin(CustomDevice _custom);
@@ -61,12 +55,12 @@ private:
   RoCombo<DeviceType> type_combo;
   Attributes<Color> colors;
   Attributes<Alias> aliases;
-  bool open = true;
 };
 
-class RepairWin {
+class RepairWin : public RoWindow {
 public:
   RepairWin();
+  void Init();
   void Render();
   void CustomerSection();
   void DeviceSection();
@@ -94,13 +88,12 @@ private:
   TextField sn_imei;
   TextField vis_note;
   TextField hid_note;
-
-  //bool open = true; // use later
 };
 
-class  PartsWin {
+class  PartsWin : public RoWindow {
   public:
     PartsWin();
+    void Init();
     void Render();
     void Feedback();
     void PriceSection(const std::string& _action, Price& _price);
@@ -132,19 +125,18 @@ class  PartsWin {
     std::vector<Device> devices;
     std::unordered_map<int, Device> cmptble_devices;
     std::unordered_map<int, Alias> cmptble_aliases;
-    bool open = true;
     bool error = true;
 };
 
-class CustomDeviceWin {
+class CustomDeviceWin : public RoWindow {
 public:
   CustomDeviceWin();
+  void Init();
   void Render();
 
   bool error = true;
 private:
   std::vector<CustomDevice> devices;
-  bool open = true;
 };
 
 template <typename T>
@@ -172,12 +164,3 @@ inline void SimpleModelWin<T>::LoadData() {
   std::cout << text << std::endl;
   values = Database::Select<T>().From().All();
 }
-
-class WindowFactory {
-public:
-  static void AddWindow(const std::string& _window);
-  static void Render();
-
-private:
-  static std::map<std::string, std::unique_ptr<RoWindow>> windows;
-};

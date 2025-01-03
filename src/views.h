@@ -8,8 +8,9 @@
 #include "text_fields.h"
 #include "filters.h"
 #include "combo.h"
+#include "base_window.h"
 
-class View {
+class View : public RoWindow {
 public:
   virtual void Render() = 0;
   virtual ~View() = default;
@@ -27,17 +28,16 @@ protected:
 template <typename T>
 class BaseTableView : public View {
 public:
-  BaseTableView(std::string _window_id, int _max_columns, const std::vector<std::pair<std::string, std::string>>& _headers,
-    std::vector<T> data) {  
+  BaseTableView(std::string _window_id, int _max_columns, const std::vector<std::pair<std::string, std::string>>& _headers) {  
     config.window_id = _window_id;
     config.max_columns = _max_columns;
     config.headers = _headers;
-    this->data = std::move(data);  
+    open = true;
   }
 
 
   void Render() override {
-    ImGui::Begin(config.window_id.c_str());
+    ImGui::Begin(config.window_id.c_str(), &open);
     Filters();
     if (ImGui::BeginTable(config.window_id.c_str(), config.max_columns, ImGuiTableFlags_RowBg  | ImGuiTableFlags_Borders | ImGuiTableFlags_Sortable | ImGuiTableFlags_Hideable  | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Resizable )) {
       for (const auto& header : config.headers) {
@@ -75,19 +75,8 @@ protected:
 
 class CustomerView : public BaseTableView<Customer> {
 public:
-  CustomerView(std::vector<Customer> customers)
-    : BaseTableView<Customer>(
-      "Customers view",
-      5, 
-      { 
-        {"id", "ID"},
-        {"phone", "Phone"},
-        {"name", "Name"},
-        {"surname", "Surname"},
-        {"email", "Email"}
-      },
-      std::move(customers)
-    ) { }
+  explicit CustomerView();
+  ~CustomerView();
 
 protected:
   void DefaultRenderItem(const Customer& customer) override;
@@ -97,7 +86,7 @@ protected:
 
 class RepairView : public BaseTableView<Repair> {
 public:
-  explicit RepairView(std::vector<Repair> _repairs); 
+  explicit RepairView(); 
 
 protected:
   void DefaultRenderItem(const Repair& _repair) override;
@@ -120,7 +109,7 @@ private:
 
 class InventoryView : public BaseTableView<Part> {
 public:
-  explicit InventoryView(std::vector<Part> _parts);
+  explicit InventoryView();
 
 private:
   void DefaultRenderItem(const Part& _part) override;
@@ -137,7 +126,7 @@ private:
 
 class DevicesView : public BaseTableView<Device> {
 public:
-  explicit DevicesView(std::vector<Device> _devices);
+  explicit DevicesView();
 
 private:
   void DefaultRenderItem(const Device& _device);
