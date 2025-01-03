@@ -140,7 +140,7 @@ private:
 };
 
 template <typename T>
-class SimpleModelWin {
+class SimpleModelWin : public RoWindow{
 public:
   SimpleModelWin();
   void Render();
@@ -150,11 +150,11 @@ private:
   T model;
   TextField name;
   std::vector<T> values;
-  bool open = false;
 };
 
 template<typename T>
 inline SimpleModelWin<T>::SimpleModelWin() {
+  open = true;
   LoadData();
 }
 

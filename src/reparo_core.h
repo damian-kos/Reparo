@@ -18,11 +18,6 @@ public:
 
 private:
   RoMenuBar menu_bar;
-  SimpleModelWin<Brand>    brand_win;
-  SimpleModelWin<DeviceType> device_types_win;
-  SimpleModelWin<Category> categories_win;
-  SimpleModelWin<RepairState> repair_states_win;
-  SimpleModelWin<PaymentMethod> payments_win;
   ModalManager modals;
   void Update() override;
 

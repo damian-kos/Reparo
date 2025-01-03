@@ -36,6 +36,24 @@ void WindowFactory::AddWindow(const std::string& _window) {
   else if (_window == "parts_view") {
     windows[_window] = std::make_unique<InventoryView>();
   }
+  else if (_window == "categories") {
+    windows[_window] = std::make_unique<SimpleModelWin<Category>>();
+  }
+  else if (_window == "brands") {
+    windows[_window] = std::make_unique<SimpleModelWin<Brand>>();
+  }
+  else if (_window == "device_types") {
+    windows[_window] = std::make_unique<SimpleModelWin<DeviceType>>();
+  }
+  else if (_window == "repair_states") {
+    windows[_window] = std::make_unique<SimpleModelWin<RepairState>>();
+  }
+  else if (_window == "qualities") {
+    windows[_window] = std::make_unique<SimpleModelWin<Quality>>();
+  }
+  else if (_window == "payment_methods") {
+    windows[_window] = std::make_unique<SimpleModelWin<PaymentMethod>>();
+  }
 }
 
 void WindowFactory::Render() {

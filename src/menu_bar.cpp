@@ -23,9 +23,34 @@ void RoMenuBar::Render() {
     RepairsView();
     DevicesView();
     InventoryView();
+    AttributesView();
     ImGui::EndMenu();
   }
   ImGui::EndMainMenuBar();
+}
+
+void RoMenuBar::AttributesView() {
+  if (ImGui::BeginMenu(_("Attributes"))) {
+    if (ImGui::MenuItem(_("Repair Categories"))) {
+      WindowFactory::AddWindow("categories");
+    }
+    if (ImGui::MenuItem(_("Brands"))) {
+      WindowFactory::AddWindow("brands");
+    }
+    if (ImGui::MenuItem(_("Device Types"))) {
+      WindowFactory::AddWindow("device_types");
+    }
+    if (ImGui::MenuItem(_("Repair States"))) {
+      WindowFactory::AddWindow("repair_states");
+    }
+    if (ImGui::MenuItem(_("Qualities"))) {
+      WindowFactory::AddWindow("qualities");
+    }
+    if (ImGui::MenuItem(_("Payment Methods"))) {
+      WindowFactory::AddWindow("payment_methods");
+    }
+    ImGui::EndMenu();
+  }
 }
 
 void RoMenuBar::DeviceFromCustom() {

@@ -11,63 +11,20 @@ ReparoCore::ReparoCore() {
 void ReparoCore::Render() {
   menu_bar.Render();
   WindowFactory::Render();
-  brand_win.Render();
-  device_types_win.Render();
-  categories_win.Render();
-  repair_states_win.Render();
-  payments_win.Render();
   if (modals.RenderModal() != ModalCallback_None) {
     modals.Notify();
   }
-
-  //static std::vector<Customer> customers = Database::Select<Customer>("c.*, COUNT(repairs.id) AS has_repairs")
-  //  .From("customers c")
-  //  .LeftJoin("repairs")
-  //  .On("c.id = repairs.customer_id")
-  //  .GroupBy("c.id")
-  //  .All();
-
-  //static CustomerView customer_view(customers);
-  //customer_view.Render();
-
-  //static std::vector<Repair> repairs = Database::Select<Repair>("r.*, c.phone, c.name, rc.category, rs.state, ")
-  //  .Coalesce(" (d.model, cd.model) AS model")
-  //  .From("repairs r")
-  //  .LeftJoin("customers c").On("c.id = r.customer_id")
-  //  .LeftJoin("devices d").On("d.id = r.model_id")
-  //  .LeftJoin("custom_devices cd").On("cd.id = r.cust_device_id")
-  //  .LeftJoin("repair_categories rc").On("rc.id = r.category_id")
-  //  .LeftJoin("repair_states rs").On("rs.id = r.repair_state_id")
-  //  .OrderBy()
-  //  .All();
-
-  //static RepairView repair_view(repairs);
-  //repair_view.Render();
-
-  //static InventoryView inventory_view({});
-  //inventory_view.Render();
-
-  //static DevicesView devices_view({});
-  //devices_view.Render();
-  //ModalManager::RenderModal();
 }
 
 #ifdef DEBUG
 
 void ReparoCore::Update() {
-  brand_win.LoadData();
-  device_types_win.LoadData();
-  categories_win.LoadData();
-  repair_states_win.LoadData();
-  payments_win.LoadData();
 }
 
 void ReparoCore::RenderDebug() {
   InitializeTableBtns();
 
   ImGui::Begin("Debug");
-
-
 
     //List Creation Button for creating a tables in a database
     for (const auto& table : table_config) {

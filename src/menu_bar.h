@@ -2,8 +2,8 @@
 
 class RoMenuBar {
 public:
-  RoMenuBar();
   void Render();
+  void AttributesView();
   void InventoryView();
   void DevicesView();
   void RepairsView();

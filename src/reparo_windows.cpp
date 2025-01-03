@@ -656,10 +656,7 @@ void CustomDeviceWin::Render(){
 
 template<typename T>
 void SimpleModelWin<T>::Render() {
-  if (ImGui::Button(model.column.c_str())) {
-    open = true;
-    ImGui::OpenPopup(model.window_title.c_str());
-  }
+  ImGui::OpenPopup(model.window_title.c_str());
   if (ImGui::BeginPopupModal(model.window_title.c_str(), &open)) {
     RoTable::SimpleModel<T>(values);
     name.Render();
