@@ -234,7 +234,8 @@ namespace soci {
       }
       model.id = v.get<int>("id");
       model.name = v.get<std::string>("supplier");
-      std::vector<std::string> vec(5);
+      std::vector<std::string> vec;
+      vec.clear();
       for (int i = 1; i < 6; ++i) {
         std::string str = "line" + std::to_string(i);
         vec.push_back(v.get<std::string>(str, ""));

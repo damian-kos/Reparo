@@ -8,8 +8,10 @@ Supplier& Supplier::GetSupplier() {
   return *this;
 }
 
-const std::string Supplier::ToString() const {
-  return std::to_string(id) + " | " + name;
+const std::string Supplier::ToString(const std::string _delimiter) const {
+  std::string _str = std::to_string(id) + _delimiter + name;
+  _str += address.ToString(_delimiter);
+  return _str;
 }
 
 void Supplier::View() {

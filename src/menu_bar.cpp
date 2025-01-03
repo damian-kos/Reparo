@@ -14,6 +14,7 @@ void RoMenuBar::Render() {
     Device();
     DeviceFromCustom();
     Parts();
+    StockReceived();
     
     ImGui::EndMenu();
   }
@@ -93,6 +94,21 @@ void RoMenuBar::Parts() {
   if (ImGui::BeginMenu(_("Items"))) {
     if (ImGui::MenuItem(_("New Item"))) {
       WindowFactory::AddWindow("parts");
+    }
+    ImGui::SeparatorText(_("Options"));
+    if (ImGui::MenuItem(_("Always open"))) {
+    }
+    ImGui::EndMenu();
+  }
+}
+
+void RoMenuBar::StockReceived() {
+  if (ImGui::BeginMenu(_("Stock Received"))) {
+    if (ImGui::MenuItem(_("From Purchase Invoice"))) {
+      WindowFactory::AddWindow("purchase_invoice");
+    }
+    if (ImGui::MenuItem(_("Internal arrival"))) {
+      WindowFactory::AddWindow("internal_arrival");
     }
     ImGui::SeparatorText(_("Options"));
     if (ImGui::MenuItem(_("Always open"))) {

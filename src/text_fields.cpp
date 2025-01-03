@@ -365,12 +365,13 @@ template<typename SM>
 SM& SimpleModelField<SM>::Render() {
   static std::vector<SM> vec;
   Field();
-
+  model = SM();
   if (ImGui::IsItemEdited() || ImGui::IsItemActivated()) {
 
     Validate();
     vec.clear();
     vec = Database::Select<SM>().From().Where(column).Like(buffer).All();
+    std::cout << Database::Select<SM>().From().Where(column).Like(buffer).GetSql() << std::endl;
   }
   ImGui::PushID(label.c_str());
   if (ro_flags & TFFlags_HasPopup) {
@@ -421,6 +422,7 @@ template class SimpleModelField<Supplier>;
 template class SimpleModelField<Part>;
 template class SimpleModelField<Quality>;
 template class SimpleModelField<Alias>;
+template class SimpleModelField<Supplier>;
 
 // Currently it works only with <Color, DeviceField> which is suboptimal
 template<typename SM, typename R>

@@ -9,6 +9,7 @@ void WindowFactory::AddWindow(const std::string& _window) {
     return;
   }
 
+  // New windows
   if (_window == "customer") {
     windows[_window] = std::make_unique<CustomerWin>();
   }
@@ -24,6 +25,10 @@ void WindowFactory::AddWindow(const std::string& _window) {
   else if (_window == "parts") {
     windows[_window] = std::make_unique<PartsWin>();
   }
+  else if (_window == "purchase_invoice") {
+    windows[_window] = std::make_unique<PurchaseInvoiceWin>();
+  }
+  // Views
   else if (_window == "customers_view") {
     windows[_window] = std::make_unique<CustomerView>();
   }

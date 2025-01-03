@@ -8,6 +8,7 @@
 #include "models/customer.h"
 #include "models/supplier.h"
 #include "base_window.h"
+#include "imguidatechooser.h"
 
 class StackModal;
 
@@ -138,6 +139,21 @@ public:
 private:
   std::vector<CustomDevice> devices;
 };
+
+class PurchaseInvoiceWin : public RoWindow {
+public:
+  PurchaseInvoiceWin();
+  void Init();
+  void Render();
+
+private:
+  tm insert_date;
+  tm purchase_date;
+  tm arrival_date;
+  SimpleModelField<Supplier> supplier_field;
+  Supplier supplier;
+};
+
 
 template <typename T>
 class SimpleModelWin : public RoWindow{

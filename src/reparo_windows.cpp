@@ -678,3 +678,88 @@ template class SimpleModelWin<PaymentMethod>;
 template class SimpleModelWin<DeviceType>;
 template class SimpleModelWin<Color>;
 template class SimpleModelWin<Quality>;
+ 
+PurchaseInvoiceWin::PurchaseInvoiceWin()
+  : supplier_field(_("Supplier"), 0, TFFlags_HasPopup)
+{
+  Init();
+} 
+
+void PurchaseInvoiceWin::Init() {
+  open = true;
+  ImGui::SetDateToday(&insert_date);
+  ImGui::SetDateToday(&purchase_date);
+  ImGui::SetDateToday(&arrival_date);
+}
+
+void PurchaseInvoiceWin::Render() {
+  ImGui::OpenPopup(_("Purchase invoice"));
+  if (ImGui::BeginPopupModal(_("Purchase invoice"), &open)) {
+    if (ImGui::BeginTable("split3", 3)) {
+      
+      ImGui::TableNextRow();
+      ImGui::TableNextColumn();
+      ImGui::PushItemWidth(100);
+      if (ImGui::BeginCombo("##prefix", "PI/")) { // replace with more prefixes
+        ImGui::EndCombo();
+      }
+      ImGui::PopItemWidth();
+      ImGui::SameLine();
+      static std::string buffer;
+      ImGui::InputText("##PI", &buffer);
+
+      ImGui::TableNextColumn();
+      
+      ImGui::TableNextColumn();
+      ImGui::DateChooser(_("Insert date"), insert_date);
+      
+      ImGui::TableNextColumn();
+      ImGui::TableNextColumn();
+      ImGui::TableNextColumn();
+      ImGui::DateChooser(_("Purchase date"), purchase_date);
+
+      ImGui::TableNextColumn();
+      ImGui::TableNextColumn();
+      ImGui::TableNextColumn();
+      ImGui::DateChooser(_("Arrival date"), arrival_date);
+
+      ImGui::TableNextColumn();
+      ImGui::Text(_("Supplier"));
+      ImGui::TableNextColumn();
+      if (supplier_field.Render()) {
+        supplier = supplier_field.GetFromDb();
+        std::cout << supplier.ToString() << std::endl;
+      }
+      ImGui::TableNextColumn();
+      ImGui::Button(_("+"));
+
+      ImGui::TableNextColumn();
+      ImGui::TableNextColumn();
+      ImGui::Text("%s", supplier.address.ToString(", ", "right").c_str());
+      ImGui::TableNextColumn(); 
+      
+      ImGui::EndTable();
+    }
+
+    if (ImGui::BeginTable("split3", 9)) {
+      std::vector<std::string> _headers = { _("ID"), _("Name"), _("Supplier SKU"), _("Own SKU"), _("Quantity"), _("Purchase price. ex VAT"), _("VAT"), _("Total Net"), _("Total") };
+
+      for (auto& _header : _headers)
+        ImGui::TableSetupColumn(_header.c_str());
+
+      ImGui::TableHeadersRow();
+      
+
+        ImGui::EndTable();
+    }
+    ImGui::Button(_("Add item"));
+    if (ImGui::BeginPopupContextItem("##empty", ImGuiPopupFlags_MouseButtonLeft
+    )) {
+      ImGui::Text(_("Add item"));
+
+      ImGui::EndPopup();
+    }
+
+    ImGui::EndPopup();
+  }
+}
