@@ -2,6 +2,7 @@
 #include "imguidatechooser.h"
 #include <iostream>
 #include "conversion.h"
+#include "RoLocalization.h"
 
 DateFilter::DateFilter() 
   : directions{
@@ -59,4 +60,39 @@ std::string DateFilter::GetForSQL() {
       break;
   }
   return _string_for_sql;
+}
+
+ItemPicker::ItemPicker()
+  : supplier_sku(_("Supplier SKU"), 0, TFFlags_HasPopup | TFFlags_NeverAnError, "DISTINCT supplier_sku", "purchase_invoice_items", "supplier_sku")
+  , own_sku_field(_("Own SKU"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError)
+  , name_field(_("Item's name"), 0, TFFlags_HasPopup | TFFlags_HasLenValidator | TFFlags_EmptyIsError, "DISTINCT name", "parts", "name")
+{
+}
+
+void ItemPicker::Render() {
+  supplier_sku.Render();
+  own_sku_field.Render();
+  name_field.Render();
+
+  bool refresh = false;
+  static int _quantity = 0;
+  static double _price = 0.0;
+  static double _vat = 0.0;
+  static double _total_net = 0.0;
+  static double _total = 0.0;
+
+  if (ImGui::InputInt(_("Quantity"), &_quantity))
+    refresh = true;
+  if (ImGui::InputDouble(_("Purchase price ex. VAT"), &_price, 0.0, 0.0, "%.2f"))
+    refresh = true;
+  if (ImGui::InputDouble(_("VAT rate"), &_vat, 0.0, 0.0, "%.2f")) 
+    refresh = true;
+  
+  ImGui::InputDouble(_("Total net: %.2f"), &_total_net, 0.0, 0.0, "%.2f");
+  ImGui::InputDouble(_("Total: %.2f"), &_total, 0.0, 0.0, "%.2f");
+
+  if (refresh) {
+    _total_net = _quantity * _price;
+    _total = _total_net + (_total_net * _vat / 100);
+  }
 }

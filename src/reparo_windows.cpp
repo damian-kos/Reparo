@@ -9,6 +9,7 @@
 #include "modal.h"
 #include "tables.h"
 #include <map>
+#include "filters.h"
 
 CustomerWin::CustomerWin()
   : phone(_("Phone"), ImGuiInputTextFlags_CharsDecimal, TFFlags_HasPopup | TFFlags_EmptyIsError) { 
@@ -755,8 +756,8 @@ void PurchaseInvoiceWin::Render() {
     ImGui::Button(_("Add item"));
     if (ImGui::BeginPopupContextItem("##empty", ImGuiPopupFlags_MouseButtonLeft
     )) {
-      ImGui::Text(_("Add item"));
-
+      static ItemPicker item_picker;
+      item_picker.Render();
       ImGui::EndPopup();
     }
 
