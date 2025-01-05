@@ -9,7 +9,6 @@
 #include "modal.h"
 #include "tables.h"
 #include <map>
-#include "filters.h"
 
 CustomerWin::CustomerWin()
   : phone(_("Phone"), ImGuiInputTextFlags_CharsDecimal, TFFlags_HasPopup | TFFlags_EmptyIsError) { 
@@ -749,15 +748,43 @@ void PurchaseInvoiceWin::Render() {
         ImGui::TableSetupColumn(_header.c_str());
 
       ImGui::TableHeadersRow();
-      
+      ImGui::TableNextRow();
+      int i = 1;
+      for (auto& part : parts) {
+        part.id = i;
+        ImGui::TableNextColumn();
+        ImGui::Text("%d", part.id);
+        ImGui::TableNextColumn();
+        ImGui::Text("%s", part.name.c_str());
+        ImGui::TableNextColumn();
+        ImGui::Text("%s", part.supplier_sku.c_str());
+        ImGui::TableNextColumn();
+        ImGui::Text("%s", part.own_sku.c_str());
+        ImGui::TableNextColumn();
+        ImGui::Text("%d", part.quantity);
+        ImGui::TableNextColumn();
+        ImGui::Text("%.2f", part.price);
+        ImGui::TableNextColumn();
+        ImGui::Text("%.2f", part.vat);
+        ImGui::TableNextColumn();
+        ImGui::Text("%.2f", part.total_net);
+        ImGui::TableNextColumn();
+        ImGui::Text("%.2f", part.total);
+        ++i;
+      }
 
-        ImGui::EndTable();
+
+      ImGui::EndTable();
     }
     ImGui::Button(_("Add item"));
     if (ImGui::BeginPopupContextItem("##empty", ImGuiPopupFlags_MouseButtonLeft
     )) {
       static ItemPicker item_picker;
       item_picker.Render();
+      if (ImGui::Button(_("Add to invoice"))) {
+        ItemPicker::PartInvoice _part = item_picker.GetPart();
+        parts.push_back(item_picker.GetPart());
+      }
       ImGui::EndPopup();
     }
 

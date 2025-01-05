@@ -539,8 +539,7 @@ void OwnSKUField::Feedback() {
 }
 
 Part OwnSKUField::GetFromDb() {
-  // Currently we dont need to get the whole Part objects from database
-  return Part();
+  return Database::Get().Part_(buffer);
 }
 
 QueriedTextField::QueriedTextField(const std::string& label, ImGuiInputTextFlags flags, TFFlags ro_flags

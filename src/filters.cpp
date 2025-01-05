@@ -75,24 +75,33 @@ void ItemPicker::Render() {
   name_field.Render();
 
   bool refresh = false;
-  static int _quantity = 0;
-  static double _price = 0.0;
-  static double _vat = 0.0;
-  static double _total_net = 0.0;
-  static double _total = 0.0;
 
-  if (ImGui::InputInt(_("Quantity"), &_quantity))
+  if (ImGui::InputInt(_("Quantity"), &quantity))
     refresh = true;
-  if (ImGui::InputDouble(_("Purchase price ex. VAT"), &_price, 0.0, 0.0, "%.2f"))
+  if (ImGui::InputDouble(_("Purchase price ex. VAT"), &price, 0.0, 0.0, "%.2f"))
     refresh = true;
-  if (ImGui::InputDouble(_("VAT rate"), &_vat, 0.0, 0.0, "%.2f")) 
+  if (ImGui::InputDouble(_("VAT rate"), &vat, 0.0, 0.0, "%.2f")) 
     refresh = true;
   
-  ImGui::InputDouble(_("Total net: %.2f"), &_total_net, 0.0, 0.0, "%.2f");
-  ImGui::InputDouble(_("Total: %.2f"), &_total, 0.0, 0.0, "%.2f");
+  ImGui::InputDouble(_("Total net: %.2f"), &total_net, 0.0, 0.0, "%.2f");
+  ImGui::InputDouble(_("Total: %.2f"), &total, 0.0, 0.0, "%.2f");
 
   if (refresh) {
-    _total_net = _quantity * _price;
-    _total = _total_net + (_total_net * _vat / 100);
+    total_net= quantity * price;
+    total = total_net+ (total_net* vat / 100);
   }
+}
+
+ItemPicker::PartInvoice ItemPicker::GetPart() {
+  PartInvoice _part;
+  _part.part = own_sku_field.GetFromDb();
+  _part.name = name_field.Get();
+  _part.supplier_sku = supplier_sku.Get();
+  _part.own_sku = own_sku_field.Get();
+  _part.quantity = quantity;
+  _part.price = price;
+  _part.total_net = total_net;
+  _part.total = total;
+  std::cout << _part.part.ToString() << std::endl;
+  return _part;
 }

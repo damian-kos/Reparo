@@ -20,7 +20,25 @@ public:
   ItemPicker();
   void Init();
   void Render();
+  struct PartInvoice {
+    int id;
+    std::string name;
+    std::string supplier_sku;
+    std::string own_sku;
+    int quantity;
+    double price; // ex_vat
+    double vat;
+    double total_net;
+    double total;
+    Part part;
+  };
+  PartInvoice GetPart(); // Return the selected part
 private:
+  int quantity = 0;
+  double price = 0.0;
+  double vat = 0.0;
+  double total_net = 0.0;
+  double total = 0.0;
   QueriedTextField supplier_sku;
   OwnSKUField own_sku_field;
   QueriedTextField name_field; // for the name of the part

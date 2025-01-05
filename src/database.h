@@ -275,6 +275,9 @@ public:
   static Device Device_(const T& _value);
   template <typename T, typename SM>
   static SM SimpleModel_(const T& _value);
+  template <typename T>
+  static Part Part_(const T& _value);
+
 };
 
 // After Selector class definition, add the implementation:
@@ -426,4 +429,21 @@ inline SM DBGet::SimpleModel_(const T& _value) {
       << e.what() << std::endl;
     throw; // Re-throw for higher-level handling
   }
+}
+
+template<typename T>
+inline Part DBGet::Part_(const T& _value) {
+  Database::OpenDb();
+  std::string query;
+  if (std::is_same_v<T, int>)
+    query = "id = (:id) ";
+  else
+    query = "own_sku = (:own_sku)";
+
+  Part part;
+  T value = _value;
+  Database::sql << "SELECT * FROM parts WHERE " << query,
+    soci::use(value),
+    soci::into(part);
+  return part;
 }
