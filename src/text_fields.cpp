@@ -568,7 +568,7 @@ bool QueriedTextField::Render() {
   if (ro_flags & TFFlags_HasPopup) {
     if (popup.OnTextInput(buffer, vec)) {
       buffer = popup.record;
-      Validate();
+      Validate(); 
       _state = true;
     }
   }

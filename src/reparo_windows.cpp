@@ -795,9 +795,12 @@ void PurchaseInvoiceWin::RenderAddItemButton() {
   if (ImGui::BeginPopupContextItem("##empty", ImGuiPopupFlags_MouseButtonLeft)) {
     static ItemPicker item_picker;
     item_picker.Render();
+    ImGui::BeginDisabled(item_picker.error);
     if (ImGui::Button(_("Add to invoice"))) {
       parts.push_back(item_picker.GetPart());
     }
+    ImGui::EndDisabled();
     ImGui::EndPopup();
+   
   }
 }

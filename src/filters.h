@@ -32,6 +32,8 @@ public:
     Part part;
   };
   PartInvoice GetPart(); // Return the selected part
+  bool error = true;
+  
 private:
   int quantity = 0;
   double price = 0.0;
@@ -41,4 +43,5 @@ private:
   QueriedTextField supplier_sku;
   OwnSKUField own_sku_field;
   QueriedTextField name_field; // for the name of the part
+  void Validate();
 };

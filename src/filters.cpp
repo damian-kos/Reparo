@@ -64,15 +64,18 @@ std::string DateFilter::GetForSQL() {
 
 ItemPicker::ItemPicker()
   : supplier_sku(_("Supplier SKU"), 0, TFFlags_HasPopup | TFFlags_NeverAnError, "DISTINCT supplier_sku", "purchase_invoice_items", "supplier_sku")
-  , own_sku_field(_("Own SKU"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError)
+  , own_sku_field(_("Own SKU"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence)
   , name_field(_("Item's name"), 0, TFFlags_HasPopup | TFFlags_HasLenValidator | TFFlags_EmptyIsError, "DISTINCT name", "parts", "name")
 {
 }
 
 void ItemPicker::Render() {
-  supplier_sku.Render();
-  own_sku_field.Render();
-  name_field.Render();
+  own_sku_field.Feedback();
+  name_field.FeedbackEx({ _("Name is empty"), _("Name is too short") });
+  ImGui::NewLine();
+  supplier_sku.Render(); 
+  own_sku_field.Render(); ImGui::SameLine(); ImGui::Text("%s", own_sku_field.error ? "true" : "false");
+  name_field.Render(); ImGui::SameLine(); ImGui::Text("%s", name_field.error ? "true" : "false");
 
   bool refresh = false;
 
@@ -90,6 +93,7 @@ void ItemPicker::Render() {
     total_net= quantity * price;
     total = total_net+ (total_net* vat / 100);
   }
+  Validate();
 }
 
 ItemPicker::PartInvoice ItemPicker::GetPart() {
@@ -104,4 +108,8 @@ ItemPicker::PartInvoice ItemPicker::GetPart() {
   _part.total = total;
   std::cout << _part.part.ToString() << std::endl;
   return _part;
+}
+
+void ItemPicker::Validate() {
+  error = own_sku_field.error || name_field.error;
 }
