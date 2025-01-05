@@ -21,7 +21,6 @@ public:
   void Init();
   void Render();
   struct PartInvoice {
-    int id;
     std::string name;
     std::string supplier_sku;
     std::string own_sku;

@@ -148,6 +148,16 @@ public:
   void Init();
   void Render();
 
+  void RenderInvoiceHeader();
+  void RenderInvoiceNumber();
+  void RenderDateFields();
+  void RenderSupplierField();
+  void RenderInvoiceDetails();
+  void RenderInvoiceItems();
+  void RenderInvoiceTableHeaders();
+  void RenderInvoiceTableRows();
+  void RenderAddItemButton();
+
 private:
   tm insert_date;
   tm purchase_date;

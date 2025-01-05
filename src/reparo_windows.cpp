@@ -695,99 +695,109 @@ void PurchaseInvoiceWin::Init() {
 void PurchaseInvoiceWin::Render() {
   ImGui::OpenPopup(_("Purchase invoice"));
   if (ImGui::BeginPopupModal(_("Purchase invoice"), &open)) {
-    if (ImGui::BeginTable("split3", 3)) {
-      
-      ImGui::TableNextRow();
-      ImGui::TableNextColumn();
-      ImGui::PushItemWidth(100);
-      if (ImGui::BeginCombo("##prefix", "PI/")) { // replace with more prefixes
-        ImGui::EndCombo();
-      }
-      ImGui::PopItemWidth();
-      ImGui::SameLine();
-      static std::string buffer;
-      ImGui::InputText("##PI", &buffer);
+    RenderInvoiceHeader();
+    RenderInvoiceItems();
+    RenderAddItemButton();
+    ImGui::EndPopup();
+  }
+}
 
-      ImGui::TableNextColumn();
-      
-      ImGui::TableNextColumn();
-      ImGui::DateChooser(_("Insert date"), insert_date);
-      
-      ImGui::TableNextColumn();
-      ImGui::TableNextColumn();
-      ImGui::TableNextColumn();
-      ImGui::DateChooser(_("Purchase date"), purchase_date);
+void PurchaseInvoiceWin::RenderInvoiceHeader() {
+  if (ImGui::BeginTable("split3", 3)) {
+    RenderInvoiceNumber();
+    RenderDateFields();
+    RenderSupplierField();
+    ImGui::EndTable();
+  }
+}
 
-      ImGui::TableNextColumn();
-      ImGui::TableNextColumn();
-      ImGui::TableNextColumn();
-      ImGui::DateChooser(_("Arrival date"), arrival_date);
+void PurchaseInvoiceWin::RenderInvoiceNumber() {
+  ImGui::TableNextRow();
+  ImGui::TableNextColumn();
+  ImGui::PushItemWidth(100);
+  if (ImGui::BeginCombo("##prefix", "PI/")) {
+    ImGui::EndCombo();
+  }
+  ImGui::PopItemWidth();
+  ImGui::SameLine();
+  static std::string buffer;
+  ImGui::InputText("##PI", &buffer);
+}
 
-      ImGui::TableNextColumn();
-      ImGui::Text(_("Supplier"));
-      ImGui::TableNextColumn();
-      if (supplier_field.Render()) {
-        supplier = supplier_field.GetFromDb();
-        std::cout << supplier.ToString() << std::endl;
-      }
-      ImGui::TableNextColumn();
-      ImGui::Button(_("+"));
+void PurchaseInvoiceWin::RenderDateFields() {
+  ImGui::TableNextColumn();
+  ImGui::TableNextColumn();
+  ImGui::DateChooser(_("Insert date"), insert_date);
+  ImGui::DateChooser(_("Purchase date"), purchase_date);
+  ImGui::DateChooser(_("Arrival date"), arrival_date);
+}
 
-      ImGui::TableNextColumn();
-      ImGui::TableNextColumn();
-      ImGui::Text("%s", supplier.address.ToString(", ", "right").c_str());
-      ImGui::TableNextColumn(); 
-      
-      ImGui::EndTable();
+void PurchaseInvoiceWin::RenderSupplierField() {
+  ImGui::TableNextColumn();
+  ImGui::Text(_("Supplier"));
+  ImGui::TableNextColumn();
+  if (supplier_field.Render()) {
+    supplier = supplier_field.GetFromDb();
+    std::cout << supplier.ToString() << std::endl;
+  }
+  ImGui::TableNextColumn();
+  ImGui::Button(_("+"));
+  ImGui::TableNextColumn();
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", supplier.address.ToString(", ", "right").c_str());
+}
+
+void PurchaseInvoiceWin::RenderInvoiceItems() {
+  static ImGuiTableFlags _flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp;
+
+  if (ImGui::BeginTable("InvoiceItems", 9, _flags)) {
+    RenderInvoiceTableHeaders();
+    RenderInvoiceTableRows();
+    ImGui::EndTable();
+  }
+}
+
+void PurchaseInvoiceWin::RenderInvoiceTableHeaders() {
+  std::vector<std::string> headers = { _("ID"), _("Name"), _("Supplier SKU"), _("Own SKU"), _("Quantity"), _("Purchase price. ex VAT"), _("VAT"), _("Total Net"), _("Total") };
+  for (const auto& header : headers) {
+    ImGui::TableSetupColumn(header.c_str());
+  }
+  ImGui::TableHeadersRow();
+}
+
+void PurchaseInvoiceWin::RenderInvoiceTableRows() {
+  int i = 1;
+  for (const auto& part : parts) {
+    ImGui::TableNextRow();
+    ImGui::TableNextColumn();
+    ImGui::Text("%d", i++);
+    ImGui::TableNextColumn();
+    ImGui::TextWrapped("%s", part.name.c_str());
+    ImGui::TableNextColumn();
+    ImGui::TextWrapped("%s", part.supplier_sku.c_str());
+    ImGui::TableNextColumn();
+    ImGui::TextWrapped("%s", part.own_sku.c_str());
+    ImGui::TableNextColumn();
+    ImGui::Text("%d", part.quantity);
+    ImGui::TableNextColumn();
+    ImGui::Text("%.2f", part.price);
+    ImGui::TableNextColumn();
+    ImGui::Text("%.2f", part.vat);
+    ImGui::TableNextColumn();
+    ImGui::Text("%.2f", part.total_net);
+    ImGui::TableNextColumn();
+    ImGui::Text("%.2f", part.total);
+  }
+}
+
+void PurchaseInvoiceWin::RenderAddItemButton() {
+  ImGui::Button(_("Add item"));
+  if (ImGui::BeginPopupContextItem("##empty", ImGuiPopupFlags_MouseButtonLeft)) {
+    static ItemPicker item_picker;
+    item_picker.Render();
+    if (ImGui::Button(_("Add to invoice"))) {
+      parts.push_back(item_picker.GetPart());
     }
-
-    if (ImGui::BeginTable("split3", 9)) {
-      std::vector<std::string> _headers = { _("ID"), _("Name"), _("Supplier SKU"), _("Own SKU"), _("Quantity"), _("Purchase price. ex VAT"), _("VAT"), _("Total Net"), _("Total") };
-
-      for (auto& _header : _headers)
-        ImGui::TableSetupColumn(_header.c_str());
-
-      ImGui::TableHeadersRow();
-      ImGui::TableNextRow();
-      int i = 1;
-      for (auto& part : parts) {
-        part.id = i;
-        ImGui::TableNextColumn();
-        ImGui::Text("%d", part.id);
-        ImGui::TableNextColumn();
-        ImGui::Text("%s", part.name.c_str());
-        ImGui::TableNextColumn();
-        ImGui::Text("%s", part.supplier_sku.c_str());
-        ImGui::TableNextColumn();
-        ImGui::Text("%s", part.own_sku.c_str());
-        ImGui::TableNextColumn();
-        ImGui::Text("%d", part.quantity);
-        ImGui::TableNextColumn();
-        ImGui::Text("%.2f", part.price);
-        ImGui::TableNextColumn();
-        ImGui::Text("%.2f", part.vat);
-        ImGui::TableNextColumn();
-        ImGui::Text("%.2f", part.total_net);
-        ImGui::TableNextColumn();
-        ImGui::Text("%.2f", part.total);
-        ++i;
-      }
-
-
-      ImGui::EndTable();
-    }
-    ImGui::Button(_("Add item"));
-    if (ImGui::BeginPopupContextItem("##empty", ImGuiPopupFlags_MouseButtonLeft
-    )) {
-      static ItemPicker item_picker;
-      item_picker.Render();
-      if (ImGui::Button(_("Add to invoice"))) {
-        ItemPicker::PartInvoice _part = item_picker.GetPart();
-        parts.push_back(item_picker.GetPart());
-      }
-      ImGui::EndPopup();
-    }
-
     ImGui::EndPopup();
   }
 }
