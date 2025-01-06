@@ -375,6 +375,7 @@ TableCreator& TableCreator::PartsTable() {
       quantity            INTEGER DEFAULT 0,
       purch_price         REAL,
       purch_price_ex_vat  REAL,
+      vat                 REAL DEFAULT 0.0,
       location            TEXT DEFAULT "--",
       reserved_quantity   INTEGER DEFAULT 0,
       created_at          DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -759,10 +760,10 @@ Inserter& Inserter::Part_(Part& part) {
         if (p.id < 0) {
           Database::sql << R"(INSERT INTO parts (name, own_sku, 
             quality_id, category_id, sell_price, sell_price_ex_vat, color_id, 
-            quantity, purch_price, purch_price_ex_vat, location) 
+            quantity, purch_price, purch_price_ex_vat, vat, location) 
             VALUES (:name, :own_sku, 
             :quality_id, :category_id, :sell_price, :sell_price_ex_vat, :color_id, 
-            :quantity, :purch_price, :purch_price_ex_vat, :location) 
+            :quantity, :purch_price, :purch_price_ex_vat, :vat, :location) 
             RETURNING id)",
            soci::use(p), soci::into(part.id);
         }

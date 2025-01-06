@@ -19,6 +19,7 @@ void Part::View() {
   ImGui::Text("%s:", _("Quantity       ")); ImGui::SameLine(); ImGui::Text("%d", quantity);
   ImGui::Text("%s:", _("Purchase price ")); ImGui::SameLine(); ImGui::Text("%.2f", purch_price);
   ImGui::Text("%s:", _("Ex. VAT        ")); ImGui::SameLine(); ImGui::Text("%.2f", purch_price_ex_vat);
+  ImGui::Text("%s:", _("VAT            ")); ImGui::SameLine(); ImGui::Text("%.2f", vat);
   ImGui::Text("%s:", _("Sell Price     ")); ImGui::SameLine(); ImGui::Text("%.2f", sell_price);
   ImGui::Text("%s:", _("Ex. VAT        ")); ImGui::SameLine(); ImGui::Text("%.2f", sell_price_ex_vat);
   ImGui::Text("%s:", _("Location       ")); ImGui::SameLine(); ImGui::Text("%s", location.c_str());

@@ -578,6 +578,7 @@ void PartsWin::Submit() {
     _part.quantity = quantity;
     _part.purch_price = purch_price.amount;
     _part.purch_price_ex_vat = purch_price.ExVat();
+    _part.vat = purch_price.vat_rate;
     _part.location = location.Get();
     _part.reserved_quantity = 0;
     _part.cmptble_devices = std::move(cmptble_devices);

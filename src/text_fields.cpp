@@ -422,7 +422,6 @@ template class SimpleModelField<Supplier>;
 template class SimpleModelField<Part>;
 template class SimpleModelField<Quality>;
 template class SimpleModelField<Alias>;
-template class SimpleModelField<Supplier>;
 
 // Currently it works only with <Color, DeviceField> which is suboptimal
 template<typename SM, typename R>

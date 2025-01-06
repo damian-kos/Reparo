@@ -19,6 +19,7 @@ public:
   int quantity;
   double purch_price;
   double purch_price_ex_vat;
+  double vat;
   std::string location;
   int reserved_quantity;
   std::unordered_map<int, Device> cmptble_devices;

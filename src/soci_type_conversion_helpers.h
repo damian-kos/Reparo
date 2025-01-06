@@ -279,6 +279,7 @@ namespace soci {
       model.quantity = v.get<int>("quantity", 0);
       model.purch_price = v.get<double>("purch_price", 0);
       model.purch_price_ex_vat = v.get<double>("purch_price_ex_vat", 0);
+      model.vat = v.get<double>("vat", 0);
       model.location = v.get<std::string>("location", "N/A");
       model.reserved_quantity = v.get<int>("reserved_quantity", 0);
       model.created_at = v.get<std::tm>("created_at");
@@ -286,7 +287,7 @@ namespace soci {
       std::cout << Convert::TmToStr(model.updated_at) << std::endl;
 
       // If Part retreived with joined tables // is there a better way to handle this?
-      if (v.get_number_of_columns() > 15) {
+      if (v.get_number_of_columns() > 16) {
         model.color.name = v.get<std::string>("color", "Unknown");
         model.quality.name = v.get<std::string>("quality", "Unknown");
         model.category.name = v.get<std::string>("category", "Unknown");
@@ -306,6 +307,7 @@ namespace soci {
       v.set("quantity", model.quantity);
       v.set("purch_price", model.purch_price);
       v.set("purch_price_ex_vat", model.purch_price_ex_vat);
+      v.set("vat", model.vat);
       v.set("location", model.location, model.location.empty() ? i_null : i_ok);
       v.set("reserved_quantity", model.reserved_quantity);
       v.set("created_at", model.created_at);

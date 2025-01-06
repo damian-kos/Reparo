@@ -210,7 +210,7 @@ void RepairView::Filters() {
 InventoryView::InventoryView() 
   : BaseTableView<Part>(
     "Inventory view",
-    15,
+    16,
     {
         { "id", "ID"},
         { "name", "Name"},
@@ -223,6 +223,7 @@ InventoryView::InventoryView()
         { "quantity", "Quantity"},
         { "purch_price", "Purchase price"},
         { "purch_price_ex_vat", "Purchase price ex.VAT"},
+        { "vat", "VAT"},
         { "location", "Location"},
         { "reserved_quantity", "Reserved Quantity"},
         { "created_at", "Created at" },
@@ -295,6 +296,9 @@ void InventoryView::DefaultRenderItem(const Part & _part) {
 
   ImGui::TableNextColumn();
   ImGui::Text("%.2f", _part.purch_price_ex_vat);
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%.2f", _part.vat);
 
   ImGui::TableNextColumn();
   ImGui::Text("%s", _part.location.c_str());
