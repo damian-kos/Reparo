@@ -73,37 +73,47 @@ void ItemPicker::Render() {
   own_sku_field.Feedback();
   name_field.FeedbackEx({ _("Name is empty"), _("Name is too short") });
   ImGui::NewLine();
-  supplier_sku.Render(); 
-  own_sku_field.Render(); ImGui::SameLine(); ImGui::Text("%s", own_sku_field.error ? "true" : "false");
-  name_field.Render(); ImGui::SameLine(); ImGui::Text("%s", name_field.error ? "true" : "false");
 
   bool refresh = false;
+  supplier_sku.Render();
+  if (own_sku_field.Render()) {
+    Part _part = own_sku_field.GetFromDb();
+    if (!_part) { return; }
+    name_field.FillBuffer(_part.name);
+    price = _part.purch_price;
+    vat = _part.vat;
+    quantity = 1;
+    refresh = true;
+  }
+  name_field.Render();
+
 
   if (ImGui::InputInt(_("Quantity"), &quantity))
     refresh = true;
   if (ImGui::InputDouble(_("Purchase price ex. VAT"), &price, 0.0, 0.0, "%.2f"))
     refresh = true;
-  if (ImGui::InputDouble(_("VAT rate"), &vat, 0.0, 0.0, "%.2f")) 
+  if (ImGui::InputDouble(_("% VAT rate"), &vat, 0.0, 0.0, "%.2f"))
     refresh = true;
-  
-  ImGui::InputDouble(_("Total net: %.2f"), &total_net, 0.0, 0.0, "%.2f");
-  ImGui::InputDouble(_("Total: %.2f"), &total, 0.0, 0.0, "%.2f");
+
+  ImGui::InputDouble(_("Total net"), &total_net, 0.0, 0.0, "%.2f");
+  ImGui::InputDouble(_("Total"), &total, 0.0, 0.0, "%.2f");
 
   if (refresh) {
-    total_net= quantity * price;
-    total = total_net+ (total_net* vat / 100);
+    total_net = quantity * price;
+    total = total_net + (total_net * vat / 100);
   }
   Validate();
 }
 
-ItemPicker::PartInvoice ItemPicker::GetPart() {
-  PartInvoice _part;
+InvoiceItem ItemPicker::GetPart() {
+  InvoiceItem _part;
   _part.part = own_sku_field.GetFromDb();
   _part.name = name_field.Get();
   _part.supplier_sku = supplier_sku.Get();
   _part.own_sku = own_sku_field.Get();
   _part.quantity = quantity;
-  _part.price = price;
+  _part.price.amount = price;
+  _part.price.vat_rate = vat;
   _part.total_net = total_net;
   _part.total = total;
   std::cout << _part.part.ToString() << std::endl;

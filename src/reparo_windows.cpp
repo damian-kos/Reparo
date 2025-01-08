@@ -9,6 +9,9 @@
 #include "modal.h"
 #include "tables.h"
 #include <map>
+#include "filters.h"
+
+
 
 CustomerWin::CustomerWin()
   : phone(_("Phone"), ImGuiInputTextFlags_CharsDecimal, TFFlags_HasPopup | TFFlags_EmptyIsError) { 
@@ -781,9 +784,9 @@ void PurchaseInvoiceWin::RenderInvoiceTableRows() {
     ImGui::TableNextColumn();
     ImGui::Text("%d", part.quantity);
     ImGui::TableNextColumn();
-    ImGui::Text("%.2f", part.price);
+    ImGui::Text("%.2f", part.price.amount);
     ImGui::TableNextColumn();
-    ImGui::Text("%.2f", part.vat);
+    ImGui::Text("%.2f", part.price.vat_rate);
     ImGui::TableNextColumn();
     ImGui::Text("%.2f", part.total_net);
     ImGui::TableNextColumn();

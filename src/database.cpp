@@ -432,6 +432,7 @@ TableCreator& TableCreator::PurchaseInvoicesItemsTable() {
     own_sku                 TEXT,  -- Can be used to link to future part
     purchase_price          REAL NOT NULL,
     purchase_price_ex_vat   REAL NOT NULL,
+    vat                     REAL DEFAULT 0.0,
     quantity                INTEGER NOT NULL,
     created_at              DATETIME DEFAULT CURRENT_TIMESTAMP,
     

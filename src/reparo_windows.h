@@ -9,8 +9,7 @@
 #include "models/supplier.h"
 #include "base_window.h"
 #include "imguidatechooser.h"
-#include "filters.h"
-
+#include "invoices.h"
 
 class StackModal;
 
@@ -164,7 +163,7 @@ private:
   tm arrival_date;
   SimpleModelField<Supplier> supplier_field;
   Supplier supplier;
-  std::vector<ItemPicker::PartInvoice> parts;
+  std::vector<InvoiceItem> parts;
 };
 
 

@@ -1,15 +1,17 @@
 #pragma once
-#include <soci/soci.h>
-#include <soci/sqlite3/soci-sqlite3.h>
-#include "models/simple_models.h"
+#include "conversion.h"
 #include "models/alias.h"
 #include "models/customer.h"
 #include "models/device.h"
-#include "models/repair.h"
-#include "models/supplier.h"
 #include "models/parts.h"
-#include "conversion.h"
+#include "models/repair.h"
+#include "models/simple_models.h"
+#include "models/supplier.h"
+#include "../../src/invoices.h"
 #include <iostream>
+#include <soci/soci.h>
+//#include <soci/sqlite3/soci-sqlite3.h>
+
 
 
 // Concept definition
@@ -338,6 +340,38 @@ namespace soci {
       v.set("id", model.id);
       v.set("model", model.name);
       v.set("color", model.color.name);
+      ind = i_ok;
+    }
+  };
+
+ template <>
+  struct type_conversion<InvoiceItem> {
+    typedef values base_type;
+
+    static void from_base(const values& v, indicator ind, InvoiceItem& model) {
+      if (ind == i_null) {
+        throw std::runtime_error("Null value fetched from database");
+      }
+      model.purchase_invoice_id = v.get<int>("purchase_invoice_id");
+      model.part.id = v.get<int>("part_id", -1);
+      model.supplier_sku = v.get<std::string>("supplier_sku", "");
+      model.name = v.get<std::string>("name");
+      model.own_sku = v.get<std::string>("own_sku");
+      model.price.amount = v.get<double>("purchase_price", 0.0);
+      model.price.ex_vat = v.get<double>("purchase_price_ex_vat", -1);
+      model.quantity = v.get<int>("quantity", 0);
+    }
+
+    static void to_base(InvoiceItem& model, values& v, indicator& ind) {
+      v.set("purchase_invoice_id", model.purchase_invoice_id);
+      v.set("part_id", model.part.id);
+      v.set("supplier_sku", model.supplier_sku);
+      v.set("name", model.name);
+      v.set("own_sku", model.own_sku);
+      v.set("purchase_price", model.price.amount);
+      double _ex_vat = model.price.ExVat();
+      v.set("purchase_price_ex_vat", _ex_vat);
+      v.set("quantity", model.quantity);
       ind = i_ok;
     }
   };
