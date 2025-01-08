@@ -1,6 +1,7 @@
 #pragma once
 #include "../../src/models/parts.h"
-#include "base_window.h"
+#include "../../src/models/supplier.h"
+
 #include "../../src/models/simple_models.h"
 #include <string>
 
@@ -18,11 +19,16 @@ struct InvoiceItem {
 
 
 class Invoice {
+public:
+  int id;
+  std::string number;
+  tm created_at;
+  tm inserted_at;
 };
 
 class PurchaseInvoice : public Invoice {
 public:
 
 private:
-
+  Supplier supplier;
 };

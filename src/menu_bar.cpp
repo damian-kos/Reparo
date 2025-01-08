@@ -15,7 +15,7 @@ void RoMenuBar::Render() {
     DeviceFromCustom();
     Parts();
     StockReceived();
-    
+    SupplierRecord();
     ImGui::EndMenu();
   }
   // Views
@@ -114,6 +114,12 @@ void RoMenuBar::StockReceived() {
     if (ImGui::MenuItem(_("Always open"))) {
     }
     ImGui::EndMenu();
+  }
+}
+
+void RoMenuBar::SupplierRecord() {
+  if (ImGui::MenuItem(_("Supplier"))) {
+    WindowFactory::AddWindow("supplier");
   }
 }
 

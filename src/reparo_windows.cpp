@@ -745,7 +745,30 @@ void PurchaseInvoiceWin::RenderSupplierField() {
     std::cout << supplier.ToString() << std::endl;
   }
   ImGui::TableNextColumn();
-  ImGui::Button(_("+"));
+  ImGui::Button(_("Add Supplier"));
+  if (ImGui::BeginPopupContextItem("##empty", ImGuiPopupFlags_MouseButtonLeft)) {
+    static Supplier _new_supplier;
+    static TextField _name(_("Name"), 0, TFFlags_HasLenValidator);
+    _name.Render();
+
+    static std::vector<TextField> _address(5);
+
+    // Initialize the TextField objects only once
+    static bool initialized = false;
+    if (!initialized) {
+      for (int i = 0; i < _address.size(); ++i) {
+        std::string label = _("Address Line ") + std::to_string(i + 1);
+        _address[i] = TextField(label);
+      }
+      initialized = true;
+    }
+
+    for (int i = 0; i < _address.size(); ++i) {
+      _address[i].Render();
+    }
+
+    ImGui::EndPopup();
+  }
   ImGui::TableNextColumn();
   ImGui::TableNextColumn();
   ImGui::Text("%s", supplier.address.ToString(", ", "right").c_str());
@@ -804,7 +827,55 @@ void PurchaseInvoiceWin::RenderAddItemButton() {
       parts.push_back(item_picker.GetPart());
     }
     ImGui::EndDisabled();
-    ImGui::EndPopup();
-   
+    ImGui::EndPopup(); 
   }
 }
+
+SupplierWin::SupplierWin() {
+  Init();
+}
+
+void SupplierWin::Init() {
+  open = true;
+  name = NameField(_("Name"), 0, TFFlags_EmptyIsError | TFFlags_HasLenValidator);
+  address.resize(5);
+  // Initialize address fields
+  for (int i = 0; i < 5; i++) {
+    std::string label = _("Address Line ") + std::to_string(i + 1);
+    address[i] = TextField(label);
+  }
+}
+
+void SupplierWin::Render() {
+  ImGui::OpenPopup(_("Supplier"));
+  if (ImGui::BeginPopupModal(_("Supplier"), &open)) {
+    FieldsValidate();
+    name.Feedback();
+    ImGui::NewLine();
+    name.Render();
+    for (auto& line : address) {
+      line.Render();
+    }
+    Submit();
+    ImGui::EndPopup();
+  }
+}
+
+bool SupplierWin::Submit() {
+  ImGui::BeginDisabled(error);
+  if(ImGui::Button(_("Submit"))) {
+    Supplier _supplier;
+    _supplier.name = name.Get();
+    _supplier.address.SetLines(address);
+    _supplier.InsertToDb();
+    if (_supplier.id > 0)
+      return true;
+  }
+  ImGui::EndDisabled();
+  return false;
+}
+
+void SupplierWin::FieldsValidate() {
+  error = name.error;
+}
+

@@ -73,6 +73,7 @@ public:
   Inserter& Device_(Device& device);
   Inserter& Repair_(Repair& repair);
   Inserter& Part_(Part& part);
+  Inserter& Supplier_(Supplier& _supplier);
   template <typename T>
   Inserter& OfSimpleModel(T& model);
 

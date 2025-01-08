@@ -9,6 +9,7 @@ public:
   void Device();
   void Customer();
   void StockReceived();
+  void SupplierRecord();
   void AttributesView();
   void InventoryView();
   void DevicesView();

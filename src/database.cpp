@@ -792,6 +792,24 @@ Inserter& Inserter::Part_(Part& part) {
   );     
 }
 
+Inserter& Inserter::Supplier_(Supplier& _supplier) {
+  return ExecuteTransaction(
+    [&_supplier]() {
+      Supplier _s = _supplier;
+      int _supplier_id = -1;
+      Database::sql << "INSERT INTO suppliers "
+        "(supplier, line1, line2, line3, line4, line5) "
+        "VALUES (:supplier ,:line1 ,:line2 ,:line3 ,:line4 ,:line5) "
+        "RETURNING id",
+        soci::use(_s),
+        soci::into(_supplier_id);
+      _supplier.id = _supplier_id;
+
+    },
+    "Supplier insertion: " + _supplier.ToString()  + ")"
+  );
+}
+
 template<typename T>
 Customer DBGet::Customer_(const T& _value) {
   Database::OpenDb();

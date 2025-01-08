@@ -166,7 +166,19 @@ private:
   std::vector<InvoiceItem> parts;
 };
 
+class SupplierWin : public RoWindow {
+public:
+  SupplierWin();
+  void Init();
+  void Render();
 
+private:
+  bool Submit();
+  void FieldsValidate();
+  TextField name;
+  std::vector<TextField> address;
+  bool error;
+};
 template <typename T>
 class SimpleModelWin : public RoWindow{
 public:

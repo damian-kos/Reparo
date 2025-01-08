@@ -238,8 +238,8 @@ namespace soci {
       model.name = v.get<std::string>("supplier");
       std::vector<std::string> vec;
       vec.clear();
-      for (int i = 1; i < 6; ++i) {
-        std::string str = "line" + std::to_string(i);
+      for (int i = 0; i < 5; ++i) {
+        std::string str = "line" + std::to_string(i + 1);
         vec.push_back(v.get<std::string>(str, ""));
       }
       model.address.SetLines(vec);
@@ -252,7 +252,7 @@ namespace soci {
       v.set("supplier", model.name);
       std::vector<std::string> vec = model.address.Get().Lines();
       for (int i = 0; i < 5; ++i) {
-        std::string str = "line" + std::to_string(i+1);
+        std::string str = "line" + std::to_string(i + 1);
         v.set(str, vec[i]);
       }
 

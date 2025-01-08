@@ -8,6 +8,7 @@ public:
   Supplier& GetSupplier();
   const std::string ToString(std::string _delimiter = " | ") const;
   void View();
+  void InsertToDb();
 
   int id = -1;
   std::string name; // in database refered as 'supplier'

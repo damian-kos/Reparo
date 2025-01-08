@@ -1,6 +1,7 @@
 #include "supplier.h"
 #include "imgui.h"
 #include "../../src/RoLocalization.h"
+#include "../../src/database.h"
 
 Supplier::Supplier() { }
 
@@ -24,4 +25,9 @@ void Supplier::View() {
   for (auto& line : address.Get().Lines()) {
     ImGui::Text("%s", line.c_str());
   }
+}
+
+bool Supplier::InsertToDb() {
+  Database::Insert().Supplier_(*this);
+  return false;
 }
