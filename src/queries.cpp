@@ -134,6 +134,33 @@ namespace Query {
     return device_id;
   }
 
+  int InsertSupplier(Supplier& _supplier)   {
+    Supplier _s = _supplier;
+    int _supplier_id = -1;
+    Database::sql << "INSERT INTO suppliers "
+      "(supplier, line1, line2, line3, line4, line5) "
+      "VALUES (:supplier ,:line1 ,:line2 ,:line3 ,:line4 ,:line5) "
+      "RETURNING id",
+      soci::use(_s),
+      soci::into(_supplier_id);
+    std::cout << _supplier_id << std::endl;
+    _supplier.id = _supplier_id;
+    return _supplier_id;
+  }
+
+  int InsertPurchaseInvoice(PurchaseInvoice& _invoice) {
+    PurchaseInvoice _i = _invoice;
+    int _invoice_id = -1;
+    Database::sql << "INSERT INTO purchase_invoices "
+      "(invoice_number, supplier_id, purchased_at, arrived_at, created_at) "
+      "VALUES (:invoice_number, :supplier_id, :purchased_at, :arrived_at, :created_at) "
+      "RETURNING id",
+      soci::use(_i),
+      soci::into(_invoice_id);
+    _invoice.id = _invoice_id;
+    return _invoice_id;
+  }
+
   template <typename T>
   int InsertSimpleModel(T& _model) {
     // for safety of object lifetime and immutability

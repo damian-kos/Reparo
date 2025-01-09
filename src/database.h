@@ -74,6 +74,7 @@ public:
   Inserter& Repair_(Repair& repair);
   Inserter& Part_(Part& part);
   Inserter& Supplier_(Supplier& _supplier);
+  Inserter& PurchaseInvoice_(PurchaseInvoice& _invoice);
   template <typename T>
   Inserter& OfSimpleModel(T& model);
 

@@ -162,7 +162,6 @@ Customer CustomerWin::GetEntity() {
     customer.ship_addresses.SetID(ship_id);
   }
   return customer;
-  
 }
 
 DeviceWin::DeviceWin() {
@@ -691,7 +690,7 @@ PurchaseInvoiceWin::PurchaseInvoiceWin()
 
 void PurchaseInvoiceWin::Init() {
   open = true;
-  ImGui::SetDateToday(&insert_date);
+  ImGui::SetDateToday(&create_date);
   ImGui::SetDateToday(&purchase_date);
   ImGui::SetDateToday(&arrival_date);
 }
@@ -702,6 +701,7 @@ void PurchaseInvoiceWin::Render() {
     RenderInvoiceHeader();
     RenderInvoiceItems();
     RenderAddItemButton();
+    Submit();
     ImGui::EndPopup();
   }
 }
@@ -731,7 +731,7 @@ void PurchaseInvoiceWin::RenderInvoiceNumber() {
 void PurchaseInvoiceWin::RenderDateFields() {
   ImGui::TableNextColumn();
   ImGui::TableNextColumn();
-  ImGui::DateChooser(_("Insert date"), insert_date);
+  ImGui::DateChooser(_("Insert date"), create_date);
   ImGui::DateChooser(_("Purchase date"), purchase_date);
   ImGui::DateChooser(_("Arrival date"), arrival_date);
 }
@@ -742,9 +742,15 @@ void PurchaseInvoiceWin::RenderSupplierField() {
   ImGui::TableNextColumn();
   if (supplier_field.Render()) {
     supplier = supplier_field.GetFromDb();
-    std::cout << supplier.ToString() << std::endl;
   }
   ImGui::TableNextColumn();
+  AddSupplierBtn();
+  ImGui::TableNextColumn();
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", supplier.address.ToString(", ", "right").c_str());
+}
+
+void PurchaseInvoiceWin::AddSupplierBtn() {
   ImGui::Button(_("Add Supplier"));
   if (ImGui::BeginPopupContextItem("##Supplier", ImGuiPopupFlags_MouseButtonLeft)) {
     static SupplierWin _supplier_win;
@@ -753,13 +759,12 @@ void PurchaseInvoiceWin::RenderSupplierField() {
     if (ImGui::Button(_("Add"))) {
       Supplier _supplier = _supplier_win.GetEntity();
       supplier_field.FillBuffer(_supplier.name);
+      supplier.id = -1;
+      supplier.name = _supplier.name;
       supplier.address = _supplier.address;
     }
     ImGui::EndPopup();
   }
-  ImGui::TableNextColumn();
-  ImGui::TableNextColumn();
-  ImGui::Text("%s", supplier.address.ToString(", ", "right").c_str());
 }
 
 void PurchaseInvoiceWin::RenderInvoiceItems() {
@@ -816,6 +821,20 @@ void PurchaseInvoiceWin::RenderAddItemButton() {
     }
     ImGui::EndDisabled();
     ImGui::EndPopup(); 
+  }
+}
+
+void PurchaseInvoiceWin::Submit() {
+  if (ImGui::Button(_("Create Invoice"))) {
+    PurchaseInvoice _invoice;
+    _invoice.number = "test number";
+    _invoice.purchased_at = purchase_date;
+    _invoice.arrived_at = arrival_date;
+    _invoice.created_at = create_date;
+    _invoice.supplier = supplier;
+    _invoice.InsertToDb();
+    std::cout << _invoice.ToString() << std::endl;
+
   }
 }
 

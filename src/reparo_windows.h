@@ -151,16 +151,17 @@ public:
   void RenderInvoiceNumber();
   void RenderDateFields();
   void RenderSupplierField();
-  void RenderInvoiceDetails();
+  void AddSupplierBtn();
   void RenderInvoiceItems();
   void RenderInvoiceTableHeaders();
   void RenderInvoiceTableRows();
   void RenderAddItemButton();
+  void Submit();
 
 private:
-  tm insert_date;
   tm purchase_date;
   tm arrival_date;
+  tm create_date;
   SimpleModelField<Supplier> supplier_field;
   Supplier supplier;
   std::vector<InvoiceItem> parts;

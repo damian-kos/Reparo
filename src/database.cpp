@@ -407,8 +407,8 @@ TableCreator& TableCreator::PurchaseInvoicesTable() {
       id                 INTEGER PRIMARY KEY,
       invoice_number     TEXT NOT NULL,
       supplier_id        INTEGER,
-      vat_rate           REAL NOT NULL,
-      invoice_date       DATE NOT NULL,
+      purchased_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
+      arrived_at         DATETIME DEFAULT CURRENT_TIMESTAMP,
       created_at         DATETIME DEFAULT CURRENT_TIMESTAMP,
     
       FOREIGN KEY (supplier_id)
@@ -795,18 +795,20 @@ Inserter& Inserter::Part_(Part& part) {
 Inserter& Inserter::Supplier_(Supplier& _supplier) {
   return ExecuteTransaction(
     [&_supplier]() {
-      Supplier _s = _supplier;
-      int _supplier_id = -1;
-      Database::sql << "INSERT INTO suppliers "
-        "(supplier, line1, line2, line3, line4, line5) "
-        "VALUES (:supplier ,:line1 ,:line2 ,:line3 ,:line4 ,:line5) "
-        "RETURNING id",
-        soci::use(_s),
-        soci::into(_supplier_id);
-      _supplier.id = _supplier_id;
-
+     _supplier.id = Query::InsertSupplier(_supplier);
     },
     "Supplier insertion: " + _supplier.ToString()  + ")"
+  );
+}
+
+Inserter& Inserter::PurchaseInvoice_(PurchaseInvoice& _invoice) {
+  return ExecuteTransaction(
+    [&_invoice]() {
+      if(_invoice.supplier.id < 0)
+        Query::InsertSupplier(_invoice.supplier);
+      Query::InsertPurchaseInvoice(_invoice);
+    },
+    "Supplier insertion: " + _invoice.ToString() + ")"
   );
 }
 

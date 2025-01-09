@@ -17,18 +17,19 @@ struct InvoiceItem {
   int quantity;
 };
 
-
 class Invoice {
 public:
   int id;
   std::string number;
+  tm purchased_at;
+  tm arrived_at;
   tm created_at;
-  tm inserted_at;
+
 };
 
 class PurchaseInvoice : public Invoice {
 public:
-
-private:
   Supplier supplier;
+  const std::string ToString() const;
+  void InsertToDb();
 };

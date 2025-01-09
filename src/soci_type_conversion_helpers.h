@@ -251,6 +251,10 @@ namespace soci {
       v.set("id", model.id);
       v.set("supplier", model.name);
       std::vector<std::string> vec = model.address.Get().Lines();
+      
+      if (vec.empty())
+        vec.resize(5, "");
+
       for (int i = 0; i < 5; ++i) {
         std::string str = "line" + std::to_string(i + 1);
         v.set(str, vec[i]);
@@ -372,6 +376,31 @@ namespace soci {
       double _ex_vat = model.price.ExVat();
       v.set("purchase_price_ex_vat", _ex_vat);
       v.set("quantity", model.quantity);
+      ind = i_ok;
+    }
+  };
+
+  template <>
+  struct type_conversion<PurchaseInvoice> {
+    typedef values base_type;
+
+    static void from_base(const values& v, indicator ind, PurchaseInvoice& model) {
+      if (ind == i_null) {
+        throw std::runtime_error("Null value fetched from database");
+      }
+      model.number = v.get<std::string>("invoice_number");
+      model.supplier.id = v.get<int>("supplier_id");
+      model.purchased_at = v.get<tm>("purchased_at");
+      model.arrived_at = v.get<tm>("arrived_at");
+      model.created_at = v.get<tm>("created_at");
+    }
+
+    static void to_base(PurchaseInvoice& model, values& v, indicator& ind) {
+      v.set("invoice_number", model.number);
+      v.set("supplier_id", model.supplier.id);
+      v.set("purchased_at", model.purchased_at);
+      v.set("arrived_at", model.arrived_at);
+      v.set("created_at", model.created_at);
       ind = i_ok;
     }
   };
