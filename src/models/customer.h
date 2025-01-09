@@ -7,7 +7,7 @@
 class Customer{
 public:
   Customer();
-  Customer& GetCustomer();
+  Customer& GetEntity();
   void View();
   const std::string ToString() const;
   void InsertModal();

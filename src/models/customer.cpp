@@ -8,7 +8,7 @@
 
 Customer::Customer() {}
 
-Customer& Customer::GetCustomer() {
+Customer& Customer::GetEntity() {
 #ifdef DEBUG
   std::cout << "Customer: " << id << " / " << phone << " / " << name << " / " << surname << " / " << email << std::endl;
 #endif // DEBUG

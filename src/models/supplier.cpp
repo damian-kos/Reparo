@@ -27,7 +27,6 @@ void Supplier::View() {
   }
 }
 
-bool Supplier::InsertToDb() {
+void Supplier::InsertToDb() {
   Database::Insert().Supplier_(*this);
-  return false;
 }

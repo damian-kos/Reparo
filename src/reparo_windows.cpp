@@ -151,7 +151,7 @@ Customer CustomerWin::CreateCustomer() {
 /// return the customer created with current input fields buffers.
 /// </summary>
 /// <returns></returns>
-Customer CustomerWin::GetCustomer() {
+Customer CustomerWin::GetEntity() {
   Customer temp = phone.GetFromDb();
   Customer customer = CreateCustomer();
   if (temp.id > 0) {
@@ -377,7 +377,7 @@ void RepairWin::Submit() {
   ImGui::BeginDisabled(error);
   if (ImGui::Button(_("Submit Repair"))) {
     Repair _repair;
-    _repair.customer = customer_section.GetCustomer();
+    _repair.customer = customer_section.GetEntity();
     // We can change database query below if we needed to get brand and type of the device
     _repair.device = CreateDevice();
     _repair.category = category.GetFromDb();
@@ -746,27 +746,15 @@ void PurchaseInvoiceWin::RenderSupplierField() {
   }
   ImGui::TableNextColumn();
   ImGui::Button(_("Add Supplier"));
-  if (ImGui::BeginPopupContextItem("##empty", ImGuiPopupFlags_MouseButtonLeft)) {
-    static Supplier _new_supplier;
-    static TextField _name(_("Name"), 0, TFFlags_HasLenValidator);
-    _name.Render();
-
-    static std::vector<TextField> _address(5);
-
-    // Initialize the TextField objects only once
-    static bool initialized = false;
-    if (!initialized) {
-      for (int i = 0; i < _address.size(); ++i) {
-        std::string label = _("Address Line ") + std::to_string(i + 1);
-        _address[i] = TextField(label);
-      }
-      initialized = true;
+  if (ImGui::BeginPopupContextItem("##Supplier", ImGuiPopupFlags_MouseButtonLeft)) {
+    static SupplierWin _supplier_win;
+    _supplier_win.Feedback();
+    _supplier_win.InputFields();
+    if (ImGui::Button(_("Add"))) {
+      Supplier _supplier = _supplier_win.GetEntity();
+      supplier_field.FillBuffer(_supplier.name);
+      supplier.address = _supplier.address;
     }
-
-    for (int i = 0; i < _address.size(); ++i) {
-      _address[i].Render();
-    }
-
     ImGui::EndPopup();
   }
   ImGui::TableNextColumn();
@@ -849,30 +837,40 @@ void SupplierWin::Init() {
 void SupplierWin::Render() {
   ImGui::OpenPopup(_("Supplier"));
   if (ImGui::BeginPopupModal(_("Supplier"), &open)) {
-    FieldsValidate();
-    name.Feedback();
-    ImGui::NewLine();
-    name.Render();
-    for (auto& line : address) {
-      line.Render();
-    }
+    Feedback();
+    InputFields();
     Submit();
     ImGui::EndPopup();
   }
 }
 
-bool SupplierWin::Submit() {
+void SupplierWin::Feedback() {
+  FieldsValidate();
+  name.Feedback();
+  ImGui::NewLine();
+}
+
+void SupplierWin::InputFields() {
+  name.Render();
+  for (auto& line : address) {
+    line.Render();
+  }
+}
+
+Supplier SupplierWin::GetEntity() {
+  Supplier _supplier;
+  _supplier.name = name.Get();
+  _supplier.address.SetLines(address);
+  return _supplier;
+}
+
+void SupplierWin::Submit() {
   ImGui::BeginDisabled(error);
-  if(ImGui::Button(_("Submit"))) {
-    Supplier _supplier;
-    _supplier.name = name.Get();
-    _supplier.address.SetLines(address);
+  if (ImGui::Button(_("Submit"))) {
+    Supplier _supplier = GetEntity();
     _supplier.InsertToDb();
-    if (_supplier.id > 0)
-      return true;
   }
   ImGui::EndDisabled();
-  return false;
 }
 
 void SupplierWin::FieldsValidate() {

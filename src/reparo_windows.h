@@ -28,7 +28,7 @@ public:
   void Addresses();
   void FieldsValidate();
   Customer CreateCustomer();
-  Customer GetCustomer();
+  Customer GetEntity();
   bool error = true;
 private:
   PhoneField phone;
@@ -171,9 +171,12 @@ public:
   SupplierWin();
   void Init();
   void Render();
+  void Feedback();
+  void InputFields();
+  Supplier GetEntity();
 
 private:
-  bool Submit();
+  void Submit();
   void FieldsValidate();
   TextField name;
   std::vector<TextField> address;
