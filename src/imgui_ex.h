@@ -21,7 +21,12 @@ namespace ImGui {
       ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.8, 0.5, 0.5, 0.5));
   }
 
-  void inline EndValid(const bool& err) {
+  void inline BeginWarning(const bool& err) {
+    if (err)
+      ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(1.0, 0.9, 0.0, 0.5));
+  }
+
+  void inline EndColor(const bool& err) {
     if (err)
       ImGui::PopStyleColor();
   }

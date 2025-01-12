@@ -22,8 +22,8 @@ struct InvoiceItem {
 
 class Invoice {
 public:
-  int id;
-  std::string number;
+  int id = -1;
+  std::string name; // invoice number
   tm purchased_at;
   tm arrived_at;
   tm created_at;
@@ -36,4 +36,6 @@ public:
   const std::string ToString() const;
   void InsertToDb();
   std::vector<InvoiceItem> items;
+  static constexpr std::string_view table = "purchase_invoices";
+  static inline const std::string column = "invoice_number";
 };

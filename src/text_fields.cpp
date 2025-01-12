@@ -112,7 +112,7 @@ void TextField::Field(){
   }
   ImGui::BeginValid(has_error_with_content);
   ImGui::InputTextWithHint(("##" + label).c_str(), (label + "...").c_str(), &buffer, flags);
-  ImGui::EndValid(has_error_with_content);
+  ImGui::EndColor(has_error_with_content);
 }
 
 void TextField::Feedback() { 
@@ -150,8 +150,10 @@ void TextField::FeedbackEx(std::initializer_list<std::string> args) {
     ImGui::Text("%s", _vec_args[1].c_str());
     ImGui::SameLine();
   }
-  if (!_vec_args[2].empty())
-    return;
+  if (err_flags & ValidatorFlags_IsDuplicate && !_vec_args[2].empty()) {
+    ImGui::Text("%s", _vec_args[2].c_str());
+    ImGui::SameLine();
+  }
   if (!_vec_args[3].empty())
     return;
   if (!_vec_args[4].empty())
@@ -168,6 +170,7 @@ const void TextField::Clear() {
 
 void TextField::FillBuffer(const std::string& fill) {
   buffer = fill;
+  Validate();
 }
 
 bool PhoneField::Render() {
@@ -370,7 +373,6 @@ SM& SimpleModelField<SM>::Render() {
   Field();
   model = SM();
   if (ImGui::IsItemEdited() || ImGui::IsItemActivated()) {
-
     Validate();
     vec.clear();
     vec = Database::Select<SM>().From().Where(column).Like(buffer).All();
@@ -392,7 +394,11 @@ template<typename SM>
 void SimpleModelField<SM>::Validate() {
   err_flags = ValidatorFlags_Pass;  // Reset flags
   err_flags |= Validator::StrLen(buffer, 3);
-  error = err_flags & ValidatorFlags_StrLen;
+  if (!(ro_flags & TFFlags_AllowDbPresence)) {
+    std::string _table = std::string(model.table);
+    err_flags |= Validator::DatabaseChk<SM>(_table, column + " = '" + buffer+ "'"); // Edit with corresponding table once data in db exists
+  }
+  error = err_flags & (ValidatorFlags_StrLen | ValidatorFlags_IsDuplicate);
   EmptyBufferError();
 }
 
@@ -400,7 +406,10 @@ template<typename SM>
 void SimpleModelField<SM>::Feedback() {
   if (!has_error_with_content) { return; }
   if (err_flags & ValidatorFlags_StrLen) {
-    ImGui::Text("%s too short", label.c_str()); ImGui::SameLine();
+    ImGui::Text(_("%s too short"), label.c_str()); ImGui::SameLine();
+  }
+  if (err_flags & ValidatorFlags_IsDuplicate) {
+    ImGui::Text(_("%s already exists"), label.c_str()); ImGui::SameLine();
   }
 }
 
@@ -425,6 +434,8 @@ template class SimpleModelField<Supplier>;
 template class SimpleModelField<Part>;
 template class SimpleModelField<Quality>;
 template class SimpleModelField<Alias>;
+template class SimpleModelField<PurchaseInvoice>;
+
 
 // Currently it works only with <Color, DeviceField> which is suboptimal
 template<typename SM, typename R>

@@ -66,7 +66,7 @@ public:
   const std::string& Get() const;
   const void Clear();
   void FillBuffer(const std::string& fill);
-  bool error = true; // trivial so no getter
+  bool error = true; 
 protected:
   std::string label;
   std::string buffer;

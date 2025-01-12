@@ -146,16 +146,16 @@ public:
       sql << "SELECT " << columns;
     }
 
-    Selector& From(const std::string& table = "") {
-      std::string table_name = table;
-      if constexpr (!std::is_same_v<T, std::string>) {
-        if (table_name.empty()) {
+    Selector& From(const std::string& _table = "") {
+      std::string table_name = _table;
+      if (table_name.empty()) {
+        if constexpr (std::is_class<T>::value && requires { T::table; }) {
           T temp;
-          table_name = temp.table; 
+          table_name = temp.table;
         }
       }
       sql << " FROM " << table_name;
-      
+
       return *this;
     }
 
@@ -227,6 +227,11 @@ public:
 
     Selector& Date(const std::string& _date) {
       sql << _date;
+      return *this;
+    }
+
+    Selector& Last(const std::string& _primary_key = "id") {
+      sql << " ORDER BY " << _primary_key << " DESC LIMIT 1";
       return *this;
     }
 

@@ -390,7 +390,8 @@ namespace soci {
       if (ind == i_null) {
         throw std::runtime_error("Null value fetched from database");
       }
-      model.number = v.get<std::string>("invoice_number");
+      model.id = v.get<int>("id");
+      model.name = v.get<std::string>("invoice_number");
       model.supplier.id = v.get<int>("supplier_id");
       model.purchased_at = v.get<tm>("purchased_at");
       model.arrived_at = v.get<tm>("arrived_at");
@@ -398,7 +399,7 @@ namespace soci {
     }
 
     static void to_base(PurchaseInvoice& model, values& v, indicator& ind) {
-      v.set("invoice_number", model.number);
+      v.set("invoice_number", model.name);
       v.set("supplier_id", model.supplier.id);
       v.set("purchased_at", model.purchased_at);
       v.set("arrived_at", model.arrived_at);

@@ -683,21 +683,25 @@ template class SimpleModelWin<Color>;
 template class SimpleModelWin<Quality>;
  
 PurchaseInvoiceWin::PurchaseInvoiceWin()
-  : supplier_field(_("Supplier"), 0, TFFlags_HasPopup)
+  :invoice_number(_("Invoice number"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError, "invoice_number"),
+   supplier_field(_("Supplier"), 0, TFFlags_HasPopup)
 {
   Init();
 } 
 
 void PurchaseInvoiceWin::Init() {
   open = true;
-  ImGui::SetDateToday(&create_date);
-  ImGui::SetDateToday(&purchase_date);
-  ImGui::SetDateToday(&arrival_date);
+  ImGui::SetDateToday(&create_date.date);
+  ImGui::SetDateToday(&purchase_date.date);
+  ImGui::SetDateToday(&arrival_date.date);
+  std::string _last_number = Database::Select<std::string>("invoice_number").From("purchase_invoices").Last().One();
+  invoice_number.FillBuffer(_last_number);
 }
 
 void PurchaseInvoiceWin::Render() {
   ImGui::OpenPopup(_("Purchase invoice"));
   if (ImGui::BeginPopupModal(_("Purchase invoice"), &open)) {
+    Feedback();
     RenderInvoiceHeader();
     RenderInvoiceItems();
     RenderAddItemButton();
@@ -724,16 +728,21 @@ void PurchaseInvoiceWin::RenderInvoiceNumber() {
   }
   ImGui::PopItemWidth();
   ImGui::SameLine();
-  static std::string buffer;
-  ImGui::InputText("##PI", &buffer);
+  invoice_number.Render();
 }
 
 void PurchaseInvoiceWin::RenderDateFields() {
   ImGui::TableNextColumn();
   ImGui::TableNextColumn();
-  ImGui::DateChooser(_("Insert date"), create_date);
-  ImGui::DateChooser(_("Purchase date"), purchase_date);
-  ImGui::DateChooser(_("Arrival date"), arrival_date);
+
+  ImGui::BeginWarning(create_date.warning);
+  ImGui::DateChooser(_("Insert date"), create_date.date);
+  ImGui::EndColor(create_date.warning);
+
+  ImGui::DateChooser(_("Purchase date"), purchase_date.date);
+
+
+  ImGui::DateChooser(_("Arrival date"), arrival_date.date);
 }
 
 void PurchaseInvoiceWin::RenderSupplierField() {
@@ -826,18 +835,40 @@ void PurchaseInvoiceWin::RenderAddItemButton() {
 }
 
 void PurchaseInvoiceWin::Submit() {
+  ImGui::BeginDisabled(error);
   if (ImGui::Button(_("Create Invoice"))) {
     PurchaseInvoice _invoice;
-    _invoice.number = "test number";
-    _invoice.purchased_at = purchase_date;
-    _invoice.arrived_at = arrival_date;
-    _invoice.created_at = create_date;
+    _invoice.name = "test number";
+    _invoice.purchased_at = purchase_date.date;
+    _invoice.arrived_at = arrival_date.date;
+    _invoice.created_at = create_date.date;
     _invoice.supplier = supplier;
     _invoice.items = items;
     _invoice.InsertToDb();
     std::cout << _invoice.ToString() << std::endl;
 
   }
+  ImGui::EndDisabled();
+}
+
+void PurchaseInvoiceWin::Feedback() {
+  FieldsValidate();
+  invoice_number.FeedbackEx({
+  _("Invoice number is empty"),
+  _("Invoice number is too short"),
+  _("Invoice number already exists")
+    });
+  if (create_date.warning || purchase_date.warning || arrival_date.warning ) {
+    ImGui::Text("%s", _("Some dates are in the future")); ImGui::SameLine();
+  }
+  ImGui::NewLine();
+}
+
+void PurchaseInvoiceWin::FieldsValidate() {
+  create_date.warning = ImGui::DateInvalid(create_date.date);
+  purchase_date.warning = ImGui::DateInvalid(purchase_date.date);
+  arrival_date.warning = ImGui::DateInvalid(arrival_date.date);
+  error = invoice_number.error;
 }
 
 SupplierWin::SupplierWin() {

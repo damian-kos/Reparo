@@ -96,6 +96,35 @@ namespace ImGui {
     return;
   }
 
+  bool DateInvalid(const tm& _date) {
+    std::tm current_date = GetCurrentDate();
+
+    // Compare years
+    if (_date.tm_year > current_date.tm_year) {
+      return true;
+    }
+    else if (_date.tm_year < current_date.tm_year) {
+      return false;
+    }
+
+    // Compare months
+    if (_date.tm_mon > current_date.tm_mon) {
+      return true;
+    }
+    else if (_date.tm_mon < current_date.tm_mon) {
+      return false;
+    }
+
+    // Compare days
+    if (_date.tm_mday > current_date.tm_mday) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+
+  
 
   std::string rightJustify(std::string str) {
     std::ostringstream oss;

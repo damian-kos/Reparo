@@ -159,12 +159,17 @@ public:
   void Submit();
 
 private:
-  tm purchase_date;
-  tm arrival_date;
-  tm create_date;
+  void Feedback();
+  void FieldsValidate();
+  SimpleModelField<PurchaseInvoice> invoice_number;
+  RoDate purchase_date;
+  //tm purchase_date;
+  RoDate arrival_date;
+  RoDate create_date;
   SimpleModelField<Supplier> supplier_field;
   Supplier supplier;
   std::vector<InvoiceItem> items;
+  bool error = true;
 };
 
 class SupplierWin : public RoWindow {

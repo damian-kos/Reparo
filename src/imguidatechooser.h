@@ -32,6 +32,11 @@ ImGui::TestDateChooser();
 
 struct tm;  // defined in <time.h>
 
+struct RoDate {
+  tm date;
+  bool warning = false;
+};
+
 namespace ImGui {
 
   // Some example of date formats: "%d/%m/%Y" "%A %d %b %Y"
@@ -39,6 +44,7 @@ namespace ImGui {
   // Some helper methods (note that I cannot use tm directly in this hader file, so we can't initialize a static date directly with these methods)
   IMGUI_API void SetDateZero(tm* date);
   IMGUI_API void SetDateToday(tm* date);
+  IMGUI_API bool DateInvalid(const tm& date);
 
 
   IMGUI_API void TestDateChooser(const char* dateFormat = "%d/%m/%Y", bool closeWhenMouseLeavesIt = true, const char* leftArrow = "<", const char* rightArrow = ">", const char* upArrowString = "   ^   ", const char* downArrowString = "   v   ");
