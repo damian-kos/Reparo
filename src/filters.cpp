@@ -75,18 +75,29 @@ void ItemPicker::Render() {
   ImGui::NewLine();
 
   bool refresh = false;
-  supplier_sku.Render();
-  if (own_sku_field.Render()) {
-    Part _part = own_sku_field.GetFromDb();
+
+  if (supplier_sku.Render()) {
+    if (supplier_sku.Get().empty()) { return; } 
+    Part _part = Database::Select<Part>("p.*").From("purchase_invoice_items pii")
+      .InnerJoin("parts p")
+      .On("pii.part_id = p.id")
+      .Where("supplier_sku ")
+      .Like(supplier_sku.Get())
+      .One();
     if (!_part) { return; }
-    name_field.FillBuffer(_part.name);
-    price = _part.purch_price;
-    vat = _part.vat;
-    quantity = 1;
+    RefreshFields(_part);
     refresh = true;
   }
-  name_field.Render();
 
+  if (own_sku_field.Render()) {
+    if (own_sku_field.Get().empty()) { return; }
+    Part _part = own_sku_field.GetFromDb();
+    if (!_part) { return; }
+    RefreshFields(_part);
+    refresh = true;
+  }
+
+  name_field.Render();
 
   if (ImGui::InputInt(_("Quantity"), &quantity))
     refresh = true;
@@ -103,6 +114,14 @@ void ItemPicker::Render() {
     total = total_net + (total_net * vat / 100);
   }
   Validate();
+}
+
+void ItemPicker::RefreshFields(Part& _part) {
+  own_sku_field.FillBuffer(_part.own_sku);
+  name_field.FillBuffer(_part.name);
+  price = _part.purch_price;
+  vat = _part.vat;
+  quantity = 1;
 }
 
 InvoiceItem ItemPicker::GetPart() {

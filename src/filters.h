@@ -21,6 +21,7 @@ public:
   ItemPicker();
   void Init();
   void Render();
+  void RefreshFields(Part& _part);
   InvoiceItem GetPart(); // Return the selected part
   bool error = true;
 

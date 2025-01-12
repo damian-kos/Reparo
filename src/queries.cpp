@@ -129,7 +129,7 @@ namespace Query {
     int _new_quantity = _item.part.quantity + _item.quantity;
     Database::sql << R"(UPDATE parts 
             SET purch_price = :purch_price, purch_price_ex_vat = :purch_price_ex_vat, 
-            quantity = :quantity, vat = :vat, 
+            quantity = :quantity, vat = :vat 
             WHERE id = :id)",
       soci::use(_i.price.amount),
       soci::use(_i.price.ExVat()),
