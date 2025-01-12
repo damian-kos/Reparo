@@ -67,6 +67,9 @@ bool Popup<T>::OnTextInput(std::string& buffer, const std::vector<T>& data) {
         label = _record;
       }
 
+      if (label.empty())
+        continue;
+
       if (ImGui::Selectable(label.c_str())) {
           record = _record;
         state = true;

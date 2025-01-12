@@ -398,6 +398,20 @@ TableCreator& TableCreator::PartsTable() {
     );
   )";
   Database::ExecuteTransaction(_sql);
+
+
+  Database::OpenDb();
+  std::string create_trigger_sql = R"(
+    CREATE TRIGGER IF NOT EXISTS update_part_timestamp
+    AFTER UPDATE ON parts
+    BEGIN
+      UPDATE parts 
+      SET updated_at = CURRENT_TIMESTAMP
+      WHERE id = NEW.id;
+    END;
+  )";
+  Database::ExecuteTransaction(create_trigger_sql);
+
   return *this;
 }
 
@@ -753,42 +767,20 @@ Inserter& Inserter::Repair_(Repair& repair) {
   );
 }
 
-Inserter& Inserter::Part_(Part& part) {
+Inserter& Inserter::Part_(Part& _part) {
   return ExecuteTransaction(
-      [&part]() {
-        Part p = part;
+      [&_part]() {
+        Part _p = _part;
 
-        if (p.id < 0) {
-          Database::sql << R"(INSERT INTO parts (name, own_sku, 
-            quality_id, category_id, sell_price, sell_price_ex_vat, color_id, 
-            quantity, purch_price, purch_price_ex_vat, vat, location) 
-            VALUES (:name, :own_sku, 
-            :quality_id, :category_id, :sell_price, :sell_price_ex_vat, :color_id, 
-            :quantity, :purch_price, :purch_price_ex_vat, :vat, :location) 
-            RETURNING id)",
-           soci::use(p), soci::into(part.id);
+        if (_p.id < 0) {
+          Query::InsertItem(_p);
         }
+        Query::InsertItemDevices(_p);
 
-        if (!p.cmptble_devices.empty()) {
-          for (auto& [key, value] : p.cmptble_devices) {
-            Database::sql << R"(INSERT INTO part_model (part_id, model_id)
-            VALUES (:part_id, :model_id))",
-              soci::use(part.id),
-              soci::use(value.id);
-          }
-        }
-
-        if (!p.cmptble_aliases.empty()) {
-          for (auto& [key, value] : p.cmptble_aliases) {
-            Database::sql << R"(INSERT INTO part_model_alias (part_id, alias_id)
-        VALUES (:part_id, :alias_id))",
-              soci::use(part.id),
-              soci::use(value.id);
-          }
-        }
+        Query::InsertItemAliases(_p);
 
       },
-      "Part insertion (part name: " + part.name + ")"
+      "Part insertion (part name: " + _part.name + ")"
   );     
 }
 
@@ -807,8 +799,22 @@ Inserter& Inserter::PurchaseInvoice_(PurchaseInvoice& _invoice) {
       if(_invoice.supplier.id < 0)
         Query::InsertSupplier(_invoice.supplier);
       Query::InsertPurchaseInvoice(_invoice);
+
+      for (auto& item : _invoice.items) {
+        item.purchase_invoice_id = _invoice.id;
+        if (item.part.id < 0) {
+          Part _part;
+          _part = item;
+          std::cout << " part not inserted yet: " << _part.ToString() << std::endl;
+          item.part.id = Query::InsertItem(_part);
+        }
+        else {
+          Query::UpdateItem(item);
+        }
+        Query::InsertInvoiceItem(item);
+      }
     },
-    "Supplier insertion: " + _invoice.ToString() + ")"
+    "Purchase invoice insertion: " + _invoice.ToString() + ")"
   );
 }
 

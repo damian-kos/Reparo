@@ -1,7 +1,9 @@
+class Part;
 class Customer;
 class Repair;
 class Supplier;
 class PurchaseInvoice;
+struct InvoiceItem;
 
 /// <summary>
 /// Used to allow to run multiple queries in one Transaction without need to reopening database.
@@ -13,10 +15,16 @@ namespace Query {
   int UpdateShippingAddress(Customer& customer);
   int InsertCustomer(Customer& customer);
   int UpdateCustomer(Customer& customer);
+  int InsertItem(Part& _part);
+  int UpdateItem(Part& _part);
+  int UpdateItem(InvoiceItem& _item);
+  void InsertItemDevices(Part& _part);
+  void InsertItemAliases(Part& _part);
   int InsertRepair(Repair& repair);
   int InsertCustomDevice(Repair& repair);
   int InsertSupplier(Supplier& _supplier);
   int InsertPurchaseInvoice(PurchaseInvoice& _invoice);
+  int InsertInvoiceItem(InvoiceItem& _item);
 
   template <typename T>
   int InsertSimpleModel(T& _model);

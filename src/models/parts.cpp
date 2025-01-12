@@ -3,6 +3,7 @@
 #include "../../src/modal.h"
 #include "../../src/database.h"
 #include "../../src/tables.h"
+#include "../../src/invoices.h"
 
 const std::string Part::ToString() const{
   return std::to_string(id) + " | " + name + " | " + own_sku;
@@ -36,4 +37,14 @@ void Part::InsertModal() {
 
 void Part::InsertToDb() { 
   Database::Insert().Part_(*this); 
+}
+
+Part& Part::operator=(InvoiceItem& _item) {
+  own_sku = _item.own_sku;
+  name = _item.name;
+  purch_price = _item.price.amount;
+  purch_price_ex_vat = _item.price.ExVat();
+  vat = _item.price.vat_rate;
+  quantity = _item.quantity;
+  return *this;
 }

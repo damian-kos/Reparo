@@ -363,6 +363,7 @@ namespace soci {
       model.own_sku = v.get<std::string>("own_sku");
       model.price.amount = v.get<double>("purchase_price", 0.0);
       model.price.ex_vat = v.get<double>("purchase_price_ex_vat", -1);
+      model.price.vat_rate = v.get<double>("vat", 0.0);
       model.quantity = v.get<int>("quantity", 0);
     }
 
@@ -375,6 +376,7 @@ namespace soci {
       v.set("purchase_price", model.price.amount);
       double _ex_vat = model.price.ExVat();
       v.set("purchase_price_ex_vat", _ex_vat);
+      v.set("vat", model.price.vat_rate);
       v.set("quantity", model.quantity);
       ind = i_ok;
     }

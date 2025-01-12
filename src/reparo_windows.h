@@ -164,7 +164,7 @@ private:
   tm create_date;
   SimpleModelField<Supplier> supplier_field;
   Supplier supplier;
-  std::vector<InvoiceItem> parts;
+  std::vector<InvoiceItem> items;
 };
 
 class SupplierWin : public RoWindow {

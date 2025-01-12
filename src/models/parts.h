@@ -4,6 +4,7 @@
 
 struct Device;
 struct Alias;
+struct InvoiceItem;
 
 class Part {
 public:
@@ -13,29 +14,31 @@ public:
   std::string own_sku;
   Quality quality;
   Category category;
-  double sell_price;
-  double sell_price_ex_vat;
+  double sell_price = 0.0;
+  double sell_price_ex_vat = 0.0;
   Color color;
-  int quantity;
-  double purch_price;
-  double purch_price_ex_vat;
-  double vat;
+  int quantity = 0;
+  double purch_price = 0.0;
+  double purch_price_ex_vat = 0.0;
+  double vat = 0.0;
   std::string location;
-  int reserved_quantity;
+  int reserved_quantity = 0;
   std::unordered_map<int, Device> cmptble_devices;
   std::unordered_map<int, Alias> cmptble_aliases;
-  std::tm created_at; // date
-  std::tm updated_at; // date
+  std::tm created_at = {};
+  std::tm updated_at = {};
   static constexpr std::string_view table = "parts";
   static inline const std::string column = "own_sku";
 
   void View();
   void InsertModal();
   void InsertToDb();
- 
+
   operator bool() const {
     return id > 0;
   }
+
+  Part& operator=(InvoiceItem& _item);
 
 private:
 

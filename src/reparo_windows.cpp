@@ -787,7 +787,7 @@ void PurchaseInvoiceWin::RenderInvoiceTableHeaders() {
 
 void PurchaseInvoiceWin::RenderInvoiceTableRows() {
   int i = 1;
-  for (const auto& part : parts) {
+  for (const auto& part : items) {
     ImGui::TableNextRow();
     ImGui::TableNextColumn();
     ImGui::Text("%d", i++);
@@ -817,7 +817,8 @@ void PurchaseInvoiceWin::RenderAddItemButton() {
     item_picker.Render();
     ImGui::BeginDisabled(item_picker.error);
     if (ImGui::Button(_("Add to invoice"))) {
-      parts.push_back(item_picker.GetPart());
+      std::cout << item_picker.GetPart().ToString() << std::endl;
+      items.push_back(item_picker.GetPart());
     }
     ImGui::EndDisabled();
     ImGui::EndPopup(); 
@@ -832,6 +833,7 @@ void PurchaseInvoiceWin::Submit() {
     _invoice.arrived_at = arrival_date;
     _invoice.created_at = create_date;
     _invoice.supplier = supplier;
+    _invoice.items = items;
     _invoice.InsertToDb();
     std::cout << _invoice.ToString() << std::endl;
 

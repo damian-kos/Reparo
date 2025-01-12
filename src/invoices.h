@@ -6,6 +6,7 @@
 #include <string>
 
 struct InvoiceItem {
+  int id = -1;
   int purchase_invoice_id;
   Part part;
   std::string supplier_sku;
@@ -15,6 +16,8 @@ struct InvoiceItem {
   double total_net;
   double total;
   int quantity;
+
+  const std::string ToString() const;
 };
 
 class Invoice {
@@ -32,4 +35,5 @@ public:
   Supplier supplier;
   const std::string ToString() const;
   void InsertToDb();
+  std::vector<InvoiceItem> items;
 };

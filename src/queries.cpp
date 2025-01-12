@@ -108,6 +108,57 @@ namespace Query {
     return customer_id;
   }
 
+  int InsertItem(Part& _part)  {
+    Part _p = _part;
+    int _part_id = -1;
+    Database::sql << R"(INSERT INTO parts (name, own_sku, 
+            quality_id, category_id, sell_price, sell_price_ex_vat, color_id, 
+            quantity, purch_price, purch_price_ex_vat, vat, location) 
+            VALUES (:name, :own_sku, 
+            :quality_id, :category_id, :sell_price, :sell_price_ex_vat, :color_id, 
+            :quantity, :purch_price, :purch_price_ex_vat, :vat, :location) 
+            RETURNING id)",
+      soci::use(_p), soci::into(_part_id);
+    _part.id = _part_id;
+    return _part_id;
+  }
+
+  int UpdateItem(InvoiceItem& _item) {
+    InvoiceItem _i = _item;
+    int _item_id = _i.id;
+    int _new_quantity = _item.part.quantity + _item.quantity;
+    Database::sql << R"(UPDATE parts 
+            SET purch_price = :purch_price, purch_price_ex_vat = :purch_price_ex_vat, 
+            quantity = :quantity, vat = :vat, 
+            WHERE id = :id)",
+      soci::use(_i.price.amount),
+      soci::use(_i.price.ExVat()),
+      soci::use(_new_quantity),
+      soci::use(_i.price.vat_rate),
+      soci::use(_i.part.id);
+    return _item_id;
+  }
+
+  void InsertItemDevices(Part& _part) {
+    Part _p = _part;
+    for (auto& [key, value] : _p.cmptble_devices) {
+      Database::sql << R"(INSERT INTO part_model (part_id, model_id)
+            VALUES (:part_id, :model_id))",
+        soci::use(_part.id),
+        soci::use(value.id);
+    }
+  }
+
+  void InsertItemAliases(Part& _part) {
+    Part _p = _part;
+    for (auto& [key, value] : _p.cmptble_aliases) {
+      Database::sql << R"(INSERT INTO part_model_alias (part_id, alias_id)
+            VALUES (:part_id, :alias_id))",
+        soci::use(_part.id),
+        soci::use(value.id);
+    }
+  }
+
   int InsertRepair(Repair& repair) {
     Repair r = repair;
     int repair_id = 0;
@@ -159,6 +210,20 @@ namespace Query {
       soci::into(_invoice_id);
     _invoice.id = _invoice_id;
     return _invoice_id;
+  }
+
+  int InsertInvoiceItem(InvoiceItem& _item) {
+    InvoiceItem _i = _item;
+    int _item_id = -1;
+
+    Database::sql << "INSERT INTO purchase_invoice_items "
+      "(purchase_invoice_id, part_id, supplier_sku, name, own_sku, purchase_price, purchase_price_ex_vat, quantity, vat) "
+      "VALUES (:purchase_invoice_id, :part_id, :supplier_sku, :name, :own_sku, :purchase_price, :purchase_price_ex_vat, :quantity, :vat) "
+      "RETURNING id",
+      soci::use(_i),
+      soci::into(_item_id);
+    _item.id = _item_id;
+    return _item_id;
   }
 
   template <typename T>
