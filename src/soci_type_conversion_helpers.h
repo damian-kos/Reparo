@@ -399,6 +399,7 @@ namespace soci {
     }
 
     static void to_base(PurchaseInvoice& model, values& v, indicator& ind) {
+      v.set("id", model.id);
       v.set("invoice_number", model.name);
       v.set("supplier_id", model.supplier.id);
       v.set("purchased_at", model.purchased_at);

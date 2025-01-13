@@ -71,7 +71,7 @@ ItemPicker::ItemPicker()
 
 void ItemPicker::Render() {
   own_sku_field.Feedback();
-  name_field.FeedbackEx({ _("Name is empty"), _("Name is too short") });
+  name_field.FeedbackEx();
   ImGui::NewLine();
 
   bool refresh = false;

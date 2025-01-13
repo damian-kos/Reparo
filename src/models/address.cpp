@@ -50,3 +50,8 @@ std::string Address::ToString(const std::string _delimiter, const std::string al
   }
   return _str;
 }
+
+void Address::Clear() {
+  id = -1;
+  address.clear();
+}

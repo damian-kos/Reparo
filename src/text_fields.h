@@ -60,7 +60,7 @@ public:
   int Render();
   void Field();
   virtual void Feedback();
-  void FeedbackEx(std::initializer_list<std::string> args = {});
+  void FeedbackEx();
   virtual void Validate();
   void EmptyBufferError();
   const std::string& Get() const;

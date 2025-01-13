@@ -754,3 +754,8 @@ namespace ImGui {
 
 
 } // namespace ImGui
+
+void RoDate::Clear() {
+  ImGui::SetDateToday(&date);
+  warning = false;
+}

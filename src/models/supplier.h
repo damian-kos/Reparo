@@ -9,7 +9,7 @@ public:
   const std::string ToString(std::string _delimiter = " | ") const;
   void View();
   void InsertToDb();
-
+  void Clear();
   int id = -1;
   std::string name; // in database refered as 'supplier'
 

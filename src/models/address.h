@@ -22,6 +22,7 @@ public:
   Address& SetLines(std::vector<TextField>& _address);
   Address& SetLines(std::vector<std::string>& _address);
   std::string ToString(const std::string _delimiter, const std::string _align = "left") const;
+  void Clear();
 
 private:
   int id;

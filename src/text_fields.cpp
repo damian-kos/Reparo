@@ -136,28 +136,20 @@ void TextField::EmptyBufferError() {
   has_error_with_content = error && buffer.size() > 0;
 }
 
-void TextField::FeedbackEx(std::initializer_list<std::string> args) {
-  // Convert initializer list to vector for easier handling
-  std::vector<std::string> _vec_args(args.begin(), args.end());
- 
-  // Pad the vector with empty strings if fewer than 5 arguments are provided
-  _vec_args.resize(5);
-  if (ro_flags & TFFlags_EmptyIsError && buffer.empty() && !_vec_args[0].empty()) {
-    ImGui::Text("%s", _vec_args[0].c_str());
+void TextField::FeedbackEx() {
+
+  if (ro_flags & TFFlags_EmptyIsError && buffer.empty()) {
+    ImGui::Text("%s is empty", label.c_str());
     ImGui::SameLine();
   }
-  if (err_flags & ValidatorFlags_StrLen && !_vec_args[1].empty()) {
-    ImGui::Text("%s", _vec_args[1].c_str());
+  if (err_flags & ValidatorFlags_StrLen) {
+    ImGui::Text("%s is too short", label.c_str());
     ImGui::SameLine();
   }
-  if (err_flags & ValidatorFlags_IsDuplicate && !_vec_args[2].empty()) {
-    ImGui::Text("%s", _vec_args[2].c_str());
+  if (err_flags & ValidatorFlags_IsDuplicate) {
+    ImGui::Text("%s",label.c_str());
     ImGui::SameLine();
   }
-  if (!_vec_args[3].empty())
-    return;
-  if (!_vec_args[4].empty())
-    return;
 }
 
 const std::string& TextField::Get() const {
@@ -166,6 +158,7 @@ const std::string& TextField::Get() const {
 
 const void TextField::Clear() {
   buffer.clear();
+  Validate();
 }
 
 void TextField::FillBuffer(const std::string& fill) {

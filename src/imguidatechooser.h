@@ -35,6 +35,7 @@ struct tm;  // defined in <time.h>
 struct RoDate {
   tm date;
   bool warning = false;
+  void Clear();
 };
 
 namespace ImGui {

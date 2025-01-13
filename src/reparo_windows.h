@@ -157,13 +157,13 @@ public:
   void RenderInvoiceTableRows();
   void RenderAddItemButton();
   void Submit();
+  void ResetFields();
 
 private:
   void Feedback();
   void FieldsValidate();
   SimpleModelField<PurchaseInvoice> invoice_number;
   RoDate purchase_date;
-  //tm purchase_date;
   RoDate arrival_date;
   RoDate create_date;
   SimpleModelField<Supplier> supplier_field;

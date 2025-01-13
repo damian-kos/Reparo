@@ -30,3 +30,9 @@ void Supplier::View() {
 void Supplier::InsertToDb() {
   Database::Insert().Supplier_(*this);
 }
+
+void Supplier::Clear() {
+  id = -1;
+  name.clear();
+  address.Clear();
+}
