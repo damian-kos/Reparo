@@ -180,13 +180,14 @@ public:
   void Feedback();
   void InputFields();
   Supplier GetEntity();
+  void Clear();
 
 private:
   void Submit();
   void FieldsValidate();
   TextField name;
   std::vector<TextField> address;
-  bool error;
+  bool error = true;
 };
 template <typename T>
 class SimpleModelWin : public RoWindow{

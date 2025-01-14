@@ -21,8 +21,9 @@ public:
   ItemPicker();
   void Init();
   void Render();
-  void RefreshFields(Part& _part);
+  void FillFields(Part& _part);
   InvoiceItem GetPart(); // Return the selected part
+  void Clear();
   bool error = true;
 
 private:

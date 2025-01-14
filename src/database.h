@@ -159,9 +159,18 @@ public:
       return *this;
     }
 
-    Selector& Where(const std::string& _condition) {
-      if(!_condition.empty())
-        sql << " WHERE " << _condition;
+    Selector& Where(const std::string& _condition, const std::string _equal = "") {
+     
+      if (!_condition.empty()) {
+          std::string _condition_formatted = "LOWER(" + _condition + ")";
+        if (_equal.empty()) {
+          sql << " WHERE " << _condition_formatted; // because _condition can be used with Like() method
+        }
+        else {
+          std::string _equal_formatted = "LOWER('" + _equal + "')";
+          sql << " WHERE " << _condition_formatted << " = " << _equal_formatted;
+        }
+      }
       return *this;
     }
 
@@ -284,7 +293,8 @@ public:
   static SM SimpleModel_(const T& _value);
   template <typename T>
   static Part Part_(const T& _value);
-
+  template <typename T>
+  static Supplier Supplier_(const T& _value);
 };
 
 // After Selector class definition, add the implementation:
@@ -453,4 +463,22 @@ inline Part DBGet::Part_(const T& _value) {
     soci::use(value),
     soci::into(part);
   return part;
+}
+
+template<typename T>
+inline Supplier DBGet::Supplier_(const T& _value) {
+  Database::OpenDb();
+  std::string query;
+  if (std::is_same_v<T, int>)
+    query = "id = (:id) ";
+  else
+    query = "name = (:name)";
+  
+  Supplier _supplier;
+  T value = _value;
+  Database::sql << "SELECT * FROM suppliers WHERE " << query,
+    soci::use(value),
+    soci::into(_supplier);
+  
+  return _supplier;
 }

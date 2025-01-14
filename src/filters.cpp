@@ -81,11 +81,10 @@ void ItemPicker::Render() {
     Part _part = Database::Select<Part>("p.*").From("purchase_invoice_items pii")
       .InnerJoin("parts p")
       .On("pii.part_id = p.id")
-      .Where("supplier_sku ")
-      .Like(supplier_sku.Get())
+      .Where("supplier_sku", supplier_sku.Get())
       .One();
     if (!_part) { return; }
-    RefreshFields(_part);
+    FillFields(_part);
     refresh = true;
   }
 
@@ -93,7 +92,7 @@ void ItemPicker::Render() {
     if (own_sku_field.Get().empty()) { return; }
     Part _part = own_sku_field.GetFromDb();
     if (!_part) { return; }
-    RefreshFields(_part);
+    FillFields(_part);
     refresh = true;
   }
 
@@ -116,7 +115,7 @@ void ItemPicker::Render() {
   Validate();
 }
 
-void ItemPicker::RefreshFields(Part& _part) {
+void ItemPicker::FillFields(Part& _part) {
   own_sku_field.FillBuffer(_part.own_sku);
   name_field.FillBuffer(_part.name);
   price = _part.purch_price;
@@ -137,6 +136,17 @@ InvoiceItem ItemPicker::GetPart() {
   _part.total = total;
   std::cout << _part.part.ToString() << std::endl;
   return _part;
+}
+
+void ItemPicker::Clear() {
+  quantity = 1;
+  price = 0.0;
+  vat = 0.0;
+  total_net = 0.0;
+  total = 0.0;
+  supplier_sku.Clear();
+  own_sku_field.Clear();
+  name_field.Clear();
 }
 
 void ItemPicker::Validate() {

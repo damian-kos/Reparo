@@ -756,8 +756,9 @@ void PurchaseInvoiceWin::RenderSupplierField() {
   ImGui::TableNextColumn();
   AddSupplierBtn();
   ImGui::TableNextColumn();
+  ImGui::Text(_("Supplier's address"));
   ImGui::TableNextColumn();
-  ImGui::Text("%s", supplier.address.ToString(", ", "right").c_str());
+  ImGui::TextWrapped("%s", supplier.address.ToString(", ", "right").c_str());
 }
 
 void PurchaseInvoiceWin::AddSupplierBtn() {
@@ -767,11 +768,10 @@ void PurchaseInvoiceWin::AddSupplierBtn() {
     _supplier_win.Feedback();
     _supplier_win.InputFields();
     if (ImGui::Button(_("Add"))) {
-      Supplier _supplier = _supplier_win.GetEntity();
-      supplier_field.FillBuffer(_supplier.name);
-      supplier.id = -1;
-      supplier.name = _supplier.name;
-      supplier.address = _supplier.address;
+      supplier = _supplier_win.GetEntity();
+      supplier_field.FillBuffer(supplier.name);
+      _supplier_win.Clear();
+      ImGui::CloseCurrentPopup();
     }
     ImGui::EndPopup();
   }
@@ -796,39 +796,53 @@ void PurchaseInvoiceWin::RenderInvoiceTableHeaders() {
 }
 
 void PurchaseInvoiceWin::RenderInvoiceTableRows() {
-  int i = 1;
-  for (const auto& part : items) {
+  int i = 0;
+  for (auto it = items.begin(); it != items.end(); ) {
     ImGui::TableNextRow();
     ImGui::TableNextColumn();
-    ImGui::Text("%d", i++);
+    std::string _label = std::to_string(++i);
+    ImGui::Selectable(_label.c_str(), false, ImGuiSelectableFlags_SpanAllColumns);
+    if (ImGui::BeginPopupContextItem(_label.c_str() , ImGuiPopupFlags_MouseButtonRight)) {
+      if (ImGui::Button(_("Remove"))) {
+        it = items.erase(it); // Erase the element and update the iterator
+        ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
+        continue; // Skip the increment of the iterator
+      }
+      ImGui::EndPopup();
+    }
+
     ImGui::TableNextColumn();
-    ImGui::TextWrapped("%s", part.name.c_str());
+    ImGui::TextWrapped("%s", it->name.c_str());
     ImGui::TableNextColumn();
-    ImGui::TextWrapped("%s", part.supplier_sku.c_str());
+    ImGui::TextWrapped("%s", it->supplier_sku.c_str());
     ImGui::TableNextColumn();
-    ImGui::TextWrapped("%s", part.own_sku.c_str());
+    ImGui::TextWrapped("%s", it->own_sku.c_str());
     ImGui::TableNextColumn();
-    ImGui::Text("%d", part.quantity);
+    ImGui::Text("%d", it->quantity);
     ImGui::TableNextColumn();
-    ImGui::Text("%.2f", part.price.amount);
+    ImGui::Text("%.2f", it->price.amount);
     ImGui::TableNextColumn();
-    ImGui::Text("%.2f", part.price.vat_rate);
+    ImGui::Text("%.2f", it->price.vat_rate);
     ImGui::TableNextColumn();
-    ImGui::Text("%.2f", part.total_net);
+    ImGui::Text("%.2f", it->total_net);
     ImGui::TableNextColumn();
-    ImGui::Text("%.2f", part.total);
+    ImGui::Text("%.2f", it->total);
+
+    ++it; // Increment the iterator only if no element was erased
   }
 }
 
 void PurchaseInvoiceWin::RenderAddItemButton() {
   ImGui::Button(_("Add item"));
   if (ImGui::BeginPopupContextItem("##empty", ImGuiPopupFlags_MouseButtonLeft)) {
-    static ItemPicker item_picker;
-    item_picker.Render();
-    ImGui::BeginDisabled(item_picker.error);
+    static ItemPicker _item_picker;
+    _item_picker.Render();
+    ImGui::BeginDisabled(_item_picker.error);
     if (ImGui::Button(_("Add to invoice"))) {
-      std::cout << item_picker.GetPart().ToString() << std::endl;
-      items.push_back(item_picker.GetPart());
+      items.push_back(_item_picker.GetPart());
+      _item_picker.Clear();
+      ImGui::CloseCurrentPopup();
     }
     ImGui::EndDisabled();
     ImGui::EndPopup(); 
@@ -860,7 +874,7 @@ void PurchaseInvoiceWin::ResetFields() {
   supplier_field.Clear();
   supplier.Clear();
   items.clear();
-  bool error = false;
+  error = false;
 }
 
 void PurchaseInvoiceWin::Feedback() {
@@ -878,16 +892,17 @@ void PurchaseInvoiceWin::FieldsValidate() {
   purchase_date.warning = ImGui::DateInvalid(purchase_date.date);
   arrival_date.warning = ImGui::DateInvalid(arrival_date.date);
 
-  error = invoice_number.error || supplier_field.error;
+  error = invoice_number.error || supplier_field.error || items.empty();
 }
 
-SupplierWin::SupplierWin() {
+SupplierWin::SupplierWin() 
+  : name(_("Name"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError)
+{
   Init();
 }
 
 void SupplierWin::Init() {
   open = true;
-  name = NameField(_("Name"), 0, TFFlags_EmptyIsError | TFFlags_HasLenValidator);
   address.resize(5);
   // Initialize address fields
   for (int i = 0; i < 5; i++) {
@@ -921,9 +936,22 @@ void SupplierWin::InputFields() {
 
 Supplier SupplierWin::GetEntity() {
   Supplier _supplier;
+  _supplier = Database::Select<Supplier>().From().Where("supplier", name.Get()).One();
+  if (_supplier.id > 0) {
+    return _supplier;
+  }
+  _supplier.id = -1;
   _supplier.name = name.Get();
   _supplier.address.SetLines(address);
   return _supplier;
+}
+
+void SupplierWin::Clear() {
+  name.Clear();
+  for (auto& line : address) {
+    line.Clear();
+  }
+  error = true;
 }
 
 void SupplierWin::Submit() {
