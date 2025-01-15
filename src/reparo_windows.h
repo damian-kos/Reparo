@@ -163,6 +163,7 @@ private:
   void Feedback();
   void FieldsValidate();
   SimpleModelField<PurchaseInvoice> invoice_number;
+  QueriedTextField external_id;
   RoDate purchase_date;
   RoDate arrival_date;
   RoDate create_date;

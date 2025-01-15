@@ -203,8 +203,8 @@ namespace Query {
     PurchaseInvoice _i = _invoice;
     int _invoice_id = -1;
     Database::sql << "INSERT INTO purchase_invoices "
-      "(invoice_number, supplier_id, purchased_at, arrived_at, created_at) "
-      "VALUES (:invoice_number, :supplier_id, :purchased_at, :arrived_at, :created_at) "
+      "(invoice_number, external_id, supplier_id, purchased_at, arrived_at, created_at) "
+      "VALUES (:invoice_number, :external_id, :supplier_id, :purchased_at, :arrived_at, :created_at) "
       "RETURNING id",
       soci::use(_i),
       soci::into(_invoice_id);

@@ -111,7 +111,11 @@ void TextField::Field(){
     has_error_with_content = false;
   }
   ImGui::BeginValid(has_error_with_content);
+  if(!has_error_with_content)
+    ImGui::BeginWarning(warning);
   ImGui::InputTextWithHint(("##" + label).c_str(), (label + "...").c_str(), &buffer, flags);
+  if (!has_error_with_content)
+    ImGui::EndColor(warning);
   ImGui::EndColor(has_error_with_content);
 }
 
@@ -147,7 +151,11 @@ void TextField::FeedbackEx() {
     ImGui::SameLine();
   }
   if (err_flags & ValidatorFlags_IsDuplicate) {
-    ImGui::Text("%s",label.c_str());
+    ImGui::Text("%s already exists",label.c_str());
+    ImGui::SameLine();
+  }
+  if (ro_flags & TFFlags_DuplicateWarning && warning) {
+    ImGui::Text("%s already exists, make sure that you want to proceed", label.c_str());
     ImGui::SameLine();
   }
 }
@@ -365,7 +373,8 @@ SM& SimpleModelField<SM>::Render() {
   static std::vector<SM> vec;
   Field();
   model = SM();
-  if (ImGui::IsItemEdited() || ImGui::IsItemActivated()) {
+  is_edited = ImGui::IsItemEdited();
+  if (is_edited || ImGui::IsItemActivated()) {
     Validate();
     vec.clear();
     vec = Database::Select<SM>().From().Where(column).Like(buffer).All();
@@ -583,9 +592,17 @@ bool QueriedTextField::Render() {
 }
 
 void QueriedTextField::Validate() {
+  warning = false;
   err_flags = ValidatorFlags_Pass;  // Reset flags
   if (ro_flags & TFFlags_HasLenValidator)
     err_flags |= Validator::StrLen(buffer, 3);
+
+  if (ro_flags & TFFlags_DuplicateWarning) {
+    std::string _duplicate = Database::Select<std::string>(select).From(from).Where(where, buffer).One();
+    if (!_duplicate.empty())
+      warning = true;
+  }
+
   error = err_flags & ValidatorFlags_StrLen;
   EmptyBufferError();
 }

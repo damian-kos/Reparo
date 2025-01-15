@@ -159,11 +159,10 @@ public:
       return *this;
     }
 
-    Selector& Where(const std::string& _condition, const std::string _equal = "") {
-     
+    Selector& Where(const std::string& _condition, const std::string _equal = "__DEFAULT__") {
       if (!_condition.empty()) {
-          std::string _condition_formatted = "LOWER(" + _condition + ")";
-        if (_equal.empty()) {
+        std::string _condition_formatted = "LOWER(" + _condition + ")";
+        if (_equal == "__DEFAULT__") {
           sql << " WHERE " << _condition_formatted; // because _condition can be used with Like() method
         }
         else {

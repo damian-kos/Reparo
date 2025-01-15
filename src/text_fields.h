@@ -29,7 +29,7 @@ enum TFFlags_ {
   TFFlags_AllowDbPresence     = 1 << 3,   // Set if found result in Database shouldn't result in error
   TFFlags_EmptyIsError        = 1 << 4,   // Empty buffer will set field to have en error if set
   TFFlags_NeverAnError        = 1 << 5,   // Prevents to highlight field as an error
-
+  TFFlags_DuplicateWarning    = 1 << 6,   // Set if duplicate in database is allowed but should be warned
 };
 
 typedef int ValidatorFlags;
@@ -67,6 +67,8 @@ public:
   const void Clear();
   void FillBuffer(const std::string& fill);
   bool error = true; 
+  bool warning = false; 
+  bool is_edited = false;
 protected:
   std::string label;
   std::string buffer;

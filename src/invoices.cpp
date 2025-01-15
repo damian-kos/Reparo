@@ -8,7 +8,7 @@ const std::string InvoiceItem::ToString() const {
 }
 
 const std::string PurchaseInvoice::ToString() const {
-  return std::to_string(id) + " | " + name + " | Purchased at: " + Convert::TmToStr(purchased_at) + " | Supplier " + supplier.ToString();
+  return std::to_string(id) + " | Ext. ID " + external_id + " | " + name + " | Purchased at: " + Convert::TmToStr(purchased_at) + " | Supplier " + supplier.ToString();
 }
 
 void PurchaseInvoice::InsertToDb() {

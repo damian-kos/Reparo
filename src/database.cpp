@@ -420,6 +420,7 @@ TableCreator& TableCreator::PurchaseInvoicesTable() {
     CREATE TABLE IF NOT EXISTS purchase_invoices (
       id                 INTEGER PRIMARY KEY,
       invoice_number     TEXT NOT NULL,
+      external_id,       TEXT,
       supplier_id        INTEGER,
       purchased_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
       arrived_at         DATETIME DEFAULT CURRENT_TIMESTAMP,

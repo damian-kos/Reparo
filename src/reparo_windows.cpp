@@ -681,7 +681,8 @@ template class SimpleModelWin<Color>;
 template class SimpleModelWin<Quality>;
  
 PurchaseInvoiceWin::PurchaseInvoiceWin()
-  :invoice_number(_("Invoice number"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError, "invoice_number"),
+  : invoice_number(_("Invoice number"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError, "invoice_number"),
+   external_id(_("External ID"), 0, TFFlags_HasPopup | TFFlags_DuplicateWarning , "external_id", "purchase_invoices", "external_id"),
    supplier_field(_("Supplier"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence)
 {
   Init();
@@ -709,9 +710,15 @@ void PurchaseInvoiceWin::Render() {
 }
 
 void PurchaseInvoiceWin::RenderInvoiceHeader() {
-  if (ImGui::BeginTable("split3", 3)) {
+  ImGui::SeparatorText(_("Invoice details"));
+  if (ImGui::BeginTable("Invoice Details", 3)) {
     RenderInvoiceNumber();
     RenderDateFields();
+    ImGui::EndTable();
+  }
+
+  ImGui::SeparatorText(_("Supplier details"));
+  if (ImGui::BeginTable("Supplier Details", 3)) {
     RenderSupplierField();
     ImGui::EndTable();
   }
@@ -719,20 +726,32 @@ void PurchaseInvoiceWin::RenderInvoiceHeader() {
 
 void PurchaseInvoiceWin::RenderInvoiceNumber() {
   ImGui::TableNextRow();
+
+  ImGui::TableNextColumn();
+  static bool _copy = false;
+  if (external_id.Render() && _copy)
+    invoice_number.FillBuffer(external_id.Get());
+
   ImGui::TableNextColumn();
   ImGui::PushItemWidth(100);
+  if (ImGui::Checkbox(_("Copy from external"), &_copy)) {
+    invoice_number.Clear();
+    if (_copy)
+      invoice_number.FillBuffer(external_id.Get());
+  }
   if (ImGui::BeginCombo("##prefix", "PI/")) {
     ImGui::EndCombo();
   }
   ImGui::PopItemWidth();
   ImGui::SameLine();
+  ImGui::BeginDisabled(_copy);
   invoice_number.Render();
+  ImGui::EndDisabled();
 }
 
 void PurchaseInvoiceWin::RenderDateFields() {
   ImGui::TableNextColumn();
-  ImGui::TableNextColumn();
-
+  
   ImGui::BeginWarning(create_date.warning);
   ImGui::DateChooser(_("Insert date"), create_date.date);
   ImGui::EndColor(create_date.warning);
@@ -749,16 +768,23 @@ void PurchaseInvoiceWin::RenderDateFields() {
 void PurchaseInvoiceWin::RenderSupplierField() {
   ImGui::TableNextColumn();
   ImGui::Text(_("Supplier"));
+
   ImGui::TableNextColumn();
   if (supplier_field.Render()) {
     supplier = supplier_field.GetFromDb();
   }
+
   ImGui::TableNextColumn();
   AddSupplierBtn();
+
   ImGui::TableNextColumn();
   ImGui::Text(_("Supplier's address"));
+
   ImGui::TableNextColumn();
   ImGui::TextWrapped("%s", supplier.address.ToString(", ", "right").c_str());
+
+  ImGui::TableNextColumn();
+
 }
 
 void PurchaseInvoiceWin::AddSupplierBtn() {
@@ -778,8 +804,9 @@ void PurchaseInvoiceWin::AddSupplierBtn() {
 }
 
 void PurchaseInvoiceWin::RenderInvoiceItems() {
-  static ImGuiTableFlags _flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp;
+  ImGui::SeparatorText(_("Invoice items"));
 
+  static ImGuiTableFlags _flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp;
   if (ImGui::BeginTable("InvoiceItems", 9, _flags)) {
     RenderInvoiceTableHeaders();
     RenderInvoiceTableRows();
@@ -854,6 +881,7 @@ void PurchaseInvoiceWin::Submit() {
   if (ImGui::Button(_("Create Invoice"))) {
     PurchaseInvoice _invoice;
     _invoice.name = invoice_number.Get();
+    _invoice.external_id = external_id.Get();
     _invoice.purchased_at = purchase_date.date;
     _invoice.arrived_at = arrival_date.date;
     _invoice.created_at = create_date.date;
@@ -868,6 +896,7 @@ void PurchaseInvoiceWin::Submit() {
 
 void PurchaseInvoiceWin::ResetFields() {
   invoice_number.Clear();
+  external_id.Clear();
   create_date.Clear();
   purchase_date.Clear();
   arrival_date.Clear();
@@ -880,6 +909,7 @@ void PurchaseInvoiceWin::ResetFields() {
 void PurchaseInvoiceWin::Feedback() {
   FieldsValidate();
   invoice_number.FeedbackEx();
+  external_id.FeedbackEx();
   supplier_field.FeedbackEx();
   if (create_date.warning || purchase_date.warning || arrival_date.warning ) {
     ImGui::Text("%s", _("Some dates are in the future")); ImGui::SameLine();
