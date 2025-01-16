@@ -369,7 +369,7 @@ namespace soci {
 
     static void to_base(InvoiceItem& model, values& v, indicator& ind) {
       v.set("purchase_invoice_id", model.purchase_invoice_id);
-      v.set("part_id", model.part.id);
+      v.set("part_id", model.part.id, model.part.id == -1 ? i_null : i_ok);
       v.set("supplier_sku", model.supplier_sku, model.supplier_sku.empty() ? i_null : i_ok);
       v.set("name", model.name);
       v.set("own_sku", model.own_sku);

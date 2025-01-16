@@ -460,53 +460,54 @@ TableCreator& TableCreator::PurchaseInvoicesItemsTable() {
         REFERENCES parts(id)
         ON DELETE SET NULL
         ON UPDATE CASCADE
-);
+  );
+)";
 
-  -- Trigger to create new part when own_sku is inserted in purchase_invoice_items
-  CREATE TRIGGER IF NOT EXISTS create_new_part_from_purchase_item
-      AFTER INSERT ON purchase_invoice_items
-      WHEN NEW.part_id IS NULL
-  BEGIN
-      INSERT INTO parts (name, own_sku)
-      VALUES (NEW.supplier_sku, NEW.own_sku);
-    
+  Database::ExecuteTransaction(_sql);
+
+  Database::OpenDb();
+  std::string create_trigger_sql = R"(CREATE TRIGGER after_purchase_item_insert_combined
+    AFTER INSERT ON purchase_invoice_items
+    BEGIN
+      -- If part_id is NULL, create a new part
+      INSERT INTO parts (name, own_sku, quality_id, category_id, sell_price, sell_price_ex_vat, color_id, quantity, purch_price, purch_price_ex_vat, vat, location)
+      SELECT NEW.name, NEW.own_sku, -1, -1, 0, 0, -1, 0, NEW.purchase_price, NEW.purchase_price_ex_vat, NEW.vat, NULL
+      WHERE NEW.part_id IS NULL;
+
+      -- Update the purchase_invoice_items table with the new part_id if it was created
       UPDATE purchase_invoice_items
       SET part_id = (SELECT id FROM parts WHERE own_sku = NEW.own_sku)
-      WHERE id = NEW.id;
-  END;
+      WHERE NEW.part_id IS NULL AND id = NEW.id;
 
-  -- Trigger to update parts.updated_at
-  CREATE TRIGGER IF NOT EXISTS update_part_timestamp
-      AFTER UPDATE ON parts
-  BEGIN
-      UPDATE parts 
-      SET updated_at = CURRENT_TIMESTAMP
-      WHERE id = NEW.id;
-  END;
-
-  -- Trigger to update parts quantity after purchase
-  CREATE TRIGGER IF NOT EXISTS after_purchase_item_insert
-      AFTER INSERT ON purchase_invoice_items
-      WHEN NEW.part_id IS NOT NULL
-  BEGIN
-      UPDATE parts 
+      -- Update the parts table
+      UPDATE parts
       SET quantity = quantity + NEW.quantity,
-          last_purchase_price = NEW.purchase_price,
-          last_purchase_price_ex_vat = NEW.purchase_price_ex_vat
-      WHERE id = NEW.part_id;
-  END;
+        purch_price = NEW.purchase_price,
+        purch_price_ex_vat = NEW.purchase_price_ex_vat,
+        updated_at = CURRENT_TIMESTAMP
+      WHERE id = (SELECT part_id FROM purchase_invoice_items WHERE id = NEW.id);
 
-
-  -- Trigger to update parts history after purchase
-  CREATE TRIGGER IF NOT EXISTS update_part_history
-      AFTER INSERT ON purchase_invoice_items
-  BEGIN
-      INSERT INTO parts_history (part_id, operation, quantity, action_id, notes, created_at)
-      VALUES  (NEW.part_id, "Add", NEW.quantity, 1, NEW.purchase_invoice_id, CURRENT_TIMESTAMP)
-  END;
-    );
+    -- Insert into parts_history table
+      INSERT INTO parts_history (
+        part_id,
+        operation,
+        quantity,
+        action_id,
+        notes,
+        created_at
+      )
+      VALUES (
+        (SELECT part_id FROM purchase_invoice_items WHERE id = NEW.id),
+        'Add',
+        NEW.quantity,
+        1,
+        'Stock purchase from invoice ' || (SELECT invoice_number FROM purchase_invoices WHERE id = NEW.purchase_invoice_id),
+        CURRENT_TIMESTAMP
+      );
+    END;
   )";
-  Database::ExecuteTransaction(_sql);
+  Database::ExecuteTransaction(create_trigger_sql);
+
   return *this;
 }
 
@@ -803,15 +804,7 @@ Inserter& Inserter::PurchaseInvoice_(PurchaseInvoice& _invoice) {
 
       for (auto& item : _invoice.items) {
         item.purchase_invoice_id = _invoice.id;
-        if (item.part.id < 0) {
-          Part _part;
-          _part = item;
-          std::cout << " part not inserted yet: " << _part.ToString() << std::endl;
-          item.part.id = Query::InsertItem(_part);
-        }
-        else {
-          Query::UpdateItem(item);
-        }
+        // Trigger for other logic
         Query::InsertInvoiceItem(item);
       }
     },
