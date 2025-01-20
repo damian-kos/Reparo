@@ -16,9 +16,9 @@ private:
   int selected = 1;
 };
 
-class ItemPicker {
+class InvoiceItemPicker {
 public:
-  ItemPicker();
+  InvoiceItemPicker();
   void Init();
   void Render();
   void FillFields(Part& _part);
@@ -36,4 +36,38 @@ private:
   OwnSKUField own_sku_field;
   QueriedTextField name_field; // for the name of the part
   void Validate();
+};
+
+// Shorter names for the flags from now on
+enum ItemFilterFlags_ {
+  DisableNone      = 0, 
+  DisableOwnSKU    = 1 << 1,
+  DisableName      = 1 << 2,
+  DisableDevice    = 1 << 3,
+  DisableAlias     = 1 << 4,
+  DisableQuality   = 1 << 5,
+  DisableCategory  = 1 << 6,
+  ShowTable        = 1 << 7
+};
+
+typedef int ItemFilterFlags;
+
+class ItemFilter {
+public:
+  ItemFilter(ItemFilterFlags _flags = 0);
+  bool Render();
+  std::string GetOwnSKU();
+  std::string GetName();
+  std::string GetDevice();
+  std::string GetAlias();
+  std::string GetQuality();
+  std::string GetCategory();
+private:
+  ItemFilterFlags flags = 0;
+  OwnSKUField own_sku_filter;
+  QueriedTextField name_filter;
+  DeviceField device_filter;
+  SimpleModelField<Alias> alias_filter;
+  QueriedTextField quality_filter;
+  QueriedTextField category_filter;
 };

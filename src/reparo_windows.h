@@ -10,6 +10,7 @@
 #include "base_window.h"
 #include "imguidatechooser.h"
 #include "invoices.h"
+#include "views.h"
 
 class StackModal;
 
@@ -67,10 +68,10 @@ public:
   void CustomerSection();
   void DeviceSection();
   void NotesSection();
+  void PriceSection();
   void FieldsValidate();
   void DeviceFeedback();
   void NotesFeedback();
-  void PriceSection();
   void PriceFeedback();
   void Submit();
   void RepairValidated();

@@ -62,14 +62,14 @@ std::string DateFilter::GetForSQL() {
   return _string_for_sql;
 }
 
-ItemPicker::ItemPicker()
+InvoiceItemPicker::InvoiceItemPicker()
   : supplier_sku(_("Supplier SKU"), 0, TFFlags_HasPopup | TFFlags_NeverAnError, "DISTINCT supplier_sku", "purchase_invoice_items", "supplier_sku")
   , own_sku_field(_("Own SKU"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence)
   , name_field(_("Item's name"), 0, TFFlags_HasPopup | TFFlags_HasLenValidator | TFFlags_EmptyIsError, "DISTINCT name", "parts", "name")
 {
 }
 
-void ItemPicker::Render() {
+void InvoiceItemPicker::Render() {
   own_sku_field.Feedback();
   name_field.FeedbackEx();
   ImGui::NewLine();
@@ -115,7 +115,7 @@ void ItemPicker::Render() {
   Validate();
 }
 
-void ItemPicker::FillFields(Part& _part) {
+void InvoiceItemPicker::FillFields(Part& _part) {
   own_sku_field.FillBuffer(_part.own_sku);
   name_field.FillBuffer(_part.name);
   price = _part.purch_price;
@@ -123,7 +123,7 @@ void ItemPicker::FillFields(Part& _part) {
   quantity = 1;
 }
 
-InvoiceItem ItemPicker::GetPart() {
+InvoiceItem InvoiceItemPicker::GetPart() {
   InvoiceItem _part;
   _part.part = own_sku_field.GetFromDb();
   _part.name = name_field.Get();
@@ -138,7 +138,7 @@ InvoiceItem ItemPicker::GetPart() {
   return _part;
 }
 
-void ItemPicker::Clear() {
+void InvoiceItemPicker::Clear() {
   quantity = 1;
   price = 0.0;
   vat = 0.0;
@@ -149,6 +149,65 @@ void ItemPicker::Clear() {
   name_field.Clear();
 }
 
-void ItemPicker::Validate() {
+void InvoiceItemPicker::Validate() {
   error = own_sku_field.error || name_field.error;
 }
+
+ItemFilter::ItemFilter(ItemFilterFlags _flags) 
+  : flags(_flags)
+  , own_sku_filter(_("Own SKU"), 0, TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence)
+  , name_filter(_("Item's name"), 0, TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence, "name", "parts", "name")
+  , device_filter(_("Compatible with device"), 0, TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence)
+  , alias_filter(_("Compatible with alias"), 0, TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence)
+  , quality_filter(_("Choose quality"), 0, TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence, "quality", "qualities", "quality")
+  , category_filter(_("Choose category"), 0, TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence, "category", "repair_categories", "category")
+{
+}
+
+bool ItemFilter::Render() {
+  bool _state = false;
+  if (!(flags & DisableOwnSKU))
+    own_sku_filter.Render();
+  if (!(flags & DisableName))
+    name_filter.Render();
+  if (!(flags & DisableDevice))
+    device_filter.Render();
+  if (!(flags & DisableAlias))
+    alias_filter.Render();
+  if (!(flags & DisableQuality))
+    quality_filter.Render();
+  if (!(flags & DisableCategory))
+    category_filter.Render();
+  if (ImGui::Button(_("Search")))
+    _state = true;
+  return _state;
+}
+
+std::string ItemFilter::GetOwnSKU() {
+  return own_sku_filter.Get();
+}
+
+std::string ItemFilter::GetName() {
+  return name_filter.Get();
+}
+
+std::string ItemFilter::GetDevice() {
+  Device _device = device_filter.GetFromDb();
+  std::string _device_cmpbl = _device ? "pm.model_id = " + std::to_string(_device.id) : "";
+  return _device_cmpbl;
+}
+
+std::string ItemFilter::GetAlias() {
+  Alias _alias = alias_filter.GetFromDb();
+  std::string _alias_cmpbl = _alias ? "pma.alias_id = " + std::to_string(_alias.id) : "";
+  return _alias_cmpbl;
+}
+
+std::string ItemFilter::GetQuality() {
+  return quality_filter.Get();
+}
+
+std::string ItemFilter::GetCategory() {
+  return category_filter.Get();
+}
+

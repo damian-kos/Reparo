@@ -11,8 +11,6 @@
 #include <map>
 #include "filters.h"
 
-
-
 CustomerWin::CustomerWin()
   : phone(_("Phone"), ImGuiInputTextFlags_CharsDecimal, TFFlags_HasPopup | TFFlags_EmptyIsError) { 
   Init();
@@ -295,13 +293,22 @@ void RepairWin::Init() {
 
 void RepairWin::Render() {
   ImGui::Begin(_("Repair"), &open);
-  FieldsValidate();
-  RepairValidated();
-  CustomerSection();
-  DeviceSection();
-  NotesSection();
-  PriceSection();
-  Submit();
+  if (ImGui::BeginTable("Repair Window", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable)) {
+    ImGui::TableNextRow();
+    ImGui::TableNextColumn();
+    FieldsValidate();
+    RepairValidated();
+    CustomerSection();
+    DeviceSection();
+    NotesSection();
+    PriceSection();
+    Submit();
+    ImGui::TableNextColumn();
+    ImGui::SeparatorText(_("Assign parts or items"));
+    static InventoryView _view(_("Pick an item"));
+    _view.Render();
+    ImGui::EndTable();
+  }
   ImGui::End();
 }
 
@@ -335,6 +342,12 @@ void RepairWin::NotesSection() {
   hid_note.Render();
 }
 
+void RepairWin::PriceSection() {
+  ImGui::SeparatorColor(_("PRICE"), price_section_error);
+  PriceFeedback(); 
+  ImGui::InputDouble("##Price", &price, 0.10, 1.0, "%.2f");
+}
+
 void RepairWin::FieldsValidate() {
   device_section_error = device.error || category.error || color.error || sn_imei.error;
   notes_section_error = vis_note.error || hid_note.error;
@@ -356,12 +369,6 @@ void RepairWin::DeviceFeedback() {
 void RepairWin::NotesFeedback() {
   vis_note.Feedback();
   hid_note.Feedback();
-}
-
-void RepairWin::PriceSection(){
-  ImGui::SeparatorColor(_("PRICE"), price_section_error);
-  PriceFeedback(); 
-  ImGui::InputDouble("##Price", &price, 0.10, 1.0, "%.2f");
 }
 
 void RepairWin::PriceFeedback() {
@@ -863,7 +870,7 @@ void PurchaseInvoiceWin::RenderInvoiceTableRows() {
 void PurchaseInvoiceWin::RenderAddItemButton() {
   ImGui::Button(_("Add item"));
   if (ImGui::BeginPopupContextItem("##empty", ImGuiPopupFlags_MouseButtonLeft)) {
-    static ItemPicker _item_picker;
+    static InvoiceItemPicker _item_picker;
     _item_picker.Render();
     ImGui::BeginDisabled(_item_picker.error);
     if (ImGui::Button(_("Add to invoice"))) {

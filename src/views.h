@@ -21,6 +21,7 @@ protected:
     int max_columns;
     // Column header name in SQL query table - Header name in imgui table
     std::vector<std::pair<std::string, std::string>> headers;
+    bool is_window = true;
   };
   Config config;
 };
@@ -28,16 +29,18 @@ protected:
 template <typename T>
 class BaseTableView : public View {
 public:
-  BaseTableView(std::string _window_id, int _max_columns, const std::vector<std::pair<std::string, std::string>>& _headers) {  
+  BaseTableView(std::string _window_id, int _max_columns, const std::vector<std::pair<std::string, std::string>>& _headers, bool _is_window = true) {  
     config.window_id = _window_id;
     config.max_columns = _max_columns;
     config.headers = _headers;
+    config.is_window = _is_window;
     open = true;
   }
 
 
   void Render() override {
-    ImGui::Begin(config.window_id.c_str(), &open);
+    if(config.is_window)
+      ImGui::Begin(config.window_id.c_str(), &open);
     Filters();
     if (ImGui::BeginTable(config.window_id.c_str(), config.max_columns, ImGuiTableFlags_RowBg  | ImGuiTableFlags_Borders | ImGuiTableFlags_Sortable | ImGuiTableFlags_Hideable  | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Resizable )) {
       for (const auto& header : config.headers) {
@@ -57,7 +60,8 @@ public:
 
       ImGui::EndTable();
     }
-    ImGui::End();
+    if (config.is_window)
+      ImGui::End();
   }
 
 
@@ -110,18 +114,14 @@ private:
 class InventoryView : public BaseTableView<Part> {
 public:
   explicit InventoryView();
+  explicit InventoryView(const std::string& _window_id);
 
 private:
+  void Init(const std::string& _window_id, const bool& _is_window = true);
   void DefaultRenderItem(const Part& _part) override;
   void LoadData(const std::string& _orderby = "", const int& _direction = 0) override;
   void Filters() override;
-  OwnSKUField own_sku_filter;
-  QueriedTextField name_filter;
-  DeviceField device_filter;
-  SimpleModelField<Alias> alias_filter;
-  QueriedTextField quality_filter;
-  QueriedTextField category_filter;
-
+  ItemFilter item_filter;
 };
 
 class DevicesView : public BaseTableView<Device> {

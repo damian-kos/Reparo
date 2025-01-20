@@ -207,60 +207,41 @@ void RepairView::Filters() {
   }
 }
 
-InventoryView::InventoryView() 
-  : BaseTableView<Part>(
-    "Inventory view",
-    16,
-    {
-        { "id", "ID"},
-        { "name", "Name"},
-        { "own_sku", "Own SKU"},
-        { "quality", "Quality"},
-        { "category", "Category"},
-        { "sell_price", "Sell Price"},
-        { "sell_price_ex_vat", "Sell Price ex.VAT"},
-        { "color", "Color"},
-        { "quantity", "Quantity"},
-        { "purch_price", "Purchase price"},
-        { "purch_price_ex_vat", "Purchase price ex.VAT"},
-        { "vat", "VAT"},
-        { "location", "Location"},
-        { "reserved_quantity", "Reserved Quantity"},
-        { "created_at", "Created at" },
-        { "updated_at", "Updated at" }
-    }
-  ), 
-  own_sku_filter(
-    _("Own SKU"),
-    0,
-    TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence
-  ),
-  name_filter(
-    _("Item's name"),
-    0,
-    TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence, "name", "parts", "name"
-  ),
-  device_filter(
-    _("Compatible with device"),
-    0,
-    TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence
-  ),
-  alias_filter(
-    _("Compatible with alias"),
-    0,
-    TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence
-  ),
-  quality_filter(
-    _("Choose quality"),
-    0,
-    TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence, "quality", "qualities", "quality"
-  ), 
-  category_filter(
-    _("Choose category"),
-    0,
-    TFFlags_HasPopup | TFFlags_NeverAnError | TFFlags_AllowDbPresence, "category", "repair_categories", "category"
-  )
-  {}
+InventoryView::InventoryView()
+  : BaseTableView<Part>("Inventory view", 16, {})
+{
+  Init("Inventory view");
+}
+
+InventoryView::InventoryView(const std::string& _window_id)
+  : BaseTableView<Part>(_window_id, 16, {})
+{
+  Init(_window_id, false);
+}
+
+void InventoryView::Init(const std::string& _window_id, const bool& _is_window) {
+  config.window_id = _window_id;
+  config.max_columns = 16;
+  config.headers = {
+    { "id", "ID"},
+    { "name", "Name"},
+    { "own_sku", "Own SKU"},
+    { "quality", "Quality"},
+    { "category", "Category"},
+    { "sell_price", "Sell Price"},
+    { "sell_price_ex_vat", "Sell Price ex.VAT"},
+    { "color", "Color"},
+    { "quantity", "Quantity"},
+    { "purch_price", "Purchase price"},
+    { "purch_price_ex_vat", "Purchase price ex.VAT"},
+    { "vat", "VAT"},
+    { "location", "Location"},
+    { "reserved_quantity", "Reserved Quantity"},
+    { "created_at", "Created at" },
+    { "updated_at", "Updated at" }
+  };
+  config.is_window = _is_window;
+}
 
 void InventoryView::DefaultRenderItem(const Part & _part) {
   ImGui::TableNextColumn();
@@ -316,10 +297,7 @@ void InventoryView::DefaultRenderItem(const Part & _part) {
 }
 
 void InventoryView::LoadData(const std::string& _orderby, const int& _direction) {
-  Device _device = device_filter.GetFromDb();
-  std::string _device_cmpbl = _device ? "pm.model_id = " + std::to_string(_device.id) : "";
-  Alias _alias = alias_filter.GetFromDb();
-  std::string _alias_cmpbl = _alias ? "pma.alias_id = " + std::to_string(_alias.id) : "";
+  std::string own_sku = item_filter.GetOwnSKU();
   data = Database::Select<Part>("DISTINCT p.*, q.quality , rc.category , c.color  ")
     .From("parts p")
     .LeftJoin("qualities q").On("q.id = p.quality_id")
@@ -328,26 +306,19 @@ void InventoryView::LoadData(const std::string& _orderby, const int& _direction)
     .LeftJoin("part_model pm").On("pm.part_id = p.id")
     .LeftJoin("part_model_alias pma").On("pma.part_id = p.id")
     .Where("p.own_sku")
-    .Like(own_sku_filter.Get())
-    .And("p.name").Like(name_filter.Get())
-    .And("q.quality").Like(quality_filter.Get())
-    .And("rc.category").Like(category_filter.Get())
-    .And(_device_cmpbl)
-    .And(_alias_cmpbl)
-    
+    .Like(own_sku)
+    .And("p.name").Like(item_filter.GetName())
+    .And("q.quality").Like(item_filter.GetQuality())
+    .And("rc.category").Like(item_filter.GetCategory())
+    .And(item_filter.GetDevice())
+    .And(item_filter.GetAlias())
     .OrderBy(_orderby, _direction)
     .All();
 
 }
 
 void InventoryView::Filters() {
-  own_sku_filter.Render();
-  name_filter.Render();
-  device_filter.Render();
-  alias_filter.Render();
-  quality_filter.Render();
-  category_filter.Render();
-  if (ImGui::Button(_("Search")))
+  if(item_filter.Render())
     LoadData();
 }
 
