@@ -25,6 +25,8 @@ struct InvoiceItem : public SelectableItem {
 
 struct RepairItem : public SelectableItem {
   bool assign = false; // assigns to repair reserved parts
+  double total_net;
+  double total;
   const std::string ToString() const;
   void Clear();
 };

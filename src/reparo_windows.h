@@ -65,6 +65,8 @@ public:
   RepairWin();
   void Init();
   void Render();
+  void ItemAssign();
+  void RenderAssignedItems();
   void CustomerSection();
   void DeviceSection();
   void NotesSection();
@@ -91,6 +93,7 @@ private:
   TextField sn_imei;
   TextField vis_note;
   TextField hid_note;
+  std::vector <RepairItem> items; // assigned parts to repair
 };
 
 class  PartsWin : public RoWindow {

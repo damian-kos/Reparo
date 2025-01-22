@@ -305,20 +305,71 @@ void RepairWin::Render() {
     Submit();
 
     ImGui::TableNextColumn();
-    ImGui::SeparatorText(_("Assign parts or items"));
-
-    static InventoryView _view(_("Pick an item"), ViewStateFlags_Select);
-    _view.Render();
-
-    RepairItem& _item = _view.GetSelectedItem();
-    if (_item.assign) {
-      std::cout << _item.ToString() << std::endl;
-      _item.Clear();
-    }
+    ItemAssign();
    
-    ImGui::EndTable();
+    RenderAssignedItems();
+
+  ImGui::EndTable();
   }
   ImGui::End();
+}
+
+void RepairWin::ItemAssign() {
+  ImGui::SeparatorText(_("Assign parts or items"));
+
+  static InventoryView _view(_("Pick an item"), ViewStateFlags_Select);
+  _view.Render();
+
+  RepairItem& _item = _view.GetSelectedItem();
+  if (_item.assign) {
+    RepairItem _new = _item;
+    //items.push_back(_item);
+    Convert::PushBackIfUnique(items, _item);
+    _item.Clear();
+  }
+}
+
+void RepairWin::RenderAssignedItems() {
+  // Similar table in PurchaseInvoiceWin - can we merge?
+  ImGui::SeparatorText(_("Assigned items"));
+  static ImGuiTableFlags _flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp;
+  if (ImGui::BeginTable("Assigned items", 7, _flags)) {
+    std::vector<std::string> headers = { _("ID"), _("Name"), _("Quantity"), _("Sell price ex. VAT"), _("VAT"), _("Total Net"), _("Total") };
+    for (const auto& header : headers) {
+      ImGui::TableSetupColumn(header.c_str());
+    }
+    ImGui::TableHeadersRow();
+    int i = 0;
+    for (auto it = items.begin(); it != items.end(); ) {
+      ImGui::TableNextRow();
+      ImGui::TableNextColumn();
+      std::string _label = std::to_string(++i);
+      ImGui::Selectable(_label.c_str(), false, ImGuiSelectableFlags_SpanAllColumns);
+      if (ImGui::BeginPopupContextItem(_label.c_str(), ImGuiPopupFlags_MouseButtonRight)) {
+        if (ImGui::Button(_("Remove"))) {
+          it = items.erase(it); // Erase the element and update the iterator
+          ImGui::CloseCurrentPopup();
+          ImGui::EndPopup();
+          continue; // Skip the increment of the iterator
+        }
+        ImGui::EndPopup();
+      }
+      ImGui::TableNextColumn();
+      ImGui::TextWrapped("%s", it->part.name.c_str());
+      ImGui::TableNextColumn();
+      ImGui::TextWrapped("%d", it->quantity);
+      ImGui::TableNextColumn();
+      ImGui::TextWrapped("%.2f", it->part.sell_price_ex_vat);
+      ImGui::TableNextColumn();
+      ImGui::Text("%2.0f", it->part.vat);
+      ImGui::TableNextColumn();
+      ImGui::Text("%.2f", it->total);
+      ImGui::TableNextColumn();
+      ImGui::Text("%.2f", it->total_net);
+      ++it;
+    }
+    ImGui::EndTable();
+  }
 }
 
 void RepairWin::CustomerSection() {
