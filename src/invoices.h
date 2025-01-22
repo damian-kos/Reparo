@@ -24,6 +24,9 @@ struct InvoiceItem : public SelectableItem {
 };
 
 struct RepairItem : public SelectableItem {
+  // When assign item to repair, most likely one item will be assigned, saves time for an user
+  RepairItem() { quantity = 1; } 
+  int repair_id = -1;
   bool assign = false; // assigns to repair reserved parts
   double total_net;
   double total;

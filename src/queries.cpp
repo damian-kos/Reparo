@@ -185,6 +185,13 @@ namespace Query {
     return device_id;
   }
 
+  void InsertRepairPart(RepairItem& _item) {
+    RepairItem _i = _item;
+    Database::sql << "INSERT INTO repair_parts (repair_id, part_id, quantity, sell_price_ex_vat, vat) "
+      "VALUES (:repair_id, :part_id, :quantity, :sell_price_ex_vat, :vat)",
+      soci::use(_i);
+  }
+
   int InsertSupplier(Supplier& _supplier)   {
     Supplier _s = _supplier;
     int _supplier_id = -1;

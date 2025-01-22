@@ -222,11 +222,11 @@ void RepairItemPicker::Render() {
   ImGui::InputInt(_("Quantity"), &repair_item.quantity);
   ImGui::SameLine();
   ImGui::Text(_(" - %d available"), repair_item.part.quantity);
-  ImGui::InputDouble(_("Sell price ex. VAT"), &repair_item.part.sell_price, 0.0, 0.0, "%.2f"); 
+  ImGui::InputDouble(_("Sell price ex. VAT"), &repair_item.part.sell_price_ex_vat, 0.0, 0.0, "%.2f"); 
   ImGui::InputDouble(_("% VAT"), &repair_item.part.vat, 0.0, 0.0, "%.2f");
   if (ImGui::Button(_("Assign part"))) {
-    repair_item.total = repair_item.quantity * repair_item.part.sell_price;
-    repair_item.total_net = repair_item.total + (repair_item.total * repair_item.part.vat / 100);
+    repair_item.total_net = repair_item.quantity * repair_item.part.sell_price_ex_vat;
+    repair_item.total = repair_item.total_net + (repair_item.total_net * repair_item.part.vat / 100);
     repair_item.assign = true;
   }
 }

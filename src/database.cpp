@@ -762,7 +762,11 @@ Inserter& Inserter::Repair_(Repair& repair) {
         Query::InsertCustomDevice(repair);
       }
       
-      Query::InsertRepair(repair);
+      int _repair_id = Query::InsertRepair(repair);
+      for (auto& _item : repair.items) {
+        _item.repair_id = _repair_id;
+        Query::InsertRepairPart(_item);
+      }
     
     },
     "Device insertion (Device Name: " + repair.ToString() + ")"

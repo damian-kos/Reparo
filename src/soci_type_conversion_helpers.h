@@ -410,6 +410,33 @@ namespace soci {
       ind = i_ok;
     }
   };
+
+  template <>
+  struct type_conversion<RepairItem> {
+    typedef values base_type;
+
+    static void from_base(const values& v, indicator ind, RepairItem& model) {
+      if (ind == i_null) {
+        throw std::runtime_error("Null value fetched from database");
+      }
+      model.repair_id = v.get<int>("repair_id");
+      model.part.id = v.get<int>("part_id", -1);
+      model.quantity = v.get<int>("quantity", -1);
+      model.part.sell_price_ex_vat = v.get<double>("sell_price_ex_vat");
+      model.part.vat = v.get<double>("vat");
+    
+    }
+
+    static void to_base(RepairItem& model, values& v, indicator& ind) {
+      v.set("repair_id", model.repair_id);
+      v.set("part_id", model.part.id, model.part.id == -1 ? i_null : i_ok);
+      v.set("quantity", model.quantity);
+      v.set("sell_price_ex_vat", model.part.sell_price_ex_vat);
+      v.set("vat", model.part.vat);
+      ind = i_ok;
+      
+    }
+  };
 }
 
 

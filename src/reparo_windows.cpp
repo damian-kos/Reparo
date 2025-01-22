@@ -278,8 +278,8 @@ RepairWin::RepairWin()
   : customer_section(TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence)
   , price_can_be_zero(true)
   , device(_("Model"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence)
-  , category(_("Category"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError)
-  , color(_("Color"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError)
+  , category(_("Category"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence)
+  , color(_("Color"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence)
   , sn_imei(_("Serial / IMEI"), 0, TFFlags_EmptyIsError)
   , vis_note(_("Notes for customer"), 0, TFFlags_EmptyIsError)
   , hid_note(_("Notes hidden from customer"), 0, TFFlags_EmptyIsError)
@@ -332,6 +332,8 @@ void RepairWin::ItemAssign() {
 void RepairWin::RenderAssignedItems() {
   // Similar table in PurchaseInvoiceWin - can we merge?
   ImGui::SeparatorText(_("Assigned items"));
+  double _total_net = 0;
+  double _total = 0;
   static ImGuiTableFlags _flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp;
   if (ImGui::BeginTable("Assigned items", 7, _flags)) {
     std::vector<std::string> headers = { _("ID"), _("Name"), _("Quantity"), _("Sell price ex. VAT"), _("VAT"), _("Total Net"), _("Total") };
@@ -363,13 +365,17 @@ void RepairWin::RenderAssignedItems() {
       ImGui::TableNextColumn();
       ImGui::Text("%2.0f", it->part.vat);
       ImGui::TableNextColumn();
-      ImGui::Text("%.2f", it->total);
-      ImGui::TableNextColumn();
       ImGui::Text("%.2f", it->total_net);
+      _total_net += it->total_net;
+      ImGui::TableNextColumn();
+      ImGui::Text("%.2f", it->total);
+      _total += it->total;
       ++it;
     }
     ImGui::EndTable();
   }
+  ImGui::Text(_("Total Net: %.2f"), _total_net);
+  ImGui::Text(_("Total: %.2f"), _total);
 }
 
 void RepairWin::CustomerSection() {
@@ -454,7 +460,7 @@ void RepairWin::Submit() {
     _repair.price = price;
     _repair.repair_state = Database::Get().SimpleModel_<int, RepairState>(2);
     _repair.cust_device_id = device.IsInDb() ? -1 : 1;
-
+    _repair.items = std::move(items);
     _repair.InsertModal();
 
   }

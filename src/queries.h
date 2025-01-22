@@ -4,7 +4,7 @@ class Repair;
 class Supplier;
 class PurchaseInvoice;
 struct InvoiceItem;
-
+struct RepairItem;
 /// <summary>
 /// Used to allow to run multiple queries in one Transaction without need to reopening database.
 /// </summary>
@@ -22,6 +22,7 @@ namespace Query {
   void InsertItemAliases(Part& _part);
   int InsertRepair(Repair& repair);
   int InsertCustomDevice(Repair& repair);
+  void InsertRepairPart(RepairItem& _item);
   int InsertSupplier(Supplier& _supplier);
   int InsertPurchaseInvoice(PurchaseInvoice& _invoice);
   int InsertInvoiceItem(InvoiceItem& _item);

@@ -2,6 +2,7 @@
 #include "customer.h"
 #include "simple_models.h"
 #include "device.h"
+#include "../../src/invoices.h"
 
 class Repair  {
 public:
@@ -16,6 +17,7 @@ public:
   double price;
   RepairState repair_state;
   int cust_device_id;
+  std::vector<RepairItem> items;
   std::tm created_at; // date
   std::tm updated_at; // date
   std::tm finished_at; // date
