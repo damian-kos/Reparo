@@ -211,3 +211,27 @@ std::string ItemFilter::GetCategory() {
   return category_filter.Get();
 }
 
+RepairItemPicker::RepairItemPicker(RepairItem& _item) 
+ : repair_item(_item)
+{
+}
+
+void RepairItemPicker::Render() {
+  ImGui::SeparatorText(_("Edit item"));
+  ImGui::Text("Name: %s", repair_item.part.name.c_str()); // with TextWrapped the popup window is rendering in unexpected areas
+  ImGui::InputInt(_("Quantity"), &repair_item.quantity);
+  ImGui::InputDouble(_("Sell price ex. VAT"), &repair_item.part.sell_price, 0.0, 0.0, "%.2f"); 
+  ImGui::SameLine();
+  ImGui::Text(_(" - %d available"), repair_item.part.quantity);
+  ImGui::InputDouble(_("% VAT"), &repair_item.part.vat, 0.0, 0.0, "%.2f");
+  if (ImGui::Button(_("Assign part")))
+    repair_item.assign = true;
+}
+
+RepairItem RepairItemPicker::GetItem() {
+  return repair_item;
+}
+
+void RepairItemPicker::Clear() {
+  repair_item = RepairItem();
+}

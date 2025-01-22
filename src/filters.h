@@ -16,10 +16,13 @@ private:
   int selected = 1;
 };
 
-class InvoiceItemPicker {
+class ItemPicker {
+  virtual void Render() = 0;
+};
+
+class InvoiceItemPicker : public ItemPicker {
 public:
   InvoiceItemPicker();
-  void Init();
   void Render();
   void FillFields(Part& _part);
   InvoiceItem GetPart(); // Return the selected part
@@ -36,6 +39,17 @@ private:
   OwnSKUField own_sku_field;
   QueriedTextField name_field; // for the name of the part
   void Validate();
+};
+
+class RepairItemPicker : public ItemPicker {
+public:
+  RepairItemPicker(RepairItem& _item);
+  void Render();
+  RepairItem GetItem();
+  void Clear();
+  bool error = true;
+private:
+  RepairItem& repair_item;
 };
 
 // Shorter names for the flags from now on

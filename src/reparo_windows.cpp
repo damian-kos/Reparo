@@ -303,10 +303,19 @@ void RepairWin::Render() {
     NotesSection();
     PriceSection();
     Submit();
+
     ImGui::TableNextColumn();
     ImGui::SeparatorText(_("Assign parts or items"));
-    static InventoryView _view(_("Pick an item"));
+
+    static InventoryView _view(_("Pick an item"), ViewStateFlags_Select);
     _view.Render();
+
+    RepairItem& _item = _view.GetSelectedItem();
+    if (_item.assign) {
+      std::cout << _item.ToString() << std::endl;
+      _item.Clear();
+    }
+   
     ImGui::EndTable();
   }
   ImGui::End();

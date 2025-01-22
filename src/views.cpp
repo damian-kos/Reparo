@@ -210,16 +210,21 @@ void RepairView::Filters() {
 InventoryView::InventoryView()
   : BaseTableView<Part>("Inventory view", 16, {})
 {
-  Init("Inventory view");
+  Init("Inventory view", ViewStateFlags_Default);
 }
 
-InventoryView::InventoryView(const std::string& _window_id)
+InventoryView::InventoryView(const std::string& _window_id, ViewStateFlags _flags)
   : BaseTableView<Part>(_window_id, 16, {})
 {
-  Init(_window_id, false);
+  Init(_window_id, _flags, false);
 }
 
-void InventoryView::Init(const std::string& _window_id, const bool& _is_window) {
+RepairItem& InventoryView::GetSelectedItem() {
+  if (config.flags & ViewStateFlags_Select)
+    return repair_item;
+}
+
+void InventoryView::Init(const std::string& _window_id, ViewStateFlags _flags, const bool& _is_window) {
   config.window_id = _window_id;
   config.max_columns = 16;
   config.headers = {
@@ -241,12 +246,12 @@ void InventoryView::Init(const std::string& _window_id, const bool& _is_window) 
     { "updated_at", "Updated at" }
   };
   config.is_window = _is_window;
+  config.flags = _flags;
 }
 
 void InventoryView::DefaultRenderItem(const Part & _part) {
   ImGui::TableNextColumn();
-  std::string _id_str = std::to_string(_part.id);
-  ImGui::Selectable(_id_str.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap);
+  ActionsOnTable(const_cast<Part&>(_part));
 
   ImGui::TableNextColumn();
   ImGui::Text("%s", _part.name.c_str());
@@ -296,6 +301,29 @@ void InventoryView::DefaultRenderItem(const Part & _part) {
   ImGui::Text("%s", _updated_at.c_str());
 }
 
+void InventoryView::DefaultAction(Part& _item) {
+  std::string _id_str = std::to_string(_item.id);
+  ImGui::Selectable(_id_str.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap);
+}
+
+void InventoryView::SelectAction(Part& _item) {
+  std::string _id_str = std::to_string(_item.id);
+  if (ImGui::Selectable(_id_str.c_str(), repair_item.id == _item.id, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap
+    | ImGuiSelectableFlags_AllowDoubleClick  )) {
+      if (ImGui::IsMouseDoubleClicked(0)) {
+        repair_item.id = _item.id;
+        repair_item.part = _item;
+      }
+  }
+  if (repair_item.id == _item.id) {
+    if (ImGui::BeginPopupContextItem(_id_str.c_str(), ImGuiPopupFlags_MouseButtonLeft)) {
+      static RepairItemPicker _picker(repair_item);
+      _picker.Render();
+      ImGui::EndPopup();
+    }
+  }
+}
+
 void InventoryView::LoadData(const std::string& _orderby, const int& _direction) {
   std::string own_sku = item_filter.GetOwnSKU();
   data = Database::Select<Part>("DISTINCT p.*, q.quality , rc.category , c.color  ")
@@ -320,6 +348,10 @@ void InventoryView::LoadData(const std::string& _orderby, const int& _direction)
 void InventoryView::Filters() {
   if(item_filter.Render())
     LoadData();
+}
+
+Part InventoryView::SelectState() {
+    return Part();
 }
 
 DevicesView::DevicesView()

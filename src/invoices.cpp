@@ -15,3 +15,13 @@ void PurchaseInvoice::InsertToDb() {
   Database::Insert().PurchaseInvoice_(*this);
 }
 
+const std::string RepairItem::ToString() const {
+  return std::to_string(id) + " | " + part.name + " | " + std::to_string(part.sell_price) + " | " + part.ToString();;
+}
+
+void RepairItem::Clear() {
+  id = -1;
+  part = Part();
+  quantity = 0;
+  assign = false;
+}

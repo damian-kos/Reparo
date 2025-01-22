@@ -9,6 +9,15 @@
 #include "filters.h"
 #include "combo.h"
 #include "base_window.h"
+#include "invoices.h"
+
+enum ViewStateFlags_ {
+  ViewStateFlags_Default          = 1 << 1,
+  ViewStateFlags_Select           = 1 << 2,
+  ViewStateFlags_RemoveMultiple   = 1 << 3
+};
+
+typedef int ViewStateFlags;
 
 class View : public RoWindow {
 public:
@@ -22,6 +31,7 @@ protected:
     // Column header name in SQL query table - Header name in imgui table
     std::vector<std::pair<std::string, std::string>> headers;
     bool is_window = true;
+    ViewStateFlags flags = ViewStateFlags_Default;
   };
   Config config;
 };
@@ -29,14 +39,16 @@ protected:
 template <typename T>
 class BaseTableView : public View {
 public:
-  BaseTableView(std::string _window_id, int _max_columns, const std::vector<std::pair<std::string, std::string>>& _headers, bool _is_window = true) {  
+  BaseTableView(std::string _window_id, int _max_columns, 
+    const std::vector<std::pair<std::string, std::string>>& _headers 
+    , ViewStateFlags _flags = ViewStateFlags_Default, bool _is_window = true) {  
     config.window_id = _window_id;
     config.max_columns = _max_columns;
     config.headers = _headers;
     config.is_window = _is_window;
+    config.flags = _flags;
     open = true;
   }
-
 
   void Render() override {
     if(config.is_window)
@@ -53,7 +65,7 @@ public:
 
       for (const auto& item : data) {
         ImGui::TableNextRow();
-
+        
         DefaultRenderItem(item);
         
       }
@@ -70,6 +82,21 @@ protected:
     // Implement a basic default rendering
     // This is a placeholder and should be specialized for different data types
   }
+
+  virtual void ActionsOnTable(T& _item) {
+    if (config.flags & ViewStateFlags_Default) {
+      DefaultAction(_item);
+    }
+    else if (config.flags & ViewStateFlags_Select) {
+      SelectAction(_item);
+    }
+    else if (config.flags & ViewStateFlags_RemoveMultiple) {
+      RemoveMultipleAction(_item);
+    }
+  }
+  virtual void DefaultAction(T& _item) {}
+  virtual void SelectAction(T& _item) {}
+  virtual void RemoveMultipleAction(T& _item) {}
   std::vector<T> data;
   virtual void LoadData(const std::string& _orderby = "", const int& _direction = 0);
   virtual void Sort();
@@ -114,14 +141,20 @@ private:
 class InventoryView : public BaseTableView<Part> {
 public:
   explicit InventoryView();
-  explicit InventoryView(const std::string& _window_id);
+  explicit InventoryView(const std::string& _window_id, ViewStateFlags _flags);
 
+  // SelectAction state
+  RepairItem& GetSelectedItem();
 private:
-  void Init(const std::string& _window_id, const bool& _is_window = true);
+  void Init(const std::string& _window_id, ViewStateFlags _flags, const bool& _is_window = true);
   void DefaultRenderItem(const Part& _part) override;
+  void DefaultAction(Part& _item) override;
+  void SelectAction(Part& _item) override;
   void LoadData(const std::string& _orderby = "", const int& _direction = 0) override;
   void Filters() override;
+  Part SelectState();
   ItemFilter item_filter;
+  RepairItem repair_item;
 };
 
 class DevicesView : public BaseTableView<Device> {

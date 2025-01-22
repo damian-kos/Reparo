@@ -5,19 +5,28 @@
 #include "../../src/models/simple_models.h"
 #include <string>
 
-struct InvoiceItem {
+struct SelectableItem {
   int id = -1;
-  int purchase_invoice_id;
   Part part;
-  std::string supplier_sku;
+  int quantity = 0;
+};
+
+struct InvoiceItem : public SelectableItem {
   std::string name;
+  int purchase_invoice_id;
+  std::string supplier_sku;
   std::string own_sku;
   Price price;
   double total_net;
   double total;
-  int quantity;
 
   const std::string ToString() const;
+};
+
+struct RepairItem : public SelectableItem {
+  bool assign = false; // assigns to repair reserved parts
+  const std::string ToString() const;
+  void Clear();
 };
 
 class Invoice {
@@ -43,3 +52,4 @@ public:
     return id > 0 && !name.empty();
   }
 };
+
