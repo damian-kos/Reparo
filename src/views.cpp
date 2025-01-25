@@ -313,6 +313,8 @@ void InventoryView::SelectAction(Part& _item) {
       if (ImGui::IsMouseDoubleClicked(0)) {
         repair_item.id = _item.id;
         repair_item.part = _item;
+        // When assign item to repair, most likely one item will be assigned, saves time for an user
+        repair_item.quantity = 1;
       }
   }
   if (repair_item.id == _item.id) {

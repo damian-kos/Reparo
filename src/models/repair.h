@@ -17,12 +17,13 @@ public:
   double price;
   RepairState repair_state;
   int cust_device_id;
-  std::vector<RepairItem> items;
+  ItemsContainer<RepairItem> items;
   std::tm created_at; // date
   std::tm updated_at; // date
   std::tm finished_at; // date
   static constexpr std::string_view table = "repairs";
   const std::string ToString() const;
+  static void RepairItemsTable(ItemsContainer<RepairItem>& _items, const bool _removable = false);
   void View();
   void InsertModal();
   void InsertToDb();

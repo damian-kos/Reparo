@@ -593,6 +593,8 @@ TableCreator& TableCreator::RepairPartsTable() {
       repair_id          INTEGER,
       part_id            INTEGER,
       quantity           INTEGER NOT NULL,
+      sell_price_ex_vat  DOUBLE NOT NULL,
+      vat                DOUBLE NOT NULL,
 
       FOREIGN KEY (repair_id)
           REFERENCES repairs(id)
@@ -604,6 +606,38 @@ TableCreator& TableCreator::RepairPartsTable() {
           ON DELETE CASCADE
           ON UPDATE CASCADE
     );
+  )";
+  Database::ExecuteTransaction(_sql);
+
+  Database::OpenDb();
+  _sql = R"(
+    CREATE TRIGGER repair_items_insert
+    AFTER INSERT ON repair_parts
+    BEGIN
+        -- Update the parts table
+        UPDATE parts
+        SET reserved_quantity = reserved_quantity + NEW.quantity,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = NEW.part_id;
+
+        -- Insert into parts_history table
+        INSERT INTO parts_history (
+            part_id,
+            operation,
+            quantity,
+            action_id,
+            notes,
+            created_at
+        )
+        VALUES (
+            NEW.part_id,
+            'Reserved',
+            NEW.quantity,
+            1,
+            'Reserved for repair: ' || NEW.repair_id,
+            CURRENT_TIMESTAMP
+        );
+    END;
   )";
   Database::ExecuteTransaction(_sql);
   return *this;
@@ -763,7 +797,7 @@ Inserter& Inserter::Repair_(Repair& repair) {
       }
       
       int _repair_id = Query::InsertRepair(repair);
-      for (auto& _item : repair.items) {
+      for (auto& _item : repair.items.records) {
         _item.repair_id = _repair_id;
         Query::InsertRepairPart(_item);
       }

@@ -324,58 +324,14 @@ void RepairWin::ItemAssign() {
   if (_item.assign) {
     RepairItem _new = _item;
     //items.push_back(_item);
-    Convert::PushBackIfUnique(items, _item);
+    Convert::PushBackIfUnique(items.records, _item);
     _item.Clear();
   }
 }
 
 void RepairWin::RenderAssignedItems() {
   // Similar table in PurchaseInvoiceWin - can we merge?
-  ImGui::SeparatorText(_("Assigned items"));
-  double _total_net = 0;
-  double _total = 0;
-  static ImGuiTableFlags _flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp;
-  if (ImGui::BeginTable("Assigned items", 7, _flags)) {
-    std::vector<std::string> headers = { _("ID"), _("Name"), _("Quantity"), _("Sell price ex. VAT"), _("VAT"), _("Total Net"), _("Total") };
-    for (const auto& header : headers) {
-      ImGui::TableSetupColumn(header.c_str());
-    }
-    ImGui::TableHeadersRow();
-    int i = 0;
-    for (auto it = items.begin(); it != items.end(); ) {
-      ImGui::TableNextRow();
-      ImGui::TableNextColumn();
-      std::string _label = std::to_string(++i);
-      ImGui::Selectable(_label.c_str(), false, ImGuiSelectableFlags_SpanAllColumns);
-      if (ImGui::BeginPopupContextItem(_label.c_str(), ImGuiPopupFlags_MouseButtonRight)) {
-        if (ImGui::Button(_("Remove"))) {
-          it = items.erase(it); // Erase the element and update the iterator
-          ImGui::CloseCurrentPopup();
-          ImGui::EndPopup();
-          continue; // Skip the increment of the iterator
-        }
-        ImGui::EndPopup();
-      }
-      ImGui::TableNextColumn();
-      ImGui::TextWrapped("%s", it->part.name.c_str());
-      ImGui::TableNextColumn();
-      ImGui::TextWrapped("%d", it->quantity);
-      ImGui::TableNextColumn();
-      ImGui::TextWrapped("%.2f", it->part.sell_price_ex_vat);
-      ImGui::TableNextColumn();
-      ImGui::Text("%2.0f", it->part.vat);
-      ImGui::TableNextColumn();
-      ImGui::Text("%.2f", it->total_net);
-      _total_net += it->total_net;
-      ImGui::TableNextColumn();
-      ImGui::Text("%.2f", it->total);
-      _total += it->total;
-      ++it;
-    }
-    ImGui::EndTable();
-  }
-  ImGui::Text(_("Total Net: %.2f"), _total_net);
-  ImGui::Text(_("Total: %.2f"), _total);
+  Repair::RepairItemsTable(items, true);
 }
 
 void RepairWin::CustomerSection() {
@@ -409,9 +365,12 @@ void RepairWin::NotesSection() {
 }
 
 void RepairWin::PriceSection() {
+  bool _price_items_diff = price != items.total.amount;
   ImGui::SeparatorColor(_("PRICE"), price_section_error);
   PriceFeedback(); 
+  ImGui::BeginWarning(_price_items_diff);
   ImGui::InputDouble("##Price", &price, 0.10, 1.0, "%.2f");
+  ImGui::EndColor(_price_items_diff);
 }
 
 void RepairWin::FieldsValidate() {
@@ -438,8 +397,13 @@ void RepairWin::NotesFeedback() {
 }
 
 void RepairWin::PriceFeedback() {
+  bool _price_items_diff = price != items.total.amount;
+  if (_price_items_diff)
+    ImGui::Text(_("Price and items total are different"));
+  else
+    ImGui::NewLine();
   if (price_section_error)
-    ImGui::Text("Price needs to be more than 0");
+    ImGui::Text(_("Price needs to be more than 0"));
   else
     ImGui::NewLine();
 }
@@ -460,7 +424,7 @@ void RepairWin::Submit() {
     _repair.price = price;
     _repair.repair_state = Database::Get().SimpleModel_<int, RepairState>(2);
     _repair.cust_device_id = device.IsInDb() ? -1 : 1;
-    _repair.items = std::move(items);
+    _repair.items = items;
     _repair.InsertModal();
 
   }

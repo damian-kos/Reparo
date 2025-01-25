@@ -84,6 +84,7 @@ private:
   bool device_section_error = true;
   bool notes_section_error = true;
   bool price_section_error = true;
+  bool price_section_warning = true;
   bool error = true;
   double price = 0;
   bool price_can_be_zero;
@@ -93,7 +94,7 @@ private:
   TextField sn_imei;
   TextField vis_note;
   TextField hid_note;
-  std::vector <RepairItem> items; // assigned parts to repair
+  ItemsContainer<RepairItem> items;
 };
 
 class  PartsWin : public RoWindow {
