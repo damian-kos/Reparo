@@ -107,6 +107,14 @@ bool RepairModal::ModalContents() {
 
   if (config.state == ModalState_Update) {
     repair.View(previous);
+    if (ImGui::Button("Confirm")) {
+      action = true;
+      repair.UpdateToDb();
+      ImGui::CloseCurrentPopup();
+    }
+    if (ImGui::Button("Cancel")) {
+      ImGui::CloseCurrentPopup();
+    }
   }
 
   return action;

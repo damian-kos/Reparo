@@ -140,6 +140,7 @@ void CustomerWin::FieldsValidate() {
 /// <returns></returns>
 Customer CustomerWin::CreateCustomer() {
   Customer customer;
+  customer.id = phone.GetFromDb().id;
   customer.phone = phone.Get();
   customer.name = name.Get();
   customer.surname = surname.Get();
@@ -155,8 +156,8 @@ Customer CustomerWin::CreateCustomer() {
 /// </summary>
 /// <returns></returns>
 Customer CustomerWin::GetEntity() {
-  Customer temp = phone.GetFromDb();
   Customer customer = CreateCustomer();
+  Customer temp = phone.GetFromDb();
   if (temp.id > 0) {
     customer.id = temp.id;
     int billing_id = temp.billing_addresses.Get().ID();
@@ -452,19 +453,13 @@ void RepairWin::Submit() {
     }
     ImGui::EndDisabled();
   }
-  //if (state == WindowState_Update) {
-  //  if (ImGui::Button(_("Update repair"))) {
-  //    //Update(CreateRepair());
-  //  //CompareRepairs();
-  //  }
-  //}
 }
 
 Repair RepairWin::CreateRepair() {
   Repair _repair;
   if(state == WindowState_Update)
     _repair.id = previous_repair.id;
-  _repair.customer = customer_section.GetEntity();
+  _repair.customer = customer_section.CreateCustomer();
   // We can change database query below if we needed to get brand and type of the device
   _repair.device = CreateDevice();
   _repair.category = category.GetFromDb();

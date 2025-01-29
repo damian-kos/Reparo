@@ -18,6 +18,8 @@ namespace Query {
   int InsertItem(Part& _part);
   int UpdateItem(Part& _part);
   int UpdateItem(InvoiceItem& _item);
+  int UpdateRepair(Repair& repair);
+  int UpdateRepairPart(RepairItem& _item);
   void InsertItemDevices(Part& _part);
   void InsertItemAliases(Part& _part);
   int InsertRepair(Repair& repair);

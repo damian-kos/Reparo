@@ -123,3 +123,7 @@ void Repair::UpdateModal() {
   RepairModal _modal(*this, _config);
   ModalManager::SetModal(_modal);
 }
+
+void Repair::UpdateToDb() {
+  Database::Update().Repair_(*this);
+}

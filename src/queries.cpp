@@ -139,6 +139,29 @@ namespace Query {
     return _item_id;
   }
 
+  int UpdateRepair(Repair& repair)  {
+    Repair r = repair;
+    int _repair_id = r.id; 
+    Database::sql << R"(UPDATE repairs 
+            SET customer_id = :customer_id, model_id = :model_id, category_id = :category_id, 
+            color_id = :color_id, visible_desc = :visible_desc, hidden_desc = :hidden_desc, 
+            price = :price, repair_state_id = :repair_state_id, sn_imei = :sn_imei, cust_device_id = :cust_device_id 
+            WHERE id = :id)",
+      soci::use(r);
+    return _repair_id;
+  }
+
+  int UpdateRepairPart(RepairItem& _item) {
+    RepairItem _i = _item;
+    Database::sql << "UPDATE repair_parts SET "
+      "quantity = :quantity, "
+      "sell_price_ex_vat = :sell_price_ex_vat, "
+      "vat = :vat "
+      "WHERE repair_id = :repair_id AND part_id = :part_id",
+      soci::use(_i);
+    return _i.id;
+  }
+
   void InsertItemDevices(Part& _part) {
     Part _p = _part;
     for (auto& [key, value] : _p.cmptble_devices) {

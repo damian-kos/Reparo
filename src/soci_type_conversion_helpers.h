@@ -421,19 +421,20 @@ namespace soci {
       }
       model.repair_id = v.get<int>("repair_id");
       model.part.id = v.get<int>("part_id", -1);
-      model.part.name = v.get<std::string>("name");
       model.quantity = v.get<int>("quantity", -1);
       model.part.sell_price_ex_vat = v.get<double>("sell_price_ex_vat");
       model.part.vat = v.get<double>("vat");
       model.total_net = model.part.sell_price_ex_vat * model.quantity;
       model.total = model.total_net * ( 1 + (model.part.vat / 100));
-    
+      if (v.get_number_of_columns() > 5) {
+        model.part.name = v.get<std::string>("name");
+      }
     }
 
     static void to_base(RepairItem& model, values& v, indicator& ind) {
       v.set("repair_id", model.repair_id);
       v.set("part_id", model.part.id, model.part.id == -1 ? i_null : i_ok);
-      v.set("name", model.part.name);
+      //v.set("name", model.part.name);
       v.set("quantity", model.quantity);
       v.set("sell_price_ex_vat", model.part.sell_price_ex_vat);
       v.set("vat", model.part.vat);

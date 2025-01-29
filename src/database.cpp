@@ -640,6 +640,74 @@ TableCreator& TableCreator::RepairPartsTable() {
     END;
   )";
   Database::ExecuteTransaction(_sql);
+
+
+  Database::OpenDb();
+  _sql = R"(
+    CREATE TRIGGER repair_items_update
+    AFTER UPDATE ON repair_parts
+    BEGIN
+        -- Calculate the difference between new and old quantity
+        -- If NEW.quantity is 3 and OLD.quantity is 5, this will be -2
+        -- If NEW.quantity is 7 and OLD.quantity is 5, this will be +2
+        UPDATE parts
+        SET reserved_quantity = reserved_quantity + (NEW.quantity - OLD.quantity),
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = NEW.part_id;
+
+        -- Insert into parts_history table
+        INSERT INTO parts_history (
+            part_id,
+            operation,
+            quantity,
+            action_id,
+            notes,
+            created_at
+        )
+        VALUES (
+            NEW.part_id,
+            'Reserved',
+            NEW.quantity - OLD.quantity,  -- Same calculation here
+            1,
+            'Reserved for repair (update): ' || NEW.repair_id,
+            CURRENT_TIMESTAMP
+        );
+    END;
+  )";
+  Database::ExecuteTransaction(_sql);
+
+  Database::OpenDb();
+  _sql = R"(
+    CREATE TRIGGER repair_items_delete
+    AFTER DELETE ON repair_parts
+    BEGIN
+        -- Update parts table to reduce reserved quantity
+        UPDATE parts
+        SET reserved_quantity = reserved_quantity - OLD.quantity,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = OLD.part_id;
+
+        -- Insert into parts_history table
+        INSERT INTO parts_history (
+            part_id,
+            operation,
+            quantity,
+            action_id,
+            notes,
+            created_at
+        )
+        VALUES (
+            OLD.part_id,
+            'Reserved',
+            -OLD.quantity,  -- Negative because we're removing the reservation
+            1,
+            'Reserved for repair (delete): ' || OLD.repair_id,
+            CURRENT_TIMESTAMP
+        );
+    END;
+  )";
+  Database::ExecuteTransaction(_sql);
+
   return *this;
 }
 
@@ -774,7 +842,7 @@ Inserter& Inserter::Device_(Device& device) {
 Inserter& Inserter::Repair_(Repair& repair) {
   // We call set of queries from Query namespace to make sure it is all being 
   // run withing one transaction 
-  return ExecuteTransaction(
+  return ExecuteTransaction (
     [&repair]() {
     
       if (repair.customer.id < 0) {
@@ -918,3 +986,80 @@ template Customer DBGet::Customer_<std::string>(const std::string&);
 template Customer DBGet::Customer_<int>(const int&);
 template Device DBGet::Device_<std::string>(const std::string&);
 template Device DBGet::Device_<int>(const int&);
+
+Updater& Updater::Repair_(Repair& repair) {
+  return ExecuteTransaction(
+    [&repair]() {
+
+      if (repair.customer.id < 0) {
+        Query::InsertBillingAddress(repair.customer);
+        Query::InsertShippingAddress(repair.customer);
+        Query::InsertCustomer(repair.customer);
+      }
+      else {
+        Query::UpdateBillingAddress(repair.customer);
+        Query::UpdateShippingAddress(repair.customer);
+        Query::UpdateCustomer(repair.customer);
+      }
+
+      if (repair.color.id < 0) {
+        Query::InsertSimpleModel<Color>(repair.color);
+      }
+
+      if (repair.device.id < 0) {
+        Query::InsertCustomDevice(repair);
+      }
+
+      // Update repair and get its ID
+      int repair_id = Query::UpdateRepair(repair);
+
+      // Create a set of part IDs we want to keep
+      std::vector<int> keep_part_ids;
+      for (const auto& item : repair.items.records) {
+        keep_part_ids.push_back(item.part.id);
+      }
+
+      //// Delete parts that are not in the new list
+      if (!keep_part_ids.empty()) {
+        std::stringstream part_list;
+        for (size_t i = 0; i < keep_part_ids.size(); ++i) {
+          if (i > 0) part_list << ",";
+          part_list << keep_part_ids[i];
+        }
+        Database::sql << R"(DELETE FROM repair_parts 
+          WHERE repair_id = :repair_id 
+          AND part_id NOT IN ()" << part_list.str() << ")",
+          soci::use(repair_id);
+      }
+      else {
+        // If no parts to keep, delete all parts for this repair
+        Database::sql << R"(DELETE FROM repair_parts WHERE repair_id = :repair_id)",
+          soci::use(repair_id);
+      }
+
+      //// Update or insert parts
+      for (auto& item : repair.items.records) {
+        item.repair_id = repair_id;
+
+      //  // Check if this part already exists for this repair
+        RepairItem _item;
+        //int count = 0;
+        Database::sql << R"(SELECT * FROM repair_parts 
+          WHERE repair_id = :repair_id AND part_id = :part_id)",
+          soci::use(repair_id), soci::use(item.part.id),
+          soci::into(_item);
+
+        if (_item.part.id > 0) {
+      //    // Update existing part
+          if(item != _item)
+            Query::UpdateRepairPart(item);
+        }
+        else {
+      //    // Insert new part
+          Query::InsertRepairPart(item);
+        }
+      }
+    },
+    "Update repair (Repair: " + repair.ToString() + ")"
+  );
+}

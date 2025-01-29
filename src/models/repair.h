@@ -30,6 +30,7 @@ public:
   void InsertModal();
   void InsertToDb();
   void UpdateModal();
+  void UpdateToDb();
 
   bool operator==(const Repair& other) const {
      //First, check if IDs are the same

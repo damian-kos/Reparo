@@ -117,6 +117,7 @@ public:
   Updater() = default;
   template <typename T>
   Updater& OfSimpleModel(T& model);
+  Updater& Repair_(Repair& repair);
 
 private:
   template<typename Func>
