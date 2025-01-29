@@ -54,24 +54,27 @@ public:
     if(config.is_window)
       ImGui::Begin(config.window_id.c_str(), &open);
     Filters();
-    if (ImGui::BeginTable(config.window_id.c_str(), config.max_columns, ImGuiTableFlags_RowBg  | ImGuiTableFlags_Borders | ImGuiTableFlags_Sortable | ImGuiTableFlags_Hideable  | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Resizable )) {
-      for (const auto& header : config.headers) {
-        ImGui::TableSetupColumn(header.second.c_str());
-      }
+    if (ImGui::BeginChild("ResizableChild", ImVec2(-FLT_MIN, ImGui::GetTextLineHeightWithSpacing() * 8), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeY))
+      if (ImGui::BeginTable(config.window_id.c_str(), config.max_columns, ImGuiTableFlags_RowBg  | ImGuiTableFlags_Borders | ImGuiTableFlags_Sortable | ImGuiTableFlags_Hideable  | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Resizable )) {
+        for (const auto& header : config.headers) {
+          ImGui::TableSetupColumn(header.second.c_str());
+        }
 
-      ImGui::TableHeadersRow();
+        ImGui::TableHeadersRow();
 
-      Sort();
+        Sort();
 
-      for (const auto& item : data) {
-        ImGui::TableNextRow();
+        for (const auto& item : data) {
+          ImGui::TableNextRow();
         
-        DefaultRenderItem(item);
+          DefaultRenderItem(item);
         
-      }
+        }
 
-      ImGui::EndTable();
-    }
+        ImGui::EndTable();
+      }
+    ImGui::EndChild();
+
     if (config.is_window)
       ImGui::End();
   }
@@ -122,6 +125,7 @@ public:
 protected:
   void DefaultRenderItem(const Repair& _repair) override;
   void LoadData(const std::string& _orderby = "", const int& _direction = 0) override;
+  void DefaultAction(Repair& _item) override;
   void Filters() override;
 
 private:

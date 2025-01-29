@@ -85,7 +85,7 @@ namespace soci {
     typedef values base_type;
 
     static void from_base(const values& v, indicator ind, Customer& model) {
-      std::cout << "Converting from base for " << typeid(Customer).name() << std::endl;
+      // std::cout << "Converting from base for " << typeid(Customer).name() << std::endl;
 
       if (ind == i_null) {
         throw std::runtime_error("Null value fetched from database");
@@ -127,8 +127,8 @@ namespace soci {
     static void from_base(values const& v, indicator ind, Device& model) {
       int columns = v.get_number_of_columns();
       if (columns <= 0) { return; }
-      std::cout << "Converting from base for " << typeid(Device).name() << std::endl;
-      std::cout << "Column count: " << columns << std::endl;
+      // std::cout << "Converting from base for " << typeid(Device).name() << std::endl;
+      // std::cout << "Column count: " << columns << std::endl;
 
       try {
         // Get optional fields with defaults
@@ -174,7 +174,7 @@ namespace soci {
     typedef values base_type;
 
     static void from_base(const values& v, indicator ind, Repair& model) {
-      std::cout << "Converting from base for " << typeid(Repair).name() << std::endl;
+      // std::cout << "Converting from base for " << typeid(Repair).name() << std::endl;
 
       if (ind == i_null) {
         throw std::runtime_error("Null value fetched from database");
@@ -229,7 +229,7 @@ namespace soci {
     typedef values base_type;
 
     static void from_base(const values& v, indicator ind, Supplier& model) {
-      std::cout << "Converting from base for " << typeid(Supplier).name() << std::endl;
+      // std::cout << "Converting from base for " << typeid(Supplier).name() << std::endl;
 
       if (ind == i_null) {
         throw std::runtime_error("Null value fetched from database");
@@ -269,7 +269,7 @@ namespace soci {
     typedef values base_type;
 
     static void from_base(const values& v, indicator ind, Part& model) {
-      std::cout << "Converting from base for " << typeid(Part).name() << std::endl;
+      // std::cout << "Converting from base for " << typeid(Part).name() << std::endl;
 
       if (ind == i_null) {
         throw std::runtime_error("Null value fetched from database");
@@ -290,7 +290,7 @@ namespace soci {
       model.reserved_quantity = v.get<int>("reserved_quantity", 0);
       model.created_at = v.get<std::tm>("created_at");
       model.updated_at = v.get<std::tm>("updated_at");
-      std::cout << Convert::TmToStr(model.updated_at) << std::endl;
+      // std::cout << Convert::TmToStr(model.updated_at) << std::endl;
 
       // If Part retreived with joined tables // is there a better way to handle this?
       if (v.get_number_of_columns() > 16) {
@@ -421,15 +421,19 @@ namespace soci {
       }
       model.repair_id = v.get<int>("repair_id");
       model.part.id = v.get<int>("part_id", -1);
+      model.part.name = v.get<std::string>("name");
       model.quantity = v.get<int>("quantity", -1);
       model.part.sell_price_ex_vat = v.get<double>("sell_price_ex_vat");
       model.part.vat = v.get<double>("vat");
+      model.total_net = model.part.sell_price_ex_vat * model.quantity;
+      model.total = model.total_net * ( 1 + (model.part.vat / 100));
     
     }
 
     static void to_base(RepairItem& model, values& v, indicator& ind) {
       v.set("repair_id", model.repair_id);
       v.set("part_id", model.part.id, model.part.id == -1 ? i_null : i_ok);
+      v.set("name", model.part.name);
       v.set("quantity", model.quantity);
       v.set("sell_price_ex_vat", model.part.sell_price_ex_vat);
       v.set("vat", model.part.vat);

@@ -179,9 +179,15 @@ public:
       return *this;
     }
 
-    Selector& Like(const std::string& like) {
-      std::string clause =  "'%" + like + "%'";
-      sql << " LIKE " << clause;
+    Selector& AndLike(const std::string& column, const std::string& value) {
+      if (!value.empty()) {
+        sql << " AND LOWER(" << column << ") LIKE '%" << value << "%'";
+      }
+      return *this;
+    }
+
+    Selector& Like(const std::string& _like) {
+        sql << " LIKE '%" << _like << "%'";
       return *this;
     }
 

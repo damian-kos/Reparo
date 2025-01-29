@@ -23,7 +23,31 @@ void Customer::View() {
   ImGui::Text(_("Name: %s"), name.c_str());
   ImGui::Text(_("Surname: %s"), surname.c_str());
   ImGui::Text(_("Email: %s"), email.c_str());
-  RoTable::Addresses(billing_addresses.Get().Lines(), ship_addresses.Get().Lines());
+  if (ImGui::BeginTable("Addresses", 2)) {
+    ImGui::TableNextColumn();
+    RoTable::Addresses(billing_addresses.Get().Lines(), _("Billing Address"));
+    ImGui::TableNextColumn();
+    RoTable::Addresses(ship_addresses.Get().Lines(), _("Shipping Address"));
+    ImGui::EndTable();
+  }
+}
+
+void Customer::View(const Customer& _previous) {
+  if (id > 0) {
+    ImGui::Text(_("Customer ID: %d"), id);
+  }
+  ImGui::TextWrappedColor(phone != _previous.phone, _("Phone: %s"), phone.c_str());
+  ImGui::TextWrappedColor(name != _previous.name, _("Name: %s"), name.c_str());
+  ImGui::TextWrappedColor(surname != _previous.surname, _("Surname: %s"), surname.c_str());
+  ImGui::TextWrappedColor(email != _previous.email, _("Email: %s"), email.c_str());
+  if (ImGui::BeginTable("Addresses", 2)) {
+    ImGui::TableNextColumn();
+    RoTable::Addresses(billing_addresses.Get().Lines(), _("Billing Address"));
+    ImGui::TableNextColumn();
+    RoTable::Addresses(ship_addresses.Get().Lines(), _("Shipping Address"));
+    ImGui::EndTable();
+  }
+
 }
 
 const std::string Customer::ToString() const {
@@ -33,9 +57,10 @@ const std::string Customer::ToString() const {
 void Customer::InsertModal() {
   ModalConfig config;
   config.Title(_("Insert Customer?"))
-    .Msg(_("Are you sure?"));
+    .Msg(_("Are you sure?"))
+    .State(ModalState_Insert);
 
-  CustomerModal modal(*this, config, ModalEvent_Insert);
+  CustomerModal modal(*this, config);
   ModalManager::SetModal(modal);
 }
 
@@ -46,9 +71,10 @@ void Customer::InsertToDb() {
 void Customer::RemoveModal() const {
   ModalConfig config;
   config.Title(_("Remove Customer?"))
-    .Msg(_("Are you sure?"));
+    .Msg(_("Are you sure?"))
+    .State(ModalState_Remove);
 
-  CustomerModal modal(*this, config, ModalEvent_Remove);
+  CustomerModal modal(*this, config);
   ModalManager::SetModal(modal);
 }
 

@@ -81,7 +81,7 @@ protected:
 class PhoneField : public TextField {
 public:
   using TextField::TextField;
-  bool Render();
+  Customer Render();
   void Validate() override;
   void Feedback() override;
   Customer GetFromDb();

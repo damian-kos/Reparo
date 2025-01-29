@@ -9,6 +9,7 @@ public:
   Customer();
   Customer& GetEntity();
   void View();
+  void View(const Customer& _previous);
   const std::string ToString() const;
   void InsertModal();
   void InsertToDb();
@@ -41,6 +42,10 @@ public:
 
   bool operator!=(const Customer& other) const {
     return !(*this == other);
+  }
+
+  operator bool() const {
+    return id > 0;
   }
 
   void SetRepairs(const int& _count);

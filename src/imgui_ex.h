@@ -71,4 +71,15 @@ namespace ImGui {
     ImGui::PopStyleColor(3);
     return pressed;
   }
+
+  void inline TextWrappedColor(const bool _push, const char* fmt, ...) {
+    va_list args;
+    va_start(args, fmt);
+    if (_push)
+      ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0, 0.9, 0.0, 0.5));
+    ImGui::TextWrappedV(fmt, args);
+    if (_push)
+      ImGui::PopStyleColor();
+    va_end(args);
+  }
 }

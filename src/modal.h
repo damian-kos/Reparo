@@ -13,11 +13,12 @@
 
 class TextField;
 
-enum ModalEvent {
-  ModalEvent_None,
-  ModalEvent_Insert,
-  ModalEvent_Update,
-  ModalEvent_Remove,
+enum ModalState {
+  ModalState_None,
+  ModalState_Insert,
+  ModalState_UpdateWindow,
+  ModalState_Update,
+  ModalState_Remove,
 };
 
 enum ModalCallback {
@@ -32,22 +33,13 @@ public:
   ModalConfig& Title(const std::string& _title);
   ModalConfig& Msg(const std::string& _msg);
   ModalConfig& Callback(const ModalCallback& callback);
+  ModalConfig& State(const ModalState& _state);
   std::string title;
   std::string message;
   bool is_on = false;
+  ModalState state = ModalState_None;
 private:
   ModalCallback callback = ModalCallback_None;
-};
-
-// Customer modal builder
-template <typename T>
-class BuildSingleModal {
-public:
-  BuildSingleModal& SetData(this BuildSingleModal& self, const T& _model) {
-    self.model = _model;
-  }
-private:
-  T model;
 };
 
 class BaseModal {
@@ -62,18 +54,28 @@ public:
 
 protected:
   ModalConfig config;
+  bool control_open = true;
 };
 
 class RepairModal : public BaseModal {
 public:
   RepairModal(const Repair& _repair, ModalConfig& _config)
     : BaseModal(_config), repair(_repair) {
+    repair_win = RepairWin(repair);
+  }
+
+  RepairModal(const Repair& _repair, const Repair& _previous, ModalConfig& _config)
+    : BaseModal(_config), repair(_repair), previous(_previous) {
   }
 
   bool ModalContents() override;
 
 private:
   Repair repair;
+  RepairWin repair_win;
+
+  // ModalState_Update
+  Repair previous;
 };
 
 template <typename T>
@@ -93,15 +95,14 @@ private:
 
 class CustomerModal : public BaseModal {
 public:
-  CustomerModal(const Customer& _customer, ModalConfig& _config, ModalEvent _event)
-    : BaseModal(_config), customer(_customer), event(_event) {
+  CustomerModal(const Customer& _customer, ModalConfig& _config)
+    : BaseModal(_config), customer(_customer) {
   }
 
   bool ModalContents() override;
 
 private:
   Customer customer;
-  ModalEvent event = ModalEvent_None;
 };
 
 class PartModal : public BaseModal {

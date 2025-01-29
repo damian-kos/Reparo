@@ -6,7 +6,9 @@
 class RoTable {
 public:
   static void AddressesInputs(std::vector<TextField>& first, std::vector<TextField>& second);
-  static void Addresses(const std::vector<std::string>& first, const std::vector<std::string>& second);
+  static void Addresses(const std::vector<std::string>& first,  std::string _label);
+  static void Addresses(const std::vector<std::string>& _first, std::string _label, const std::vector<std::string>& _second );
+
   template <typename T>
   static void SimpleModel(std::vector<T>& models);
   static void TableWithDevices(const std::vector<Device>& _devices, std::unordered_map<int, Device>& _cmptbl_devices, std::unordered_map<int, Alias>& _cmptbl_aliases);

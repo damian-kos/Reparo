@@ -31,6 +31,7 @@ public:
   Customer CreateCustomer();
   Customer GetEntity();
   bool error = true;
+
 private:
   PhoneField phone;
   NameField name;
@@ -39,7 +40,6 @@ private:
   std::vector<TextField> billing_address;
   std::vector<TextField> ship_address;
 
-  //bool open = true;
 };
 
 class DeviceWin : public RoWindow {
@@ -63,6 +63,7 @@ private:
 class RepairWin : public RoWindow {
 public:
   RepairWin();
+  RepairWin(Repair& _repair);
   void Init();
   void Render();
   void ItemAssign();
@@ -76,8 +77,12 @@ public:
   void NotesFeedback();
   void PriceFeedback();
   void Submit();
+  Repair CreateRepair();
   void RepairValidated();
   Device CreateDevice();
+
+  // WindowState_Update
+  Repair& GetPrevious();
 
 private:
   CustomerWin customer_section;
@@ -95,6 +100,17 @@ private:
   TextField vis_note;
   TextField hid_note;
   ItemsContainer<RepairItem> items;
+
+  // WindowState_Insert
+  void Insert(Repair _repair) const;
+
+  // WindowState_Update
+  void StateSection();
+  void Update(Repair _repair) const;
+  void CompareRepairs();
+  Repair previous_repair;
+  RoCombo<RepairState> repair_state;
+
 };
 
 class  PartsWin : public RoWindow {

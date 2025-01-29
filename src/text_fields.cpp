@@ -117,6 +117,7 @@ void TextField::Field(){
   if (!has_error_with_content)
     ImGui::EndColor(warning);
   ImGui::EndColor(has_error_with_content);
+  is_edited = ImGui::IsItemEdited();
 }
 
 void TextField::Feedback() { 
@@ -174,12 +175,12 @@ void TextField::FillBuffer(const std::string& fill) {
   Validate();
 }
 
-bool PhoneField::Render() {
+Customer PhoneField::Render() {
   static std::vector<Customer> vec;
-  bool state = false;
   Field();
 
   if (ImGui::IsItemEdited() || ImGui::IsItemActivated()) {
+    customer = Customer();
     Validate();
     vec.clear();
     vec = Database::Select<Customer>()
@@ -187,21 +188,18 @@ bool PhoneField::Render() {
       .Where("phone")
       .Like(buffer)
       .All();
-    state = true;
   }
 
   ImGui::PushID(label.c_str());
-  Customer temp;
   if (ro_flags & TFFlags_HasPopup) {
     if (popup.OnTextInput(buffer, vec)) {
       buffer = popup.record.phone;
       customer = GetFromDb();
       Validate();
-      state = true;
     }
   }
   ImGui::PopID();
-  return state;
+  return customer;
 }
 
 void PhoneField::Validate() {
@@ -373,7 +371,6 @@ SM& SimpleModelField<SM>::Render() {
   static std::vector<SM> vec;
   Field();
   model = SM();
-  is_edited = ImGui::IsItemEdited();
   if (is_edited || ImGui::IsItemActivated()) {
     Validate();
     vec.clear();

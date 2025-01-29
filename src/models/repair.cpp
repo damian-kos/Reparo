@@ -17,7 +17,7 @@ const std::string Repair::ToString() const {
     + "\n";
 }
 
-void Repair::RepairItemsTable(ItemsContainer<RepairItem>& _items, const bool _removable) {
+void Repair::RenderRepairItemsTable(ItemsContainer<RepairItem>& _items, const bool _removable, const ItemsContainer<RepairItem>& _second) {
   // Similar table in PurchaseInvoiceWin - can we merge?
   ImGui::SeparatorText(_("Assigned items"));
   double _total_net = 0;
@@ -29,11 +29,16 @@ void Repair::RepairItemsTable(ItemsContainer<RepairItem>& _items, const bool _re
       ImGui::TableSetupColumn(header.c_str());
     }
     ImGui::TableHeadersRow();
-    int i = 0;
+
+
+    int _index = 0;
     for (auto it = _items.records.begin(); it != _items.records.end(); ) {
+      bool _compare = (_index < _second.records.size());
+
       ImGui::TableNextRow();
       ImGui::TableNextColumn();
-      std::string _label = std::to_string(++i);
+      
+      std::string _label = std::to_string(++_index);
       ImGui::Selectable(_label.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_DontClosePopups);
       if (_removable && ImGui::BeginPopupContextItem(_label.c_str(), ImGuiPopupFlags_MouseButtonRight)) {
         //if (ImGui::BeginPopupContextItem(_label.c_str(), ImGuiPopupFlags_MouseButtonRight)) {
@@ -45,21 +50,19 @@ void Repair::RepairItemsTable(ItemsContainer<RepairItem>& _items, const bool _re
           }
           ImGui::EndPopup();
         
+
       }
-      ImGui::TableNextColumn();
-      ImGui::TextWrapped("%s", it->part.name.c_str());
-      ImGui::TableNextColumn();
-      ImGui::TextWrapped("%d", it->quantity);
-      ImGui::TableNextColumn();
-      ImGui::TextWrapped("%.2f", it->part.sell_price_ex_vat);
-      ImGui::TableNextColumn();
-      ImGui::Text("%2.0f", it->part.vat);
-      ImGui::TableNextColumn();
-      ImGui::Text("%.2f", it->total_net);
-      _total_net += it->total_net;
-      ImGui::TableNextColumn();
-      ImGui::Text("%.2f", it->total);
+      // Use RenderItemsTableRow for each column but index
+      RenderItemsTableRow(it->part.name, _compare ? _second.records[_index - 1].part.name : "", "%s", _compare);
+      RenderItemsTableRow(it->quantity, _compare ? _second.records[_index - 1].quantity : 0, "%d", _compare);
+      RenderItemsTableRow(it->part.sell_price_ex_vat, _compare ? _second.records[_index - 1].part.sell_price_ex_vat : 0.0, "%.2f", _compare);
+      RenderItemsTableRow(it->part.vat, _compare ? _second.records[_index - 1].part.vat : 0.0, "%2.0f", _compare);
+      RenderItemsTableRow(it->total_net, _compare ? _second.records[_index - 1].total_net : 0.0, "%.2f", _compare);
+      RenderItemsTableRow(it->total, _compare ? _second.records[_index - 1].total : 0.0, "%.2f", _compare);
+
       _items.total.amount += it->total;
+      _total_net += it->total_net;
+
       ++it;
     }
     ImGui::EndTable();
@@ -67,6 +70,7 @@ void Repair::RepairItemsTable(ItemsContainer<RepairItem>& _items, const bool _re
   ImGui::Text(_("Total Net: %.2f"), _total_net);
   ImGui::Text(_("Total: %.2f"), _items.total.amount);
 }
+
 
 void Repair::View() {
   ImGui::SeparatorText(_("CUSTOMER"));
@@ -80,16 +84,42 @@ void Repair::View() {
   ImGui::TextWrapped("Note for store:     %s", hid_note.c_str());
   ImGui::TextWrapped("State:              %s", repair_state.name.c_str());
   ImGui::TextWrapped("Price:              %.2f", price);
-  RepairItemsTable(items);
+  RenderRepairItemsTable(items, false);
+}
+
+// Used to compare two repairs when we are updateding an existing repair
+void Repair::View(const Repair& _previous) {
+  ImGui::SeparatorText(_("CUSTOMER"));
+  customer.View(_previous.customer);
+  ImGui::SeparatorText(_("REPAIR DETAILS"));
+  
+  ImGui::TextWrappedColor(device.name != _previous.device.name,             "Model:              %s", device.name.c_str());
+  ImGui::TextWrappedColor(category.name != _previous.category.name,         "Category:           %s", category.name.c_str());
+  ImGui::TextWrappedColor(color.name != _previous.color.name,               "Color:              %s", color.name.c_str());
+  ImGui::TextWrappedColor(sn_imei != _previous.sn_imei,                     "SN_IMEI:            %s", sn_imei.c_str());
+  ImGui::TextWrappedColor(vis_note != _previous.vis_note,                   "Note for customer:  %s", vis_note.c_str());
+  ImGui::TextWrappedColor(hid_note != _previous.hid_note,                   "Note for store:     %s", hid_note.c_str());
+  ImGui::TextWrappedColor(price != _previous.price,                         "Price:              %.2f", price);
+  ImGui::TextWrappedColor(repair_state.name != _previous.repair_state.name, "Repair State:       %s", repair_state.name.c_str());
+  RenderRepairItemsTable(items, false, _previous.items);
 }
 
 void Repair::InsertModal() {
   ModalConfig _config;
-  _config.Title(_("Insert new repair?"));
+  _config.Title(_("Insert new repair?"))
+    .State(ModalState_Insert);
   RepairModal _modal(*this, _config);
   ModalManager::SetModal(_modal);
 }
 
 void Repair::InsertToDb()  {
   Database::Insert().Repair_(*this);
+}
+
+void Repair::UpdateModal() {
+  ModalConfig _config;
+  _config.Title(_("Edit repair?"))
+    .State(ModalState_UpdateWindow);
+  RepairModal _modal(*this, _config);
+  ModalManager::SetModal(_modal);
 }

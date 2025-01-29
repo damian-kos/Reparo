@@ -30,6 +30,13 @@ struct RepairItem : public SelectableItem {
   double total;
   const std::string ToString() const;
   void Clear();
+
+  bool operator==(const RepairItem& other) const {
+    return (part.id == other.part.id &&
+      quantity == other.quantity &&
+      total_net == other.total_net &&
+      total == other.total);
+  }
 };
 
 template <typename T>

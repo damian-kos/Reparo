@@ -15,13 +15,11 @@ void RoTable::AddressesInputs(std::vector<TextField>& first, std::vector<TextFie
   }
 }
 
-void RoTable::Addresses(const std::vector<std::string>& first, const std::vector<std::string>& second) {
-  if (ImGui::BeginTable("Address", 2)) {
-    size_t max_size = (std::max)(first.size(), second.size());
+void RoTable::Addresses(const std::vector<std::string>& first, std::string _label) {
+  if (ImGui::BeginTable(_label.c_str(), 1, 0, ImVec2(250, 0))) {
+    size_t max_size = first.size();
 
-    static std::vector<std::string> col_names = { "Billing Address", "Shipping Address" };
-    for (auto& name : col_names)
-      ImGui::TableSetupColumn(name.c_str());
+    ImGui::TableSetupColumn(_label.c_str());
     ImGui::TableHeadersRow();
     
     for (size_t i = 0; i < max_size; i++) {
@@ -33,10 +31,23 @@ void RoTable::Addresses(const std::vector<std::string>& first, const std::vector
       else {
         ImGui::Text("");  // Empty string for missing data
       }
+    }
+    ImGui::EndTable();
+  }
+}
 
+void RoTable::Addresses(const std::vector<std::string>& _first, std::string _label, const std::vector<std::string>& _second) {
+  if (ImGui::BeginTable(_label.c_str(), 1, 0, ImVec2(250,0))) {
+    size_t max_size = _first.size();
+
+    ImGui::TableSetupColumn(_label.c_str());
+    ImGui::TableHeadersRow();
+
+    for (size_t i = 0; i < max_size; i++) {
+      ImGui::TableNextRow();
       ImGui::TableNextColumn();
-      if (i < second.size()) {
-        ImGui::Text("%s", second[i].c_str());
+      if (i < _first.size()) {
+        ImGui::TextWrappedColor(_first[i] != _second[i], "%s", _first[i].c_str());
       }
       else {
         ImGui::Text("");  // Empty string for missing data

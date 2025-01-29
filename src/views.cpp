@@ -116,8 +116,7 @@ RepairView::RepairView()
 
 void RepairView::DefaultRenderItem(const Repair& _repair) {
   ImGui::TableNextColumn();
-  std::string _id_str = std::to_string(_repair.id);
-  ImGui::Selectable(_id_str.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap);
+  ActionsOnTable(const_cast<Repair&>(_repair));
 
   ImGui::TableNextColumn();
   ImGui::Text("%s", _repair.customer.phone.c_str());
@@ -178,6 +177,28 @@ void RepairView::LoadData(const std::string& _orderby, const int& _direction) {
     .Date(date.GetForSQL())
     .OrderBy(_orderby, _direction)
     .All();
+  for (auto& record : data) {
+    record.customer = Database::Get().Customer_(record.customer.id);
+    record.category.id = Database::Get().SimpleModel_<std::string, Category>(record.category.name).id;
+    record.color.name = Database::Get().SimpleModel_<int, Color>(record.color.id).name;
+    record.items.records = Database::Select<RepairItem>("rp.*, p.name")
+      .From("repair_parts rp")
+      .LeftJoin("parts p")
+      .On("rp.part_id = p.id")
+      .Where("repair_id", std::to_string(record.id))
+      .All();
+  }
+}
+
+void RepairView::DefaultAction(Repair& _repair) {
+  std::string _id_str = std::to_string(_repair.id);
+  ImGui::Selectable(_id_str.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap);
+  if (ImGui::BeginPopupContextItem()) {
+    if (ImGui::Button(_("Edit"))) {
+      _repair.UpdateModal();
+    }
+    ImGui::EndPopup();
+  }
 }
 
 void RepairView::Filters() {
@@ -309,7 +330,7 @@ void InventoryView::DefaultAction(Part& _item) {
 void InventoryView::SelectAction(Part& _item) {
   std::string _id_str = std::to_string(_item.id);
   if (ImGui::Selectable(_id_str.c_str(), repair_item.id == _item.id, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap
-    | ImGuiSelectableFlags_AllowDoubleClick  )) {
+    | ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_DontClosePopups)) {
       if (ImGui::IsMouseDoubleClicked(0)) {
         repair_item.id = _item.id;
         repair_item.part = _item;
@@ -337,13 +358,30 @@ void InventoryView::LoadData(const std::string& _orderby, const int& _direction)
     .LeftJoin("part_model_alias pma").On("pma.part_id = p.id")
     .Where("p.own_sku")
     .Like(own_sku)
-    .And("p.name").Like(item_filter.GetName())
-    .And("q.quality").Like(item_filter.GetQuality())
-    .And("rc.category").Like(item_filter.GetCategory())
+    .AndLike("p.name", item_filter.GetName())
+    .AndLike("q.quality", item_filter.GetQuality())
+    .AndLike("rc.category", item_filter.GetCategory())
     .And(item_filter.GetDevice())
     .And(item_filter.GetAlias())
     .OrderBy(_orderby, _direction)
     .All();
+
+  std::cout << Database::Select<Part>("DISTINCT p.*, q.quality , rc.category , c.color  ")
+    .From("parts p")
+    .LeftJoin("qualities q").On("q.id = p.quality_id")
+    .LeftJoin("repair_categories rc").On("rc.id = p.category_id")
+    .LeftJoin("colors c").On("c.id = p.color_id")
+    .LeftJoin("part_model pm").On("pm.part_id = p.id")
+    .LeftJoin("part_model_alias pma").On("pma.part_id = p.id")
+    .Where("p.own_sku")
+    .Like(own_sku)
+    .AndLike("p.name", item_filter.GetName())
+    .AndLike("q.quality", item_filter.GetQuality())
+    .AndLike("rc.category", item_filter.GetCategory())
+    .And(item_filter.GetDevice())
+    .And(item_filter.GetAlias())
+    .OrderBy(_orderby, _direction)
+    .GetSql() << std::endl;
 
 }
 

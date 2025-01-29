@@ -16,20 +16,24 @@ ModalConfig& ModalConfig::Callback(const ModalCallback& _callback) {
   return *this;
 }
 
+ModalConfig& ModalConfig::State(const ModalState& _state) {
+  state = _state;
+  return *this;
+}
+
 ModalCallback BaseModal::Render() {
   auto callback = ModalCallback_None;
     // It is here so we can call ImGui's CloseCurrentPopup() from nested methodes in this one.
     // Otherwise Popup would open immediately after closing it.
-    static bool _control_open = true;
-    if (_control_open)
-      ImGui::OpenPopup(config.title.c_str());
+    if (control_open)
+      ImGui::OpenPopup(config.title.c_str(), ImGuiPopupFlags_NoReopen);
     if (ImGui::BeginPopupModal(config.title.c_str(), &config.is_on)) {
       callback = ModalContents() ? ModalCallback_Customer : callback;
-      _control_open = false;
+      control_open = false;
       ImGui::EndPopup();
     }
     else {
-      _control_open = true;
+      control_open = true;
     }
   return callback;
 }
@@ -56,11 +60,11 @@ bool CustomerModal::ModalContents() {
   customer.View();
   if (ImGui::Button("Confirm")) {
     action = true;
-    switch (event) {
-      case ModalEvent_Insert:
+    switch (config.state) {
+      case ModalState_Insert:
         customer.InsertToDb();
         break;
-      case ModalEvent_Remove:
+      case ModalState_Remove:
         customer.RemoveFromDb();
         break;
       default:
@@ -69,24 +73,42 @@ bool CustomerModal::ModalContents() {
     ImGui::CloseCurrentPopup();
   }
   if (ImGui::Button("Cancel")) {
-    event = ModalEvent_None;
+    config.State(ModalState_None);
     ImGui::CloseCurrentPopup();
   }
   return action;
 }
 
-
 bool RepairModal::ModalContents() {
   bool action = false;
-  repair.View();
-  if (ImGui::Button("Confirm")) {
-    action = true;
-    repair.InsertToDb();
-    ImGui::CloseCurrentPopup();
+
+  if (config.state == ModalState_Insert) {
+    repair.View();
+    if (ImGui::Button("Confirm")) {
+      action = true;
+      repair.InsertToDb();
+      ImGui::CloseCurrentPopup();
+    }
+    if (ImGui::Button("Cancel")) {
+      ImGui::CloseCurrentPopup();
+    }
   }
-  if (ImGui::Button("Cancel")) {
-    ImGui::CloseCurrentPopup();
+
+  if (config.state == ModalState_UpdateWindow) {
+    repair_win.Render();
+    if (ImGui::Button("Update")) {
+      ModalConfig _config;
+      _config.Title(_("Confirm update repair?"))
+        .State(ModalState_Update);
+      RepairModal _modal(repair_win.CreateRepair(), repair_win.GetPrevious(), _config);
+      StackModal::SetModal(_modal);
+    }
   }
+
+  if (config.state == ModalState_Update) {
+    repair.View(previous);
+  }
+
   return action;
 }
 

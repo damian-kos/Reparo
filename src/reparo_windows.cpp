@@ -96,13 +96,18 @@ void CustomerWin::Submit() {
 
 void CustomerWin::FillBuffersByPhone(Customer&  _customer) {
   if (_customer.id > 0) {
+    phone.FillBuffer(_customer.phone);
     name.FillBuffer(_customer.name);
     surname.FillBuffer(_customer.surname);
     email.FillBuffer(_customer.email);
-    for (int i = 0; i < billing_address.size(); ++i) {
-      billing_address[i].FillBuffer(_customer.billing_addresses.Get().Lines()[i]);
-      ship_address[i].FillBuffer(_customer.ship_addresses.Get().Lines()[i]);
-    }
+    if (_customer.billing_addresses.Get().Lines().size() > 0)
+      for (int i = 0; i < billing_address.size(); ++i) {
+        billing_address[i].FillBuffer(_customer.billing_addresses.Get().Lines()[i]);
+      }
+    if (_customer.ship_addresses.Get().Lines().size() > 0)
+      for (int i = 0; i < ship_address.size(); ++i) {
+        ship_address[i].FillBuffer(_customer.ship_addresses.Get().Lines()[i]);
+      }
     // After filling buffer, need to revalidate fields.
     name.Validate();
     surname.Validate();
@@ -274,25 +279,43 @@ void DeviceWin::FillDeviceByName(Device& autofill) {
   aliases = Attributes<Alias>(autofill.id);
 }
 
-RepairWin::RepairWin()
-  : customer_section(TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence)
-  , price_can_be_zero(true)
-  , device(_("Model"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence)
-  , category(_("Category"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence)
-  , color(_("Color"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence)
-  , sn_imei(_("Serial / IMEI"), 0, TFFlags_EmptyIsError)
-  , vis_note(_("Notes for customer"), 0, TFFlags_EmptyIsError)
-  , hid_note(_("Notes hidden from customer"), 0, TFFlags_EmptyIsError)
-{
+RepairWin::RepairWin() {
   Init();
+}
+
+RepairWin::RepairWin(Repair& _repair) {
+  Init();
+  state = WindowState_Update;
+  previous_repair = _repair;
+  customer_section.FillBuffersByPhone(_repair.customer);
+  device.FillBuffer(_repair.device.name);
+  category.FillBuffer(_repair.category.name);
+  color.FillBuffer(_repair.color.name);
+  sn_imei.FillBuffer(_repair.sn_imei);
+  vis_note.FillBuffer(_repair.vis_note);
+  hid_note.FillBuffer(_repair.hid_note);
+  price = _repair.price;
+  items.records = _repair.items.records;
+  price_can_be_zero = true;
+  repair_state = RoCombo<RepairState>(_("Update repair state"));
 }
 
 void RepairWin::Init() {
   open = true;
+  customer_section = CustomerWin(TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence);
+  price_can_be_zero = true;
+  device = DeviceField(_("Model"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence);
+  category = SimpleModelField<Category>(_("Category"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence);
+  color = RelationalField<Color, DeviceField>(_("Color"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence);
+  sn_imei = TextField(_("Serial / IMEI"), 0, TFFlags_EmptyIsError);
+  vis_note = TextField(_("Notes for customer"), 0, TFFlags_EmptyIsError);
+  hid_note = TextField(_("Notes hidden from customer"), 0, TFFlags_EmptyIsError);
 }
 
 void RepairWin::Render() {
-  ImGui::Begin(_("Repair"), &open);
+  if (state == WindowState_Insert)
+    ImGui::Begin(_("Repair"), &open);
+
   if (ImGui::BeginTable("Repair Window", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable)) {
     ImGui::TableNextRow();
     ImGui::TableNextColumn();
@@ -302,6 +325,8 @@ void RepairWin::Render() {
     DeviceSection();
     NotesSection();
     PriceSection();
+    if (state == WindowState_Update)
+      StateSection();
     Submit();
 
     ImGui::TableNextColumn();
@@ -311,14 +336,19 @@ void RepairWin::Render() {
 
   ImGui::EndTable();
   }
-  ImGui::End();
+  StackModal::RenderModal();
+
+  if (state == WindowState_Insert)
+    ImGui::End();
 }
 
 void RepairWin::ItemAssign() {
   ImGui::SeparatorText(_("Assign parts or items"));
-
   static InventoryView _view(_("Pick an item"), ViewStateFlags_Select);
-  _view.Render();
+
+  if (ImGui::BeginChild("ResizableChild", ImVec2(-FLT_MIN, ImGui::GetTextLineHeightWithSpacing() * 8), ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeY))
+      _view.Render();
+  ImGui::EndChild();
 
   RepairItem& _item = _view.GetSelectedItem();
   if (_item.assign) {
@@ -331,7 +361,7 @@ void RepairWin::ItemAssign() {
 
 void RepairWin::RenderAssignedItems() {
   // Similar table in PurchaseInvoiceWin - can we merge?
-  Repair::RepairItemsTable(items, true);
+  Repair::RenderRepairItemsTable(items, true);
 }
 
 void RepairWin::CustomerSection() {
@@ -365,12 +395,12 @@ void RepairWin::NotesSection() {
 }
 
 void RepairWin::PriceSection() {
-  bool _price_items_diff = price != items.total.amount;
   ImGui::SeparatorColor(_("PRICE"), price_section_error);
   PriceFeedback(); 
-  ImGui::BeginWarning(_price_items_diff);
+  
+  ImGui::BeginWarning(price_section_warning);
   ImGui::InputDouble("##Price", &price, 0.10, 1.0, "%.2f");
-  ImGui::EndColor(_price_items_diff);
+  ImGui::EndColor(price_section_warning);
 }
 
 void RepairWin::FieldsValidate() {
@@ -381,6 +411,14 @@ void RepairWin::FieldsValidate() {
   }
   else {
     price_section_error = price <= 0; // Error if price is zero or negative
+  }  
+  // Set price_section_warning only if there is no price_section_error
+  if (!price_section_error) {
+    const double epsilon = 0.001; // Precision to two decimal places
+    price_section_warning = std::abs(price - items.total.amount) > epsilon;
+  }
+  else {
+    price_section_warning = false; // Reset warning if there is an error
   }
 }
 
@@ -397,38 +435,52 @@ void RepairWin::NotesFeedback() {
 }
 
 void RepairWin::PriceFeedback() {
-  bool _price_items_diff = price != items.total.amount;
-  if (_price_items_diff)
-    ImGui::Text(_("Price and items total are different"));
-  else
-    ImGui::NewLine();
   if (price_section_error)
     ImGui::Text(_("Price needs to be more than 0"));
-  else
+  else if (price_section_warning)
+    ImGui::Text(_("Price and items total are different"));
+  else 
     ImGui::NewLine();
 }
 
 void RepairWin::Submit() {
-  ImGui::SeparatorColor(_("SUBMIT"), error);
-  ImGui::BeginDisabled(error);
-  if (ImGui::Button(_("Submit Repair"))) {
-    Repair _repair;
-    _repair.customer = customer_section.GetEntity();
-    // We can change database query below if we needed to get brand and type of the device
-    _repair.device = CreateDevice();
-    _repair.category = category.GetFromDb();
-    _repair.color = color.GetFromDb();
-    _repair.sn_imei = sn_imei.Get();
-    _repair.vis_note = vis_note.Get();
-    _repair.hid_note = hid_note.Get();
-    _repair.price = price;
-    _repair.repair_state = Database::Get().SimpleModel_<int, RepairState>(2);
-    _repair.cust_device_id = device.IsInDb() ? -1 : 1;
-    _repair.items = items;
-    _repair.InsertModal();
-
+  if (state == WindowState_Insert) {
+    ImGui::SeparatorColor(_("SUBMIT"), error);
+    ImGui::BeginDisabled(error);
+    if (ImGui::Button(_("Submit Repair"))) {
+      Insert(CreateRepair());
+    }
+    ImGui::EndDisabled();
   }
-  ImGui::EndDisabled();
+  //if (state == WindowState_Update) {
+  //  if (ImGui::Button(_("Update repair"))) {
+  //    //Update(CreateRepair());
+  //  //CompareRepairs();
+  //  }
+  //}
+}
+
+Repair RepairWin::CreateRepair() {
+  Repair _repair;
+  if(state == WindowState_Update)
+    _repair.id = previous_repair.id;
+  _repair.customer = customer_section.GetEntity();
+  // We can change database query below if we needed to get brand and type of the device
+  _repair.device = CreateDevice();
+  _repair.category = category.GetFromDb();
+  _repair.color = color.GetFromDb();
+  _repair.sn_imei = sn_imei.Get();
+  _repair.vis_note = vis_note.Get();
+  _repair.hid_note = hid_note.Get();
+  _repair.price = price;
+  _repair.repair_state = Database::Get().SimpleModel_<int, RepairState>(2);
+  _repair.cust_device_id = device.IsInDb() ? -1 : 1;
+  _repair.items = items;
+
+  if (state == WindowState_Update)
+    _repair.repair_state = repair_state.Get();
+  
+  return _repair;
 }
 
 void RepairWin::RepairValidated() {
@@ -447,6 +499,28 @@ Device RepairWin::CreateDevice() {
   }
   _device.colors.push_back(_device_color);
   return _device;
+}
+
+Repair& RepairWin::GetPrevious() {
+  return previous_repair;
+}
+
+void RepairWin::Insert(Repair _repair) const {
+  _repair.InsertModal();
+}
+
+void RepairWin::StateSection() {
+  ImGui::SeparatorText(_("State"));
+  repair_state.Render();
+}
+
+void RepairWin::Update(Repair _repair) const {
+  _repair.UpdateModal();
+}
+
+void RepairWin::CompareRepairs() {
+  Repair _same = CreateRepair();
+
 }
 
 PartsWin::PartsWin()

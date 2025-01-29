@@ -4,7 +4,7 @@
 
 enum RoComboFlags_ {
   RoComboFlags_None = 0,
-  RoComboFlags_HasNone = 1 << 0,
+  RoComboFlags_HasNone = 1 << 0, // Some combos may have non meaning value 
 };
 
 typedef int RoComboFlags;
@@ -35,6 +35,14 @@ inline RoCombo<T>::RoCombo(const std::string& _label, RoComboFlags _flags) : lab
     _none.name = "None";
     models.insert(models.begin(), _none);
   }
+
+  if constexpr (std::is_same_v<T, RepairState>) {
+    // For RepairState, remove the first element if models is not empty
+    if (!models.empty()) {
+      models.erase(models.begin());
+    }
+  }
+
   if(!models.empty())
     model = models[0];
 }
