@@ -140,7 +140,6 @@ void CustomerWin::FieldsValidate() {
 /// <returns></returns>
 Customer CustomerWin::CreateCustomer() {
   Customer customer;
-  customer.id = phone.GetFromDb().id;
   customer.phone = phone.Get();
   customer.name = name.Get();
   customer.surname = surname.Get();
@@ -459,7 +458,7 @@ Repair RepairWin::CreateRepair() {
   Repair _repair;
   if(state == WindowState_Update)
     _repair.id = previous_repair.id;
-  _repair.customer = customer_section.CreateCustomer();
+  _repair.customer = customer_section.GetEntity();
   // We can change database query below if we needed to get brand and type of the device
   _repair.device = CreateDevice();
   _repair.category = category.GetFromDb();
