@@ -49,6 +49,10 @@ public:
     return id > 0 && !name.empty();
   }
 
+  bool operator==(const SimpleModel<Derived>& other) const {
+    return id == other.id && name == other.name;
+  }
+
 };
 
 // Derived structs

@@ -109,6 +109,7 @@ bool RepairModal::ModalContents() {
     repair.View(previous);
     if (ImGui::Button("Confirm")) {
       action = true;
+      repair.UpdateString(previous);
       repair.UpdateToDb();
       ImGui::CloseCurrentPopup();
     }

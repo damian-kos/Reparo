@@ -148,6 +148,13 @@ namespace Query {
             price = :price, repair_state_id = :repair_state_id, sn_imei = :sn_imei, cust_device_id = :cust_device_id 
             WHERE id = :id)",
       soci::use(r);
+
+    if (!r.last_update.empty()) {
+      Database::sql << R"(INSERT INTO repair_updates (repair_id, note) 
+              VALUES (:repair_id, :note))",
+        soci::use(_repair_id),
+        soci::use(r.last_update);
+    }
     return _repair_id;
   }
 

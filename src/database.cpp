@@ -177,8 +177,9 @@ TableCreator& TableCreator::RepairStatesTable() {
   // Step 2: Insert initial rows
   std::string insert_rows_sql = R"(
     INSERT OR IGNORE INTO repair_states (id, state) VALUES
-    (1, 'Pending'),
-    (2, 'Completed');
+    (1, 'All'),
+    (2, 'Pending'),
+    (3, 'Completed');
 )";
   Database::ExecuteTransaction(insert_rows_sql);
 
@@ -188,7 +189,7 @@ TableCreator& TableCreator::RepairStatesTable() {
     CREATE TRIGGER IF NOT EXISTS prevent_delete
     BEFORE DELETE ON repair_states
     FOR EACH ROW
-    WHEN OLD.id IN (1, 2)
+    WHEN OLD.id IN (1, 2, 3)
     BEGIN
       SELECT RAISE(ABORT, 'Cannot delete this row');
     END;
@@ -443,7 +444,7 @@ TableCreator& TableCreator::PurchaseInvoicesItemsTable() {
     purchase_invoice_id     TEXT NOT NULL,
     part_id                 INTEGER,
     supplier_sku            TEXT,
-    temp_part_name          TEXT,  -- Used when part doesn't exist yet
+    name                    TEXT,  -- Used when part doesn't exist yet
     own_sku                 TEXT,  -- Can be used to link to future part
     purchase_price          REAL NOT NULL,
     purchase_price_ex_vat   REAL NOT NULL,
@@ -663,7 +664,11 @@ TableCreator& TableCreator::RepairPartsTable() {
             action_id,
             notes,
             created_at
-        )
+ 
+TableCreator & TableCreator::RepairUpdatesTable()
+{
+// TODO: insert return statement here
+}       )
         VALUES (
             NEW.part_id,
             'Reserved',
@@ -783,6 +788,24 @@ TableCreator& TableCreator::PartModelAliasTable() {
   )";
   Database::ExecuteTransaction(_sql);
   return *this;
+}
+
+TableCreator& TableCreator::RepairUpdatesTable() {
+  std::string _sql = R"(
+    CREATE TABLE IF NOT EXISTS repair_updates (
+      id                  INTEGER PRIMARY KEY,
+      repair_id           INTEGER NOT NULL,
+      note                TEXT NOT NULL,
+      created_at          DATE DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (repair_id)
+          REFERENCES repairs(id)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE
+    );
+  )";
+  Database::ExecuteTransaction(_sql);
+  return *this;
+
 }
 
 Inserter& Inserter::Customer_(Customer& customer) {

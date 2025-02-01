@@ -442,6 +442,26 @@ namespace soci {
       
     }
   };
+
+  template <>
+  struct type_conversion<RepairUpdate> {
+    typedef values base_type;
+
+    static void from_base(const values& v, indicator ind, RepairUpdate& model) {
+      if (ind == i_null) {
+        throw std::runtime_error("Null value fetched from database");
+      }
+      model.note = v.get<std::string>("note");
+      model.created_at = v.get<tm>("created_at");
+
+    }
+
+    static void to_base(RepairUpdate& model, values& v, indicator& ind) {
+      v.set("note", model.note);
+      ind = i_ok;
+
+    }
+  };
 }
 
 

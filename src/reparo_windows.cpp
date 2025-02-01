@@ -298,6 +298,7 @@ RepairWin::RepairWin(Repair& _repair) {
   items.records = _repair.items.records;
   price_can_be_zero = true;
   repair_state = RoCombo<RepairState>(_("Update repair state"));
+  updates_history = Database::Select<RepairUpdate>("note, created_at").From("repair_updates").Where("repair_id = " + std::to_string(_repair.id)).OrderBy("id", 0).All();
 }
 
 void RepairWin::Init() {
@@ -305,7 +306,7 @@ void RepairWin::Init() {
   customer_section = CustomerWin(TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence);
   price_can_be_zero = true;
   device = DeviceField(_("Model"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence);
-  category = SimpleModelField<Category>(_("Category"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence);
+  category = SimpleModelField<Category>(_("Category"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_RecordRequired);
   color = RelationalField<Color, DeviceField>(_("Color"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence);
   sn_imei = TextField(_("Serial / IMEI"), 0, TFFlags_EmptyIsError);
   vis_note = TextField(_("Notes for customer"), 0, TFFlags_EmptyIsError);
@@ -313,33 +314,22 @@ void RepairWin::Init() {
 }
 
 void RepairWin::Render() {
-  if (state == WindowState_Insert)
-    ImGui::Begin(_("Repair"), &open);
+  RenderInsertState();
+  RenderUpdateState();
+}
 
-  if (ImGui::BeginTable("Repair Window", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable)) {
-    ImGui::TableNextRow();
-    ImGui::TableNextColumn();
-    FieldsValidate();
-    RepairValidated();
-    CustomerSection();
-    DeviceSection();
-    NotesSection();
-    PriceSection();
-    if (state == WindowState_Update)
-      StateSection();
-    Submit();
-
-    ImGui::TableNextColumn();
-    ItemAssign();
-   
-    RenderAssignedItems();
-
-  ImGui::EndTable();
+void RepairWin::UpdatesSection() {
+  ImGui::SeparatorText(_("Updates history"));
+  float _width = ImGui::GetColumnWidth();
+  for (size_t i = 0; i < updates_history.size(); ++i) {
+    std::string label = "##Update" + std::to_string(i); // Unique label for each entry
+    ImVec2 size = ImGui::CalcTextSize("Wg", NULL, NULL);
+    ImVec2 size_curr = ImGui::CalcTextSize(updates_history[i].note.c_str(), NULL, NULL);
+    float _height = size_curr.y * 2 < size.y * 5.25 ? size_curr.y * 2: size.y * 5.25;
+    std::string _date = Convert::TmToStr(updates_history[i].created_at);
+    ImGui::SeparatorTextAligned(_date.c_str(), ImVec2(1.0f, 0.f));
+    ImGui::InputTextMultiline(label.c_str(), &updates_history[i].note, ImVec2(_width, _height), ImGuiInputTextFlags_ReadOnly);
   }
-  StackModal::RenderModal();
-
-  if (state == WindowState_Insert)
-    ImGui::End();
 }
 
 void RepairWin::ItemAssign() {
@@ -493,6 +483,58 @@ Device RepairWin::CreateDevice() {
   }
   _device.colors.push_back(_device_color);
   return _device;
+}
+
+void RepairWin::RenderInsertState() {
+  if (state == WindowState_Insert) {
+    ImGui::Begin(_("Repair"), &open);
+    if (ImGui::BeginTable("Repair Window", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable)) {
+      ImGui::TableNextRow();
+
+      ImGui::TableNextColumn();
+      FieldsValidate();
+      RepairValidated();
+      CustomerSection();
+      DeviceSection();
+      NotesSection();
+      PriceSection();
+      Submit();
+
+      ImGui::TableNextColumn();
+      ItemAssign();
+      RenderAssignedItems();
+
+      ImGui::EndTable();
+    }
+
+    ImGui::End();
+  }
+}
+
+void RepairWin::RenderUpdateState() {
+  if (state == WindowState_Update) {
+    if (ImGui::BeginTable("Repair Window Edit", 3, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable)) {
+      ImGui::TableNextRow();
+      ImGui::TableNextColumn();
+      FieldsValidate();
+      RepairValidated();
+      CustomerSection();
+      DeviceSection();
+      NotesSection();
+      PriceSection();
+      StateSection();
+      Submit();
+
+      ImGui::TableNextColumn();
+      ItemAssign();
+      RenderAssignedItems();
+      
+      ImGui::TableNextColumn();
+      UpdatesSection();
+      ImGui::EndTable();
+    }
+    StackModal::RenderModal();
+  }
 }
 
 Repair& RepairWin::GetPrevious() {

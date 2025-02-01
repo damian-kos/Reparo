@@ -30,6 +30,7 @@ enum TFFlags_ {
   TFFlags_EmptyIsError        = 1 << 4,   // Empty buffer will set field to have en error if set
   TFFlags_NeverAnError        = 1 << 5,   // Prevents to highlight field as an error
   TFFlags_DuplicateWarning    = 1 << 6,   // Set if duplicate in database is allowed but should be warned
+  TFFlags_RecordRequired      = (1 << 7) | TFFlags_AllowDbPresence
 };
 
 typedef int ValidatorFlags;

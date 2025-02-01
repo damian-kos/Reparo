@@ -70,7 +70,8 @@ void ReparoCore::InitializeTableBtns() {
                                                             .RepairPartsTable()
                                                             .InvoicesTable()
                                                             .PartModelTable()
-                                                            .PartModelAliasTable(); }},
+                                                            .PartModelAliasTable()
+                                                            .RepairUpdatesTable(); }},
       {"Create Billing Address Table",            []() { Database::Create().BillingAddressesTable(); }},
       {"Create Shipping Address Table",           []() { Database::Create().ShipAddressesTable(); }},
       {"Create Customer Table",                   []() { Database::Create().CustomersTable(); }},
@@ -96,6 +97,7 @@ void ReparoCore::InitializeTableBtns() {
       {"Create Invoices Table",                   []() { Database::Create().InvoicesTable(); }},
       {"Create Part Model Table",                 []() { Database::Create().PartModelTable(); }},
       {"Create Part Model Alias Table",           []() { Database::Create().PartModelAliasTable(); }},
+      {"Create Repair Updates Table",             []() { Database::Create().RepairUpdatesTable(); }},
 
     };
   //  std::cout << "Initialized table buttons with " << table_config.size() << " entries." << std::endl;

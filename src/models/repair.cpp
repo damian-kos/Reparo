@@ -127,3 +127,61 @@ void Repair::UpdateModal() {
 void Repair::UpdateToDb() {
   Database::Update().Repair_(*this);
 }
+
+std::string Repair::UpdateString(const Repair& _other) {
+  std::stringstream changes;
+  if (customer != _other.customer) {
+    if (_other.customer.phone != customer.phone) {
+      changes << "Phone: " << _other.customer.phone << " -> " << customer.phone << "\n";
+    }
+    if (_other.customer.name != customer.name) {
+      changes << "Name: " << _other.customer.name << " -> " << customer.name << "\n";
+    }
+    if (_other.customer.surname != customer.surname) {
+      changes << "Surname: " << _other.customer.surname << " -> " << customer.surname << "\n";
+    }
+    if (_other.customer.email != customer.email) {
+      changes << "Email: " << _other.customer.email << " -> " << customer.email << "\n";
+    }
+  }
+  if (_other.device.name != device.name) {
+    changes << "Model: " << _other.device.name << " -> " << device.name << "\n";
+  }
+  if (_other.category != category) {
+    changes << "Category: " << _other.category.name << " -> " << category.name << "\n";
+  }
+  if (_other.color != color) {
+    changes << "Color : " << _other.color.name << " -> " << color.name << "\n";
+  }
+  if (_other.sn_imei != sn_imei) {
+    changes << "SN/IMEI: " << _other.sn_imei << " -> " << sn_imei << "\n";
+  }
+  if (_other.vis_note != vis_note) {
+    changes << "Visible note: " << _other.vis_note << " -> " << vis_note << "\n";
+  }
+  if (_other.hid_note != hid_note) {
+    changes << "Hidden note: " << _other.hid_note << " -> " << hid_note << "\n";
+  }
+  if (_other.price != price) {
+    changes << "Price: " << _other.price << " -> " << price << "\n";
+  }
+  if (_other.repair_state != repair_state) {
+    changes << "Repair state: " << _other.repair_state.name << " -> " << repair_state.name << "\n";
+  }
+  last_update = changes.str();
+  std::cout << changes.str() << std::endl;
+  //if (items != _other.items) {
+  //  changes << "Items: \n";
+  //  for (const auto& item : items.records) {
+  //    if (std::find(_other.items.records.begin(), _other.items.records.end(), item) == _other.items.records.end()) {
+  //      changes << "Added: " << item.part.name << "\n";
+  //    }
+  //  }
+  //  for (const auto& item : _other.items.records) {
+  //    if (std::find(items.records.begin(), items.records.end(), item) == items.records.end()) {
+  //      changes << "Removed: " << item.part.name << "\n";
+  //    }
+  //  }
+  //}
+  return std::string();
+}

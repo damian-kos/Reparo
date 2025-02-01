@@ -18,6 +18,15 @@ struct Device {
   operator bool() const {
     return id > 0;
   }
+
+  bool operator==(const Device& other) const {
+    if (id != other.id)
+      return false;
+    return name == other.name&&
+      brand == other.brand &&
+      type == other.type;
+
+  }
 };
 
 struct CustomDevice {

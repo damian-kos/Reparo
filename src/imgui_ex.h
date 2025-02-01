@@ -82,4 +82,11 @@ namespace ImGui {
       ImGui::PopStyleColor();
     va_end(args);
   }
+
+  void inline SeparatorTextAligned(const char* _label, const ImVec2 _alignment) {
+    ImGuiStyle* style = &ImGui::GetStyle();
+    style->SeparatorTextAlign = _alignment;
+    ImGui::SeparatorText(_label);
+    style->SeparatorTextAlign = ImVec2(0.0f, 0.5f);
+  }
 }

@@ -44,7 +44,7 @@ bool Popup<T>::OnTextInput(std::string& buffer, const std::vector<T>& data) {
   bool state = false;
   bool is_input_active = ImGui::IsItemActive();
   bool is_input_activated = ImGui::IsItemActivated();
-
+  
   if (is_input_activated) {
     ImGui::OpenPopup("Popup");
     selected = -1;
@@ -395,9 +395,16 @@ void SimpleModelField<SM>::Validate() {
   err_flags |= Validator::StrLen(buffer, 3);
   if (!(ro_flags & TFFlags_AllowDbPresence)) {
     std::string _table = std::string(model.table);
-    err_flags |= Validator::DatabaseChk<SM>(_table, column + " = '" + buffer+ "'"); // Edit with corresponding table once data in db exists
+    err_flags |= Validator::DatabaseChk<SM>(_table, column + " = '" + buffer + "'");
   }
-  error = err_flags & (ValidatorFlags_StrLen | ValidatorFlags_IsDuplicate);
+  if (ro_flags & TFFlags_RecordRequired) {
+    std::string _table = std::string(model.table);  // Added this line
+    ValidatorFlags _flag = Validator::DatabaseChk<SM>(_table, column + " = '" + buffer + "'");
+    if (!(_flag & ValidatorFlags_IsDuplicate)) {
+      err_flags |= ValidatorFlags_NotInDb;
+    }
+  }
+  error = err_flags & (ValidatorFlags_StrLen | ValidatorFlags_IsDuplicate | ValidatorFlags_NotInDb);
   EmptyBufferError();
 }
 
@@ -409,6 +416,9 @@ void SimpleModelField<SM>::Feedback() {
   }
   if (err_flags & ValidatorFlags_IsDuplicate) {
     ImGui::Text(_("%s already exists"), label.c_str()); ImGui::SameLine();
+  }
+  if (err_flags & ValidatorFlags_NotInDb) {
+    ImGui::Text(_("%s not in database"), label.c_str()); ImGui::SameLine();
   }
 }
 

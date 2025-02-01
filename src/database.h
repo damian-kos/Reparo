@@ -64,6 +64,7 @@ public:
   TableCreator& InvoicesTable();
   TableCreator& PartModelTable();
   TableCreator& PartModelAliasTable();
+  TableCreator& RepairUpdatesTable();
 };
 
 class Inserter {

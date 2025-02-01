@@ -66,6 +66,7 @@ public:
   RepairWin(Repair& _repair);
   void Init();
   void Render();
+  void UpdatesSection();
   void ItemAssign();
   void RenderAssignedItems();
   void CustomerSection();
@@ -81,7 +82,11 @@ public:
   void RepairValidated();
   Device CreateDevice();
 
+  // WindowState_Insert
+  void RenderInsertState();
+
   // WindowState_Update
+  void RenderUpdateState();
   Repair& GetPrevious();
 
 private:
@@ -110,6 +115,7 @@ private:
   void CompareRepairs();
   Repair previous_repair;
   RoCombo<RepairState> repair_state;
+  std::vector<RepairUpdate> updates_history;
 
 };
 

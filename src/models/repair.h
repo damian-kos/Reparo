@@ -5,6 +5,12 @@
 #include "../../src/invoices.h"
 #include "../../src/imgui_ex.h"
 
+class RepairUpdate {
+public:
+  std::string note;
+  tm created_at;
+};
+
 class Repair  {
 public:
   int id;
@@ -22,6 +28,7 @@ public:
   std::tm created_at; // date
   std::tm updated_at; // date
   std::tm finished_at; // date
+  std::string last_update;
   static constexpr std::string_view table = "repairs";
   const std::string ToString() const;
   static void RenderRepairItemsTable(ItemsContainer<RepairItem>& _items, const bool _removable = false, const ItemsContainer<RepairItem>& _second = {});
@@ -31,6 +38,7 @@ public:
   void InsertToDb();
   void UpdateModal();
   void UpdateToDb();
+  std::string UpdateString(const Repair& _other);
 
   bool operator==(const Repair& other) const {
      //First, check if IDs are the same
