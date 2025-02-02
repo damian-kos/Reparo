@@ -1086,3 +1086,15 @@ Updater& Updater::Repair_(Repair& repair) {
     "Update repair (Repair: " + repair.ToString() + ")"
   );
 }
+
+Updater& Updater::Customer_(Customer& _customer) {
+  return ExecuteTransaction(
+    [&_customer]() {
+        Query::UpdateBillingAddress(_customer);
+        Query::UpdateShippingAddress(_customer);
+        Query::UpdateCustomer(_customer);
+
+    },
+    "Update customer (Customer: " + _customer.ToString() + ")"
+  );
+}

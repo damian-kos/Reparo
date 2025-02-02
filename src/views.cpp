@@ -27,30 +27,10 @@ CustomerView::~CustomerView() {
 
 void CustomerView::DefaultRenderItem(const Customer& customer) {
   ImGui::TableNextColumn();
-  ImGui::Text("%d", customer.id);
+  ActionsOnTable(const_cast<Customer&>(customer));
 
   ImGui::TableNextColumn();
-
-  if (customer.HasRepairs()) {
-    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.7f, 0.3f, 0.3f, 0.65f));
-  }
-
-  ImGui::Selectable(customer.phone.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap);
-
-  if (customer.HasRepairs()) {
-    ImGui::PopStyleColor();
-    ImGui::SetItemTooltip("Can't remove customer as long as there is a related repair.", ImGui::GetStyle().HoverDelayShort);
-  }
-  else {
-    if (ImGui::BeginPopupContextItem()) {
-
-
-      if (ImGui::Button(_("Remove customer?")))
-        customer.RemoveModal();
-
-      ImGui::EndPopup();
-    }
-  }
+  ImGui::Text("%s", customer.phone.c_str());
 
   ImGui::TableNextColumn();
   ImGui::Text("%s", customer.name.c_str());
@@ -70,6 +50,32 @@ void CustomerView::LoadData(const std::string& _orderby, const int& _direction) 
     .GroupBy("c.id")
     .OrderBy(_orderby, _direction)
     .All();
+}
+
+void CustomerView::DefaultAction(Customer& _customer) {
+  if (_customer.HasRepairs()) {
+    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.7f, 0.3f, 0.3f, 0.65f));
+  }
+
+  std::string _id_str = std::to_string(_customer.id);
+  ImGui::Selectable(_id_str.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap);
+  if (ImGui::BeginPopupContextItem()) {
+    if (ImGui::Button(_("Edit"))) {
+      _customer.UpdateModal();
+    }
+    if (!_customer.HasRepairs()) {
+      if (ImGui::Button(_("Remove"))) {
+        _customer.RemoveModal();
+      }
+    }
+    ImGui::EndPopup();
+  }
+
+  if (_customer.HasRepairs()) {
+    ImGui::PopStyleColor();
+    ImGui::SetItemTooltip(_("Can't remove customer as long as there is a related repair. \n You can still edit it."), ImGui::GetStyle().HoverDelayShort);
+  }
+
 }
 
 RepairView::RepairView()

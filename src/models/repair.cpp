@@ -140,7 +140,7 @@ std::string Repair::UpdateString(const Repair& _other) {
     if (_other.customer.surname != customer.surname) {
       changes << "Surname: " << _other.customer.surname << " -> " << customer.surname << "\n";
     }
-    if (_other.customer.email != customer.email) {
+    if (_other.customer.email != customer.email) { 
       changes << "Email: " << _other.customer.email << " -> " << customer.email << "\n";
     }
   }

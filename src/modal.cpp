@@ -57,10 +57,11 @@ bool const BaseModal::GetState() {
 
 bool CustomerModal::ModalContents() {
   bool action = false;
-  customer.View();
-  if (ImGui::Button("Confirm")) {
-    action = true;
-    switch (config.state) {
+  if (config.state == ModalState_Insert || config.state == ModalState_Remove) {
+    customer.View();
+    if (ImGui::Button("Confirm")) {
+      action = true;
+      switch (config.state) {
       case ModalState_Insert:
         customer.InsertToDb();
         break;
@@ -69,14 +70,46 @@ bool CustomerModal::ModalContents() {
         break;
       default:
         break;
+      }
+      ImGui::CloseCurrentPopup();
     }
-    ImGui::CloseCurrentPopup();
+    if (ImGui::Button("Cancel")) {
+      config.State(ModalState_None);
+      ImGui::CloseCurrentPopup();
+    }
   }
-  if (ImGui::Button("Cancel")) {
-    config.State(ModalState_None);
-    ImGui::CloseCurrentPopup();
-  }
+
+  UpdateWindow();
+  UpdateView();
   return action;
+}
+
+bool CustomerModal::UpdateWindow() {
+  if (config.state == ModalState_UpdateWindow) {
+    customer_win.Render();
+    if (ImGui::Button(_("Update"))) {
+      ModalConfig _config;
+      _config.Title(_("Confirm customer update?"))
+        .State(ModalState_Update);
+      CustomerModal _modal(customer_win.GetEntity(), customer_win.GetPrevious(), _config);
+      StackModal::SetModal(_modal);
+    }
+  }
+  return false;
+}
+
+bool CustomerModal::UpdateView() {
+  if (config.state == ModalState_Update) {
+    customer.View(previous);
+    if (ImGui::Button("Confirm")) {
+      customer.UpdateToDb();
+      ImGui::CloseCurrentPopup();
+    }
+    if (ImGui::Button("Cancel")) {
+      ImGui::CloseCurrentPopup();
+    }
+  }
+  return false;
 }
 
 bool RepairModal::ModalContents() {

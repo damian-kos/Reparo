@@ -82,6 +82,19 @@ void Customer::RemoveFromDb() {
   Database::Delete().Customer_(id);
 }
 
+void Customer::UpdateModal() {
+  ModalConfig config;
+  config.Title(_("Update Customer?"))
+    .Msg(_("Are you sure?"))
+    .State(ModalState_UpdateWindow);
+  CustomerModal modal(*this, config);
+  ModalManager::SetModal(modal);
+}
+
+void Customer::UpdateToDb() {
+  Database::Update().Customer_(*this);
+}
+
 void Customer::SetRepairs(const int& _count) {
   if (_count > 0) 
     has_repairs = true;

@@ -18,6 +18,7 @@ class CustomerWin : public RoWindow {
 public:
   CustomerWin();
   CustomerWin(TFFlags phone_flags);
+  CustomerWin(Customer& _customer);
   ~CustomerWin();
   void Init();
   void Render();
@@ -32,6 +33,9 @@ public:
   Customer GetEntity();
   bool error = true;
 
+  // WindowState_Update
+  Customer& GetPrevious();
+
 private:
   PhoneField phone;
   NameField name;
@@ -40,6 +44,12 @@ private:
   std::vector<TextField> billing_address;
   std::vector<TextField> ship_address;
 
+  // WindowState_Insert
+  void RenderInsertState();
+
+  // WindowState_Update
+  void RenderUpdateState();
+  Customer previous_customer;
 };
 
 class DeviceWin : public RoWindow {

@@ -119,6 +119,7 @@ public:
   template <typename T>
   Updater& OfSimpleModel(T& model);
   Updater& Repair_(Repair& repair);
+  Updater& Customer_(Customer& _customer);
 
 private:
   template<typename Func>

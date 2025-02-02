@@ -15,6 +15,8 @@ public:
   void InsertToDb();
   void RemoveModal() const;
   void RemoveFromDb();
+  void UpdateModal();
+  void UpdateToDb();
 
   int id = -1;
   std::string phone;

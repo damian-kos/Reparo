@@ -72,9 +72,9 @@ public:
 
 private:
   Repair repair;
-  RepairWin repair_win;
 
   // ModalState_Update
+  RepairWin repair_win;
   Repair previous;
 };
 
@@ -97,12 +97,26 @@ class CustomerModal : public BaseModal {
 public:
   CustomerModal(const Customer& _customer, ModalConfig& _config)
     : BaseModal(_config), customer(_customer) {
+    customer_win = CustomerWin(customer);
+  }
+
+  CustomerModal(const Customer& _customer, const Customer& _previous, ModalConfig& _config)
+    : BaseModal(_config), customer(_customer), previous(_previous) {
   }
 
   bool ModalContents() override;
 
 private:
   Customer customer;
+
+  // ModalState_UpdateWindow
+  bool UpdateWindow();
+  CustomerWin customer_win;
+  Customer previous; 
+
+  // ModalState_Update
+  bool UpdateView();
+
 };
 
 class PartModal : public BaseModal {

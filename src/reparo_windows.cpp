@@ -21,6 +21,13 @@ CustomerWin::CustomerWin(TFFlags phoneFlags)
   Init();
 }
 
+CustomerWin::CustomerWin(Customer& _customer) {
+  Init();
+  state = WindowState_Update;
+  previous_customer = _customer;
+  FillBuffersByPhone(_customer);
+}
+
 CustomerWin::~CustomerWin() { 
   std::cout << "Customer window destroyed" << std::endl;
 }
@@ -46,21 +53,8 @@ void CustomerWin::Init() {
 }
 
 void CustomerWin::Render() {
-  if (!open) 
-    return;
-
-  ImGui::Begin(_("Insert Customer"), &open);
-  ImGui::SeparatorColor(_("CUSTOMER"), error);
-  Feedback();
-
-  InputFields();
-  Addresses();
-
-  Debug();
-
-  Submit();
-
-  ImGui::End();
+  RenderInsertState();
+  RenderUpdateState();
 }
 
 void CustomerWin::Debug(){
@@ -85,8 +79,8 @@ void CustomerWin::Feedback() {
 void CustomerWin::Submit() {
   ImGui::BeginDisabled(error);
   if (ImGui::Button(_("Submit Customer Details"))) {
-    Customer customer = CreateCustomer();
 
+    Customer customer = CreateCustomer();
     customer.InsertModal();
 
   }
@@ -139,14 +133,14 @@ void CustomerWin::FieldsValidate() {
 /// </summary>
 /// <returns></returns>
 Customer CustomerWin::CreateCustomer() {
-  Customer customer;
-  customer.phone = phone.Get();
-  customer.name = name.Get();
-  customer.surname = surname.Get();
-  customer.email = email.Get();
-  customer.billing_addresses.SetLines(billing_address);
-  customer.ship_addresses.SetLines(ship_address);
-  return customer;
+  Customer _customer;
+  _customer.phone = phone.Get();
+  _customer.name = name.Get();
+  _customer.surname = surname.Get();
+  _customer.email = email.Get();
+  _customer.billing_addresses.SetLines(billing_address);
+  _customer.ship_addresses.SetLines(ship_address);
+  return _customer;
 }
 
 /// <summary>
@@ -165,6 +159,40 @@ Customer CustomerWin::GetEntity() {
     customer.ship_addresses.SetID(ship_id);
   }
   return customer;
+}
+
+Customer& CustomerWin::GetPrevious() {
+  return previous_customer;
+}
+
+void CustomerWin::RenderInsertState() {
+  if (state == WindowState_Insert) {
+    ImGui::Begin(_("Insert Customer"), &open);
+    ImGui::SeparatorColor(_("CUSTOMER"), error);
+    Feedback();
+
+    InputFields();
+    Addresses();
+
+    Debug();
+
+    Submit();
+
+    ImGui::End();
+  }
+}
+
+void CustomerWin::RenderUpdateState() {
+  if (state == WindowState_Update) {
+    ImGui::SeparatorColor(_("CUSTOMER"), error);
+    Feedback();
+
+    InputFields();
+    Addresses();
+
+    StackModal::RenderModal();
+    Debug();
+  }
 }
 
 DeviceWin::DeviceWin() {
@@ -943,6 +971,8 @@ void PurchaseInvoiceWin::AddSupplierBtn() {
     if (ImGui::Button(_("Add"))) {
       supplier = _supplier_win.GetEntity();
       supplier_field.FillBuffer(supplier.name);
+      supplier.InsertToDb();
+      supplier_field.Validate();
       _supplier_win.Clear();
       ImGui::CloseCurrentPopup();
     }

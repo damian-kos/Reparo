@@ -115,6 +115,7 @@ public:
 protected:
   void DefaultRenderItem(const Customer& customer) override;
   void LoadData(const std::string& _orderby = "", const int& _direction = 0) override;
+  void DefaultAction(Customer& _customer) override;
 
 };
 
@@ -125,7 +126,7 @@ public:
 protected:
   void DefaultRenderItem(const Repair& _repair) override;
   void LoadData(const std::string& _orderby = "", const int& _direction = 0) override;
-  void DefaultAction(Repair& _item) override;
+  void DefaultAction(Repair& _repair) override;
   void Filters() override;
 
 private:
