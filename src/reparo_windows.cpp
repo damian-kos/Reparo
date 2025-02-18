@@ -23,6 +23,7 @@ CustomerWin::CustomerWin(TFFlags phoneFlags)
 
 CustomerWin::CustomerWin(Customer& _customer) {
   Init();
+  phone = PhoneField(_("Phone"), ImGuiInputTextFlags_CharsDecimal, TFFlags_HasPopup | TFFlags_EmptyIsError);
   state = WindowState_Update;
   previous_customer = _customer;
   FillBuffersByPhone(_customer);
@@ -111,7 +112,7 @@ void CustomerWin::FillBuffersByPhone(Customer&  _customer) {
 
 void CustomerWin::InputFields() {
   // Needs to be cleaned up we are calling GetFromDb() too many times
-  if(phone.Render())
+  if (phone.Render())
     FillBuffersByPhone(phone.customer);
   name.Render();
   surname.Render();
@@ -159,6 +160,10 @@ Customer CustomerWin::GetEntity() {
     customer.ship_addresses.SetID(ship_id);
   }
   return customer;
+}
+
+bool CustomerWin::GetError() const {
+  return error;
 }
 
 Customer& CustomerWin::GetPrevious() {
@@ -383,7 +388,7 @@ void RepairWin::RenderAssignedItems() {
 }
 
 void RepairWin::CustomerSection() {
-  ImGui::SeparatorColor(_("CUSTOMER"), customer_section.error);
+  ImGui::SeparatorColor(_("CUSTOMER"), customer_section.GetError());
   customer_section.Feedback();
   customer_section.InputFields();
   customer_section.Debug();
@@ -496,7 +501,7 @@ Repair RepairWin::CreateRepair() {
 }
 
 void RepairWin::RepairValidated() {
-  error = customer_section.error ||  device_section_error || notes_section_error || price_section_error;
+  error = customer_section.GetError() || device_section_error || notes_section_error || price_section_error;
 }
 
 Device RepairWin::CreateDevice() {

@@ -87,6 +87,7 @@ bool CustomerModal::ModalContents() {
 bool CustomerModal::UpdateWindow() {
   if (config.state == ModalState_UpdateWindow) {
     customer_win.Render();
+    ImGui::BeginDisabled(customer_win.GetError());
     if (ImGui::Button(_("Update"))) {
       ModalConfig _config;
       _config.Title(_("Confirm customer update?"))
@@ -94,6 +95,7 @@ bool CustomerModal::UpdateWindow() {
       CustomerModal _modal(customer_win.GetEntity(), customer_win.GetPrevious(), _config);
       StackModal::SetModal(_modal);
     }
+    ImGui::EndDisabled();
   }
   return false;
 }
@@ -102,6 +104,8 @@ bool CustomerModal::UpdateView() {
   if (config.state == ModalState_Update) {
     customer.View(previous);
     if (ImGui::Button("Confirm")) {
+      // So we can update the customer which we selected in the table.
+      customer.id = previous.id;
       customer.UpdateToDb();
       ImGui::CloseCurrentPopup();
     }

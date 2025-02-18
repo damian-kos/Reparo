@@ -31,7 +31,7 @@ public:
   void FieldsValidate();
   Customer CreateCustomer();
   Customer GetEntity();
-  bool error = true;
+  bool GetError() const;
 
   // WindowState_Update
   Customer& GetPrevious();
@@ -50,6 +50,7 @@ private:
   // WindowState_Update
   void RenderUpdateState();
   Customer previous_customer;
+  bool error = true;
 };
 
 class DeviceWin : public RoWindow {

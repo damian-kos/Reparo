@@ -172,7 +172,7 @@ const void TextField::Clear() {
 
 void TextField::FillBuffer(const std::string& fill) {
   buffer = fill;
-  Validate();
+  //Validate();
 }
 
 Customer PhoneField::Render() {
@@ -204,8 +204,10 @@ Customer PhoneField::Render() {
 
 void PhoneField::Validate() {
   err_flags = ValidatorFlags_Pass;
-  if (!(ro_flags & TFFlags_AllowDbPresence))
-    err_flags |= Validator::DatabaseChk<Customer>("customers", "phone = " + buffer); // Edit with corresponding table once data in db exists
+  if (!(ro_flags & TFFlags_AllowDbPresence)) {
+    std::string buf = "'" + buffer + "'";
+    err_flags |= Validator::DatabaseChk<Customer>("customers", "phone = " + buf); // Edit with corresponding table once data in db exists
+  }
   err_flags |= Validator::StrLen(buffer, 7);
   error = err_flags & (ValidatorFlags_StrLen | ValidatorFlags_IsDuplicate);
   EmptyBufferError();
