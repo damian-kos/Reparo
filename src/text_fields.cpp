@@ -178,9 +178,9 @@ void TextField::FillBuffer(const std::string& fill) {
 Customer PhoneField::Render() {
   static std::vector<Customer> vec;
   Field();
+  customer = Customer();
 
   if (ImGui::IsItemEdited() || ImGui::IsItemActivated()) {
-    customer = Customer();
     Validate();
     vec.clear();
     vec = Database::Select<Customer>()
@@ -195,6 +195,7 @@ Customer PhoneField::Render() {
     if (popup.OnTextInput(buffer, vec)) {
       buffer = popup.record.phone;
       customer = GetFromDb();
+      customer.LoadAddress();
       Validate();
     }
   }
@@ -426,6 +427,7 @@ void SimpleModelField<SM>::Feedback() {
 
 template<typename SM>
 SM SimpleModelField<SM>::GetFromDb() {
+  std::cout << "is running" << std::endl;
   if (buffer.empty()) {
     SM model;
     model.id = -1;

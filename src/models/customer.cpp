@@ -95,6 +95,26 @@ void Customer::UpdateToDb() {
   Database::Update().Customer_(*this);
 }
 
+bool Customer::Equals(const Customer& _other, bool _skip_id) const {
+  if (!_skip_id && id != _other.id) {
+    return false;
+  }
+
+  // If IDs are the same, compare other attributes
+  return (phone == _other.phone &&
+    name == _other.name &&
+    surname == _other.surname &&
+    email == _other.email &&
+    billing_addresses.Equals(_other.billing_addresses, _skip_id) &&
+    ship_addresses.Equals(_other.ship_addresses, _skip_id));
+}
+
+void Customer::LoadAddress() {
+  std::cout << "Address loading" << std::endl;
+  billing_addresses =  Database::Get().Address_(id, "billing");
+  ship_addresses = Database::Get().Address_(id, "ship");
+}
+
 void Customer::SetRepairs(const int& _count) {
   if (_count > 0) 
     has_repairs = true;

@@ -1005,6 +1005,18 @@ Device DBGet::Device_(const T& _value){
   return device;
 }
 
+// Type either 'billing' or 'ship'
+Address DBGet::Address_(const int& _id, const std::string _type ) {
+  Database::OpenDb();
+  Address _address;
+  std::string query = _type + "_addresses";
+  Database::sql << "SELECT * FROM " << query << " WHERE id = (:id)",
+    soci::use(_id),
+    soci::into(_address);
+  Database::sql.close();
+  return _address;
+}
+
 template Customer DBGet::Customer_<std::string>(const std::string&);
 template Customer DBGet::Customer_<int>(const int&);
 template Device DBGet::Device_<std::string>(const std::string&);

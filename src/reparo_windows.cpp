@@ -23,7 +23,7 @@ CustomerWin::CustomerWin(TFFlags phoneFlags)
 
 CustomerWin::CustomerWin(Customer& _customer) {
   Init();
-  phone = PhoneField(_("Phone"), ImGuiInputTextFlags_CharsDecimal, TFFlags_HasPopup | TFFlags_EmptyIsError);
+  phone = PhoneField(_("Phone3"), ImGuiInputTextFlags_CharsDecimal, TFFlags_HasPopup | TFFlags_EmptyIsError);
   state = WindowState_Update;
   previous_customer = _customer;
   FillBuffersByPhone(_customer);
@@ -60,11 +60,11 @@ void CustomerWin::Render() {
 
 void CustomerWin::Debug(){
 #ifdef DEBUG
-  ImGui::Text("%s", phone.error ? "true" : "false");
-  ImGui::Text("%s", name.error ? "true" : "false");
-  ImGui::Text("%s", surname.error ? "true" : "false");
-  ImGui::Text("%s", email.error ? "true" : "false");
-  ImGui::Text("%s", error ? "true" : "false");
+  ImGui::Text("Phone error:   %s", phone.error ? "true" : "false");
+  ImGui::Text("Name error:    %s", name.error ? "true" : "false");
+  ImGui::Text("Surname error: %s", surname.error ? "true" : "false");
+  ImGui::Text("Email error:   %s", email.error ? "true" : "false");
+  ImGui::Text("Error:         %s", error ? "true" : "false");
 #endif // DEBUG
 }
 
@@ -95,6 +95,7 @@ void CustomerWin::FillBuffersByPhone(Customer&  _customer) {
     name.FillBuffer(_customer.name);
     surname.FillBuffer(_customer.surname);
     email.FillBuffer(_customer.email);
+    _customer.LoadAddress();
     if (_customer.billing_addresses.Get().Lines().size() > 0)
       for (int i = 0; i < billing_address.size(); ++i) {
         billing_address[i].FillBuffer(_customer.billing_addresses.Get().Lines()[i]);
@@ -126,7 +127,22 @@ void CustomerWin::Addresses() {
 }
 
 void CustomerWin::FieldsValidate() {
-  error = phone.error || name.error || surname.error || email.error;
+  if (state == WindowState_Update) {
+    if (previous_customer.Equals(CreateCustomer(), true)) {
+      error = true;
+    }
+    else {
+      if (previous_customer.phone == phone.Get()) {
+        error = name.error || surname.error || email.error;
+      }
+      else {
+        error = phone.error || name.error || surname.error || email.error;
+      }
+    }
+  }
+  else {
+    error = phone.error || name.error || surname.error || email.error;
+  }
 }
 
 /// <summary>

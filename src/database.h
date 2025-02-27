@@ -303,6 +303,7 @@ public:
   static Part Part_(const T& _value);
   template <typename T>
   static Supplier Supplier_(const T& _value);
+  Address Address_(const int& _id, const std::string _type);
 };
 
 // After Selector class definition, add the implementation:

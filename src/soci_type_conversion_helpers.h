@@ -120,6 +120,38 @@ namespace soci {
   };
 
   template <>
+  struct type_conversion<Address> {
+    typedef values base_type;
+
+    static void from_base(const values& v, indicator ind, Address& model) {
+      // std::cout << "Converting from base for " << typeid(Address).name() << std::endl;
+
+      if (ind == i_null) {
+        throw std::runtime_error("Null value fetched from database");
+      }
+      int _id = v.get<int>("id");
+      model.SetID(_id);
+      std::vector<std::string> _lines(5);
+      for (int i = 0; i < 5; ++i) {
+        std::string str = "line" + std::to_string(i + 1);
+        _lines[i] = v.get<std::string>(str, "");
+      }
+      model.SetLines(_lines);
+    }
+
+    static void to_base(const Address& model, values& v, indicator& ind) {
+      v.set("id", model.Get().ID());
+      std::vector<std::string> _lines = model.Get().Lines();
+      for (int i = 0; i < 5; ++i) {
+        std::string str = "line" + std::to_string(i + 1);
+        v.set(str, _lines[i]);
+      }
+
+      ind = i_ok;
+    }
+  };
+
+  template <>
   struct type_conversion<Device>
   {
     typedef values base_type;

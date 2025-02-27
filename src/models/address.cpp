@@ -31,6 +31,18 @@ Address& Address::SetLines(std::vector<std::string>& _address) {
   return *this;
 }
 
+bool Address::Equals(const Address& _other, bool _skip_id) const {
+  if (!_skip_id && id != _other.id) {
+    return false;
+  }
+  for (int i = 0; i < address.size(); ++i) {
+    if (address[i] != _other.address[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 std::string Address::ToString(const std::string _delimiter, const std::string align) const {
   std::string _str;
   bool first = true;

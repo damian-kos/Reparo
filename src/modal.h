@@ -97,6 +97,7 @@ class CustomerModal : public BaseModal {
 public:
   CustomerModal(const Customer& _customer, ModalConfig& _config)
     : BaseModal(_config), customer(_customer) {
+    customer.LoadAddress();
     customer_win = CustomerWin(customer);
   }
 
