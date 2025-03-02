@@ -300,12 +300,18 @@ TableCreator& TableCreator::DevicesTable() {
 
   Database::OpenDb();
   std::string create_trigger_sql = R"(
-    CREATE TRIGGER IF NOT EXISTS delete_from_custom_devices
-    BEFORE INSERT ON devices
+    CREATE TRIGGER IF NOT EXISTS update_repairs_after_insert
+    AFTER INSERT ON devices
     FOR EACH ROW
     BEGIN
-      DELETE FROM custom_devices
-      WHERE model = NEW.model;
+      -- Update repairs after the new device has been inserted
+      UPDATE repairs 
+      SET cust_device_id = NULL, 
+          model_id = NEW.id
+      WHERE cust_device_id IN (SELECT id FROM custom_devices WHERE model = NEW.model);
+
+      -- Delete from custom_devices
+      DELETE FROM custom_devices WHERE model = NEW.model;
     END;
 )";
   Database::ExecuteTransaction(create_trigger_sql);
@@ -318,7 +324,8 @@ TableCreator& TableCreator::CustomDevicesTable() {
     CREATE TABLE IF NOT EXISTS custom_devices (
       id        INTEGER PRIMARY KEY,
       model     TEXT NOT NULL,
-      color     TEXT
+      color     TEXT,
+      UNIQUE(model, color) 
     );
   )";
   Database::ExecuteTransaction(_sql);

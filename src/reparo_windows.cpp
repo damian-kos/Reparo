@@ -214,17 +214,17 @@ void CustomerWin::RenderUpdateState() {
     StackModal::RenderModal();
     Debug();
   }
-}
-
+} 
 DeviceWin::DeviceWin() {
   Init();
 }
 
 DeviceWin::DeviceWin(CustomDevice _custom) {
   Init();
+  state = WindowState_Update;
   name.FillBuffer(_custom.name);
   std::string _where = "cd.model = '" + _custom.name + "'";
-  auto _device_colors = Database::Select<Color>("c.id, cd.color")
+  auto _device_colors = Database::Select<Color>("DISTINCT c.id, cd.color")
     .From("custom_devices cd")
     .LeftJoin("colors c")
     .On("c.color = cd.color")
@@ -246,55 +246,8 @@ void DeviceWin::Init() {
 }
 
 void DeviceWin::Render() { 
-  if (!open)  
-    return;
-
-  ImGui::OpenPopup(_("Insert new device"));
-
-  if (ImGui::BeginPopupModal(_("Insert new device"), &open)) {
-
-    static ImGuiTableFlags _flags =  ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingStretchProp |
-      ImGuiTableFlags_RowBg  | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Resizable;
-
-    static std::vector<std::string> _col_names = { _("Model"), _("Type"), _("Brand"), _("Colors"), _("Aliases") };
-
-    if (ImGui::BeginTable("Devices", 5, _flags)) {
-      for (auto& _name : _col_names)
-        ImGui::TableSetupColumn(_name.c_str());
-
-      ImGui::TableHeadersRow();
-      ImGui::TableNextRow();
-
-      ImGui::TableNextColumn();
-      DeviceName();
-
-      ImGui::TableNextColumn();
-      type_combo.RenderFromBtn();
-
-      ImGui::TableNextColumn();
-      brand_combo.RenderFromBtn();
-
-      ImGui::TableNextColumn();
-      colors.Render();
-
-      ImGui::TableNextColumn();
-      aliases.Render();
-
-      ImGui::EndTable();
-    }
-
-    if (ImGui::Button(_("Save"))) {
-      Device _device;
-      _device.name = name.Get();
-      _device.brand = brand_combo.Get();
-      _device.type = type_combo.Get();
-      _device.colors = colors.Get();
-      _device.aliases = aliases.Get();
-      Database::Insert().Device_(_device);
-
-    }
-    ImGui::EndPopup();
-  }
+  RenderInsertState();
+  RenderUpdateState();
 }
 
 void DeviceWin::DeviceName() {
@@ -326,6 +279,72 @@ void DeviceWin::FillDeviceByName(Device& autofill) {
   brand_combo.SetLabel(autofill.brand.name);
   colors = Attributes<Color>(autofill.id);
   aliases = Attributes<Alias>(autofill.id);
+}
+
+void DeviceWin::RenderSharedState() {
+  static ImGuiTableFlags _flags = ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingStretchProp |
+    ImGuiTableFlags_RowBg | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Resizable;
+
+  static std::vector<std::string> _col_names = { _("Model"), _("Type"), _("Brand"), _("Colors"), _("Aliases") };
+
+  if (ImGui::BeginTable("Devices", 5, _flags)) {
+    for (auto& _name : _col_names)
+      ImGui::TableSetupColumn(_name.c_str());
+
+    ImGui::TableHeadersRow();
+    ImGui::TableNextRow();
+
+    ImGui::TableNextColumn();
+    DeviceName();
+
+    ImGui::TableNextColumn();
+    type_combo.RenderFromBtn();
+
+    ImGui::TableNextColumn();
+    brand_combo.RenderFromBtn();
+
+    ImGui::TableNextColumn();
+    colors.Render();
+
+    ImGui::TableNextColumn();
+    aliases.Render();
+
+    ImGui::EndTable();
+  }
+
+  Submit();
+}
+
+void DeviceWin::RenderInsertState() {
+  if (state == WindowState_Insert) {
+    //if (!open)
+    //  return;
+
+  /*  ImGui::OpenPopup(_("Insert new device"));
+    if (ImGui::BeginPopupModal(_("Insert new device"), &open)) {*/
+      RenderSharedState();
+      //ImGui::EndPopup();
+    //}
+  }
+}
+
+void DeviceWin::RenderUpdateState() {
+  if (state == WindowState_Update) {
+    RenderSharedState();
+  }
+}
+
+void DeviceWin::Submit() {
+  if (ImGui::Button(_("Save"))) {
+    Device _device;
+    _device.name = name.Get();
+    _device.brand = brand_combo.Get();
+    _device.type = type_combo.Get();
+    _device.colors = colors.Get();
+    _device.aliases = aliases.Get();
+    Database::Insert().Device_(_device);
+    ImGui::CloseCurrentPopup();
+  }
 }
 
 RepairWin::RepairWin() {
@@ -507,7 +526,7 @@ Repair RepairWin::CreateRepair() {
   _repair.hid_note = hid_note.Get();
   _repair.price = price;
   _repair.repair_state = Database::Get().SimpleModel_<int, RepairState>(2);
-  _repair.cust_device_id = device.IsInDb() ? -1 : 1;
+  //_repair.cust_device_id = is being set withing repair insertion if device.id is < 0
   _repair.items = items;
 
   if (state == WindowState_Update)

@@ -60,6 +60,7 @@ public:
   ~DeviceWin();
   void Init();
   void Render();
+  void Submit();
   void DeviceName();
   void FillDeviceByName(Device& autofill);
 
@@ -69,6 +70,15 @@ private:
   RoCombo<DeviceType> type_combo;
   Attributes<Color> colors;
   Attributes<Alias> aliases;
+
+  // Shared between states
+  void RenderSharedState();
+
+  // WindowState_Insert
+  void RenderInsertState();
+
+  // WindowState_Update
+  void RenderUpdateState();
 };
 
 class RepairWin : public RoWindow {

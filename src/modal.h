@@ -131,11 +131,23 @@ class PartModal : public BaseModal {
   Part part;
 };
 
+class DeviceModal : public BaseModal {
+public:
+  DeviceModal(ModalConfig& _config)
+    : BaseModal(_config) {
+  }
+
+  bool ModalContents() override;
+
+private:
+  DeviceWin device_win;
+};
+
 class CustomDeviceModal : public BaseModal {
 public:
-  CustomDeviceModal(const CustomDevice& _device, ModalConfig& _config);
+  CustomDeviceModal(const CustomDevice& _device, ModalConfig& _config)
+    :BaseModal(_config), device(_device), device_win(_device) {}
 
-  ModalCallback Render() override;
   bool ModalContents() override;
 
 private:

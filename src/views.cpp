@@ -86,7 +86,7 @@ RepairView::RepairView()
         {"id", "ID"},
         {"phone", "Cust. Phone"},
         {"name", "Cust. Name"},
-        {"device", "Device"},
+        {"model", "Device"},
         {"category", "Category"},
         {"visible_desc", "Notes"},
         {"hidden_desc", "Hidden note"},
@@ -405,7 +405,7 @@ DevicesView::DevicesView()
     "Devices view",
     3,
     {
-        { "name", "Name"},
+        { "model", "Model"},
         { "brand", "Brand"},
         { "type", "Type"},
     }
@@ -472,7 +472,6 @@ void DevicesView::LoadData(const std::string& _orderby, const int& _direction) {
       .From("colors c")
       .InnerJoin("model_colors mc").On("c.id = mc.color_id")
       .Where("mc.model_id = " + _id_str)
-
       .All());
   }
 }

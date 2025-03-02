@@ -203,16 +203,24 @@ namespace Query {
 
   int InsertCustomDevice(Repair& repair) {
     // We are using device but in fact we will be instering custom device
-    Device d = repair.device;
-    int device_id = 0;
-    Database::sql << "INSERT INTO custom_devices (model, color) "
-      "VALUES (:model, :color) "
-      "RETURNING id",
-      soci::use(d.name),
-      soci::use(d.colors[0].name),
-      soci::into(device_id);
-    repair.cust_device_id = device_id;
-    return device_id;
+    Device _d = repair.device;
+    int _device_id = 0;
+
+    Database::sql << "SELECT id FROM custom_devices WHERE model = :model AND color = :color",
+      soci::use(_d.name),
+      soci::use(_d.colors[0].name),
+      soci::into(_device_id);
+
+    if (_device_id == 0) { // If not found, insert
+      Database::sql << "INSERT INTO custom_devices (model, color) "
+        "VALUES (:model, :color) "
+        "RETURNING id",
+        soci::use(_d.name),
+        soci::use(_d.colors[0].name),
+        soci::into(_device_id);
+    }
+    repair.cust_device_id = _device_id;
+    return _device_id;
   }
 
   void InsertRepairPart(RepairItem& _item) {

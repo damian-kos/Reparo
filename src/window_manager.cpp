@@ -1,5 +1,5 @@
 #include "window_manager.h"
-
+#include "modal.h"
 std::map<std::string, std::unique_ptr<RoWindow>> WindowFactory::windows;
 
 void WindowFactory::AddWindow(const std::string& _window) {
@@ -17,7 +17,11 @@ void WindowFactory::AddWindow(const std::string& _window) {
     windows[_window] = std::make_unique<RepairWin>();
   }
   else if (_window == "device") {
-    windows[_window] = std::make_unique<DeviceWin>();
+    ModalConfig config;
+    config.Title(_("Insert new device"))
+      .State(ModalState_Insert);
+    DeviceModal modal(config);
+    ModalManager::SetModal(modal);
   }
   else if (_window == "custom_device") {
     windows[_window] = std::make_unique<CustomDeviceWin>();

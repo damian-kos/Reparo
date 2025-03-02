@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "imgui.h"
+#include "RoLocalization.h"
 
 enum RoComboFlags_ {
   RoComboFlags_None = 0,
@@ -77,6 +78,12 @@ inline void RoCombo<T>::RenderFromBtn() {
 template <typename T> inline bool RoCombo<T>::Render() {
   static int _sel = 0;
   bool _set = false;
+
+  if (models.empty()) {
+    ImGui::Text(_("No records found"));
+    return false; 
+  }
+
   if (ImGui::BeginCombo(label.c_str(), models[_sel].name.c_str())) {
     for (size_t i = 0; i < models.size(); ++i) {
       const bool _is_sel = (_sel == i);
@@ -89,6 +96,7 @@ template <typename T> inline bool RoCombo<T>::Render() {
     ImGui::EndCombo();
   }
   return _set;
+
 }
 
 template<typename T>

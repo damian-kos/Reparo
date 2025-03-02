@@ -54,9 +54,10 @@ bool const BaseModal::GetState() {
   return config.is_on;
 }
 
-
 bool CustomerModal::ModalContents() {
   bool action = false;
+
+  // Insert State
   if (config.state == ModalState_Insert || config.state == ModalState_Remove) {
     customer.View();
     if (ImGui::Button("Confirm")) {
@@ -172,17 +173,13 @@ bool PartModal::ModalContents() {
   return action;
 }
 
-CustomDeviceModal::CustomDeviceModal(const CustomDevice& _device, ModalConfig& _config)
-  : BaseModal(_config), device(_device), device_win(_device) 
-{
-}
-
-ModalCallback CustomDeviceModal::Render() {
-  auto callback = ModalCallback_None;
-    device_win.Render();
-  return callback;
+bool DeviceModal::ModalContents() {
+  device_win.Render();
+  return false;
 }
 
 bool CustomDeviceModal::ModalContents() {
+  device_win.Render();
   return false;
 }
+
