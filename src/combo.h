@@ -25,6 +25,7 @@ private:
   std::vector<T> models;
   std::string label;
   RoComboFlags flags;
+  int selected = 0;
 };
 
 template<typename T>
@@ -76,7 +77,7 @@ inline void RoCombo<T>::RenderFromBtn() {
 }
 
 template <typename T> inline bool RoCombo<T>::Render() {
-  static int _sel = 0;
+  //static int selected = 0;
   bool _set = false;
 
   if (models.empty()) {
@@ -84,11 +85,11 @@ template <typename T> inline bool RoCombo<T>::Render() {
     return false; 
   }
 
-  if (ImGui::BeginCombo(label.c_str(), models[_sel].name.c_str())) {
+  if (ImGui::BeginCombo(label.c_str(), models[selected].name.c_str())) {
     for (size_t i = 0; i < models.size(); ++i) {
-      const bool _is_sel = (_sel == i);
-      if (ImGui::Selectable(models[i].name.c_str(), _is_sel)) {
-        _sel = i;
+      const bool _is_selected = (selected == i);
+      if (ImGui::Selectable(models[i].name.c_str(), _is_selected)) {
+        selected = i;
         model = models[i];
         _set = true;
       }
