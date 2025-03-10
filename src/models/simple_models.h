@@ -26,7 +26,7 @@ public:
   SimpleModel(int id, std::string name) : id(id), name(std::move(name)) {}
 
   int id = -1;
-  std::string name;
+  std::string name = "";
 
   // Returns the data as a SimpleModelData struct
   SimpleModelData Get() const {
@@ -51,6 +51,10 @@ public:
 
   bool operator==(const SimpleModel<Derived>& other) const {
     return id == other.id && name == other.name;
+  }
+
+  bool operator<(const SimpleModel<Derived>& other) const {
+    return name < other.name; // Ensure uniqueness is determined correctly
   }
 
 };

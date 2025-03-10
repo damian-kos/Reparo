@@ -1,7 +1,12 @@
 #pragma once
 #include <string>
+#include <set>
 #include <vector>
 #include <algorithm>
+#include <iterator>
+
+
+
 
 namespace Convert {
   // Forward declare instead of full implementation

@@ -271,6 +271,67 @@ namespace Query {
     return _item_id;
   }
 
+  void UpdateColors(UpdateSet<Color>& _colors, int _model_id)   {
+    for (auto& color : _colors.to_insert) {
+      int color_id = 0;
+
+      // Try to find existing color
+      Database::sql << "SELECT id FROM colors WHERE color = :color",
+        soci::use(color.name), soci::into(color_id);
+
+      if (!color_id) {
+        // Color doesn't exist, insert new color
+        Database::sql << "INSERT INTO colors (color) VALUES (:color) RETURNING id",
+          soci::use(color.name), soci::into(color_id);
+      }
+
+      // Insert into model_colors junction table
+      Database::sql << R"(INSERT INTO model_colors 
+          (model_id, color_id) VALUES (:model_id, :color_id))",
+        soci::use(_model_id), soci::use(color_id);
+    }
+
+    // Delete colors
+    for (auto& color : _colors.to_delete) {
+      Database::sql << R"(DELETE FROM model_colors WHERE 
+          color_id = :cid AND model_id = :mid )",
+        soci::use(color.id), soci::use(_model_id);
+
+      // Check if the color_id exists in any other model_colors row
+      int count = 0;
+      Database::sql << R"(SELECT COUNT(*) FROM model_colors WHERE color_id = :cid)",
+        soci::use(color.id), soci::into(count);
+
+      // If the color is no longer associated with any model, delete it from colors
+      if (count == 0) {
+        Database::sql << R"(DELETE FROM colors WHERE id = :cid)",
+          soci::use(color.id);
+      }
+    }
+  }
+
+  void UpdateAliases(UpdateSet<Alias>& _aliases, int _model_id)   {
+    // Insert aliases
+    for (const auto& alias : _aliases.to_insert) {
+      Database::sql << "INSERT INTO aliases (alias, model_id) VALUES (:alias, :mid)",
+        soci::use(alias.name), soci::use(_model_id);
+    }
+    // Delete aliases
+    for (const auto& alias : _aliases.to_delete) {
+      Database::sql << "DELETE FROM aliases WHERE alias = :alias AND model_id = :mid",
+        soci::use(alias.name), soci::use(_model_id);
+    }
+  }
+
+  void UpdateDevice(Device& _device) {
+    Device _d = _device;
+
+    Database::sql << R"(UPDATE devices
+      SET model = :model, brand_id = :brand_id, type_id = :type_id
+      WHERE id = :id)",
+      soci::use(_d);
+  }
+
   template <typename T>
   int InsertSimpleModel(T& _model) {
     // for safety of object lifetime and immutability

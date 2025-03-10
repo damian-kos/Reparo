@@ -405,6 +405,7 @@ DevicesView::DevicesView()
     "Devices view",
     3,
     {
+        //{ "id", "ID"},
         { "model", "Model"},
         { "brand", "Brand"},
         { "type", "Type"},
@@ -420,10 +421,35 @@ DevicesView::DevicesView()
   LoadData();
 }
 
-void DevicesView::DefaultRenderItem(const Device& _device) {
+void DevicesView::LoadData(const std::string& _orderby, const int& _direction) {
+  std::string _device_type = device_type_filter.Get() ? "dt.id = " + std::to_string(device_type_filter.Get().id) : "";
+  std::string _brand = brand_filter.Get() ? "b.id = " + std::to_string(brand_filter.Get().id) : "";
+  data = Database::Select<Device>("d.*, b.brand, dt.type")
+    .From("devices d")
+    .LeftJoin("brands b").On("b.id = d.brand_id")
+    .LeftJoin("device_types dt").On("dt.id = d.type_id")
+    .Where("model")
+    .Like(device_filter.Get())
+    .And(_device_type)
+    .And(_brand)
+    .OrderBy(_orderby, _direction)
+    .All();
 
+  for (auto& _device : data) {
+    std::string _id_str = std::to_string(_device.id);
+    _device.aliases = (Database::Select<Alias>().From().Where("model_id = " + _id_str).All());
+    _device.colors = (Database::Select<Color>("c.*")
+      .From("colors c")
+      .InnerJoin("model_colors mc").On("c.id = mc.color_id")
+      .Where("mc.model_id = " + _id_str)
+      .All());
+  }
+}
+
+void DevicesView::DefaultRenderItem(const Device& _device) {
   ImGui::TableNextColumn();
-  bool _open = ImGui::TreeNodeEx(_device.name.c_str(), ImGuiTreeNodeFlags_SpanFullWidth);
+  bool _open = ImGui::TreeNodeEx(_device.name.c_str(), ImGuiTreeNodeFlags_SpanAllColumns);
+  ActionsOnTable(const_cast<Device&>(_device));
   if (_open) {
     // Render Colors
     std::string _colors_node = std::string(_("Colors")) + "(" + std::to_string(_device.colors.size()) + ")";
@@ -451,28 +477,14 @@ void DevicesView::DefaultRenderItem(const Device& _device) {
   ImGui::Text("%s", _device.type.name.c_str());
 }
 
-void DevicesView::LoadData(const std::string& _orderby, const int& _direction) {
-  std::string _device_type = device_type_filter.Get() ? "dt.id = " + std::to_string(device_type_filter.Get().id) : "";
-  std::string _brand = brand_filter.Get() ? "b.id = " + std::to_string(brand_filter.Get().id) : "";
-  data = Database::Select<Device>("d.*, b.brand, dt.type")
-    .From("devices d")
-    .LeftJoin("brands b").On("b.id = d.brand_id")
-    .LeftJoin("device_types dt").On("dt.id = d.type_id")
-    .Where("model")
-    .Like(device_filter.Get())
-    .And(_device_type)
-    .And(_brand)
-    .OrderBy(_orderby, _direction)
-    .All();
-
-  for (auto& _device : data) {
-    std::string _id_str = std::to_string(_device.id);
-    _device.aliases = (Database::Select<Alias>().From().Where("model_id = " + _id_str).All());
-    _device.colors = (Database::Select<Color>("c.*")
-      .From("colors c")
-      .InnerJoin("model_colors mc").On("c.id = mc.color_id")
-      .Where("mc.model_id = " + _id_str)
-      .All());
+void DevicesView::DefaultAction(Device& _device) {
+  //std::string _id_str = std::to_string(_device.id);
+  //ImGui::Selectable(_id_str.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap);
+  if (ImGui::BeginPopupContextItem()) {
+    if (ImGui::Button(_("Edit"))) {
+      _device.UpdateModal();
+    }
+    ImGui::EndPopup();
   }
 }
 

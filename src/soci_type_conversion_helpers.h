@@ -192,9 +192,9 @@ namespace soci {
       if (model.name.empty()) {
         throw std::runtime_error("Device model name cannot be empty");
       }
-      
+      v.set("id", model.id);
       v.set("model", model.name);
-      v.set("type_id", model.type.id, model.brand.id == -1 ? i_null : i_ok); 
+      v.set("type_id", model.type.id, model.type.id == -1 ? i_null : i_ok); 
       v.set("brand_id", model.brand.id, model.brand.id == -1 ? i_null : i_ok);
 
       ind = i_ok;

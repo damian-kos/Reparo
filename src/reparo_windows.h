@@ -56,13 +56,15 @@ private:
 class DeviceWin : public RoWindow {
 public:
   DeviceWin();
+  DeviceWin(Device _device);
   DeviceWin(CustomDevice _custom);
   ~DeviceWin();
   void Init();
   void Render();
-  void Submit();
+  bool Submit();
   void DeviceName();
   void FillDeviceByName(Device& autofill);
+  Device CreateDevice();
 
 private:
   DeviceField name;
@@ -76,9 +78,12 @@ private:
 
   // WindowState_Insert
   void RenderInsertState();
+  void SubmitInsert();
 
   // WindowState_Update
   void RenderUpdateState();
+  void SubmitUpdate();
+  Device previous_device;
 };
 
 class RepairWin : public RoWindow {

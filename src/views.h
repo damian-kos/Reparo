@@ -169,6 +169,7 @@ public:
 private:
   void DefaultRenderItem(const Device& _device);
   void LoadData(const std::string& _orderby = "", const int& _direction = 0);
+  void DefaultAction(Device& _device) override;
   void Filters();
   QueriedTextField device_filter;
   RoCombo<DeviceType> device_type_filter;

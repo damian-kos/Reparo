@@ -33,6 +33,7 @@ public:
   static Selector<T> Select(const std::string& columns = "*");
   static inline bool is_initialized = false;
   static DBGet Get();
+  
 };
 
 
@@ -120,6 +121,7 @@ public:
   Updater& OfSimpleModel(T& model);
   Updater& Repair_(Repair& repair);
   Updater& Customer_(Customer& _customer);
+  Updater& Device_(Device& _device);
 
 private:
   template<typename Func>
@@ -304,6 +306,8 @@ public:
   template <typename T>
   static Supplier Supplier_(const T& _value);
   Address Address_(const int& _id, const std::string _type);
+  template<typename T>
+  static UpdateSet<T> GetItemsToUpdate(std::set<T>& _new_items, std::string _query, int _model_id);
 };
 
 // After Selector class definition, add the implementation:
@@ -490,4 +494,25 @@ inline Supplier DBGet::Supplier_(const T& _value) {
     soci::into(_supplier);
   
   return _supplier;
+} 
+
+// Retrieves a difference between items which we want to push to database and items which are already there.
+// As a result it returns a pair of vectors: one with items to insert and one with items to delete.
+// Works with Colors and Aliases -- so far.
+template<typename T>
+inline UpdateSet<T> DBGet::GetItemsToUpdate(std::set<T>& _new_items, std::string _query, int _model_id) {
+    // Fetch existing items from database
+    std::vector<T> existing_items;
+    soci::rowset<T> rs = (Database::sql.prepare << _query, soci::use(_model_id));
+
+    for (const auto& row : rs) {
+      existing_items.push_back(row);
+    }
+
+    std::sort(existing_items.begin(), existing_items.end());
+
+    std::vector<T> to_insert = Query::GetToInsert(_new_items, existing_items);
+    std::vector<T> to_delete = Query::GetToDelete(_new_items, existing_items);
+
+    return { to_insert, to_delete };
 }

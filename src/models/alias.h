@@ -19,4 +19,7 @@ public:
     return id > 0 && !name.empty() && link_id > 0;
   }
 
+  bool operator<(const Alias& other) const {
+    return name < other.name; // Ensure uniqueness is determined correctly
+  }
 };

@@ -137,6 +137,10 @@ public:
     : BaseModal(_config) {
   }
 
+  DeviceModal(const Device& _device, ModalConfig& _config)
+    : BaseModal(_config), device_win(_device) {
+  }
+
   bool ModalContents() override;
 
 private:

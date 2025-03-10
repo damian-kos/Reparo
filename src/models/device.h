@@ -12,7 +12,7 @@ struct Device {
   std::vector<Color> colors;
   std::vector<Alias> aliases;
   static constexpr std::string_view table = "devices";
-
+  void UpdateModal();
   const std::string ToString() const;
 
   operator bool() const {

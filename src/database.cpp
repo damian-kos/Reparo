@@ -2,6 +2,7 @@
 #include "debug.h"
 #include "models/customer.h"
 #include "models/simple_models.h"
+#include <set>
 
 
 soci::session Database::sql;
@@ -846,7 +847,7 @@ Inserter& Inserter::Device_(Device& device) {
           soci::use(alias.name), soci::use(device.id);
       }
 
-      // 3. Handle colors
+      // 3. Handle colors -- smells. Similar thing is in Updater for Device_
       for (const auto& color : device.colors) {
         int color_id = 0;
 
@@ -1115,5 +1116,32 @@ Updater& Updater::Customer_(Customer& _customer) {
 
     },
     "Update customer (Customer: " + _customer.ToString() + ")"
+  );
+}
+
+Updater& Updater::Device_(Device& _device) {
+  return ExecuteTransaction(
+    [&_device]() {
+      Query::UpdateDevice(_device);
+     
+      std::set<Alias> _new_aliases(_device.aliases.begin(), _device.aliases.end());
+
+      auto _alias_updates = DBGet::GetItemsToUpdate<Alias>(
+        _new_aliases,
+        "SELECT * FROM aliases WHERE model_id = :id",
+        _device.id);
+
+      Query::UpdateAliases(_alias_updates, _device.id);
+
+      std::set<Color> _new_colors(_device.colors.begin(), _device.colors.end());
+
+      auto _color_updates = DBGet::GetItemsToUpdate<Color>(
+        _new_colors,
+        "SELECT c.* FROM colors c LEFT JOIN model_colors mc ON c.id = mc.color_id WHERE mc.model_id = :mid",
+        _device.id);
+
+      Query::UpdateColors(_color_updates, _device.id);
+    },
+    "Update device (Device: " + _device.ToString() + ")"
   );
 }

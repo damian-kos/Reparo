@@ -2,6 +2,15 @@
 #include "../../src/modal.h"
 #include <iostream>
 
+void Device::UpdateModal() {
+  ModalConfig config;
+  config.Title(_("Update Device?"))
+    .Msg(_("Are you sure?"))
+    .State(ModalState_UpdateWindow);
+  DeviceModal modal(*this, config);
+  ModalManager::SetModal(modal);
+}
+
 const std::string Device::ToString() const{
   return std::to_string(id) + " | " + name + " | " + brand.name + " | " + type.name;
 }

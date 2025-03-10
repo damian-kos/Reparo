@@ -219,9 +219,19 @@ DeviceWin::DeviceWin() {
   Init();
 }
 
+DeviceWin::DeviceWin(Device _device) {
+  state = WindowState_Update;
+  previous_device = _device;
+  name.FillBuffer(_device.name);
+  brand_combo.SetLabel(_device.brand.name);
+  type_combo.SetLabel(_device.type.name);
+  colors = Attributes<Color>(_device.id);
+  aliases = Attributes<Alias>(_device.id);
+}
+
 DeviceWin::DeviceWin(CustomDevice _custom) {
   Init();
-  state = WindowState_Update;
+  state = WindowState_Insert;
   name.FillBuffer(_custom.name);
   std::string _where = "cd.model = '" + _custom.name + "'";
   auto _device_colors = Database::Select<Color>("DISTINCT c.id, cd.color")
@@ -281,6 +291,16 @@ void DeviceWin::FillDeviceByName(Device& autofill) {
   aliases = Attributes<Alias>(autofill.id);
 }
 
+Device DeviceWin::CreateDevice() {
+  Device _device;
+  _device.name = name.Get();
+  _device.brand = brand_combo.Get();
+  _device.type = type_combo.Get();
+  _device.colors = colors.Get();
+  _device.aliases = aliases.Get();
+  return _device;
+}
+
 void DeviceWin::RenderSharedState() {
   static ImGuiTableFlags _flags = ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingStretchProp |
     ImGuiTableFlags_RowBg | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Resizable;
@@ -311,39 +331,38 @@ void DeviceWin::RenderSharedState() {
 
     ImGui::EndTable();
   }
+}
 
-  Submit();
+bool DeviceWin::Submit() {
+  return ImGui::Button(_("Save"));
 }
 
 void DeviceWin::RenderInsertState() {
   if (state == WindowState_Insert) {
-    //if (!open)
-    //  return;
-
-  /*  ImGui::OpenPopup(_("Insert new device"));
-    if (ImGui::BeginPopupModal(_("Insert new device"), &open)) {*/
       RenderSharedState();
-      //ImGui::EndPopup();
-    //}
+      SubmitInsert();
+  }
+}
+
+void DeviceWin::SubmitInsert() {
+  if (Submit()) {
+    Device _device = CreateDevice();
+    Database::Insert().Device_(_device);
   }
 }
 
 void DeviceWin::RenderUpdateState() {
   if (state == WindowState_Update) {
     RenderSharedState();
+    SubmitUpdate();
   }
 }
 
-void DeviceWin::Submit() {
-  if (ImGui::Button(_("Save"))) {
-    Device _device;
-    _device.name = name.Get();
-    _device.brand = brand_combo.Get();
-    _device.type = type_combo.Get();
-    _device.colors = colors.Get();
-    _device.aliases = aliases.Get();
-    Database::Insert().Device_(_device);
-    ImGui::CloseCurrentPopup();
+void DeviceWin::SubmitUpdate() {
+  if (Submit()) {
+    Device _device = CreateDevice();
+    _device.id = previous_device.id;
+    Database::Update().Device_(_device);
   }
 }
 
