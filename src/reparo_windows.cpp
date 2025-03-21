@@ -231,6 +231,7 @@ DeviceWin::DeviceWin(Device _device) {
 
 DeviceWin::DeviceWin(CustomDevice _custom) {
   Init();
+  previous_device = _custom; // so we can assign 'name'
   state = WindowState_Insert;
   name.FillBuffer(_custom.name);
   std::string _where = "cd.model = '" + _custom.name + "'";
@@ -261,22 +262,24 @@ void DeviceWin::Render() {
 }
 
 void DeviceWin::DeviceName() {
-  std::string _model = name.Get();
-  std::string _label = _model.empty() ? _("Add model") : _model;
+  //std::string _model = name.Get();
+  std::string _label = name.Get().empty() ? _("Add model") : name.Get();
   bool _focus = false;
   _focus = ImGui::Button(_label.c_str());
   if (ImGui::BeginPopupContextItem("Name edit", ImGuiPopupFlags_MouseButtonLeft)) {
-    if (_focus) ImGui::SetKeyboardFocusHere();
-    static Device autofill;
+    
+    if (_focus) { 
+      ImGui::SetKeyboardFocusHere(); 
+    }
+    Device autofill;
     autofill = name.Render();
     ImGui::SameLine();
     if (ImGui::Button(_("Save"))) {
-      FillDeviceByName(autofill);
-      _model = name.Get();
       ImGui::CloseCurrentPopup();
     }
     ImGui::SameLine();
     if (ImGui::Button(_("Cancel"))) {
+      name.FillBuffer(previous_device.name);
       ImGui::CloseCurrentPopup();
     }
     ImGui::EndPopup();
