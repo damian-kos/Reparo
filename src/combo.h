@@ -15,6 +15,7 @@ class RoCombo {
 public:
   //RoCombo();
   RoCombo(const std::string& _label = "Empty Combo", RoComboFlags _flags = 0);
+  RoCombo(T& _model, RoComboFlags _flags = 0);
   RoCombo(const std::vector<T> _models, RoComboFlags _flags = 0);
   void RenderFromBtn();
   bool Render();
@@ -47,6 +48,11 @@ inline RoCombo<T>::RoCombo(const std::string& _label, RoComboFlags _flags) : lab
 
   if(!models.empty())
     model = models[0];
+}
+
+template<typename T>
+inline RoCombo<T>::RoCombo(T& _model, RoComboFlags _flags) : model(_model), flags(_flags) {
+  models = Database::Select<T>().From().All();
 }
 
 template<typename T>

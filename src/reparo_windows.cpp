@@ -215,6 +215,7 @@ void CustomerWin::RenderUpdateState() {
     Debug();
   }
 } 
+
 DeviceWin::DeviceWin() {
   Init();
 }
@@ -223,8 +224,8 @@ DeviceWin::DeviceWin(Device _device) {
   state = WindowState_Update;
   previous_device = _device;
   name.FillBuffer(_device.name);
-  brand_combo.SetLabel(_device.brand.name);
-  type_combo.SetLabel(_device.type.name);
+  brand_combo = RoCombo<Brand>(_device.brand);
+  type_combo = RoCombo<DeviceType>(_device.type);
   colors = Attributes<Color>(_device.id);
   aliases = Attributes<Alias>(_device.id);
 }
