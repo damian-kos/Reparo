@@ -33,6 +33,7 @@ public:
   void View();
   void InsertModal();
   void InsertToDb();
+  void UpdateModal();
 
   operator bool() const {
     return id > 0;

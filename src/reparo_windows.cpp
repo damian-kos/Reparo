@@ -650,61 +650,32 @@ void RepairWin::CompareRepairs() {
 
 }
 
-PartsWin::PartsWin()
-  : supplier(_("Supplier"), 0, TFFlags_HasPopup)
-  , own_sku_field(_("Own SKU"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError)
-  , name_field(_("Item's name"), 0, TFFlags_HasPopup | TFFlags_HasLenValidator | TFFlags_EmptyIsError, "DISTINCT name", "parts", "name")
-  , color(_("Color"), 0, TFFlags_HasPopup)
-  , quality(_("Choose quality"))
-  , category(_("Choose category"))
-  , location(_("Location"), 0, TFFlags_HasPopup, "DISTINCT location", "parts", "location")
-  , device_filter(_("Device's model"), 0, TFFlags_HasPopup, "DISTINCT model", "devices", "model")
-  , brand_filter(_("Brand"), 0, TFFlags_HasPopup)
-  , device_type_filter(_("Device type"), 0, TFFlags_HasPopup)
-{
+PartsWin::PartsWin() {
   Init();
+}
+
+PartsWin::PartsWin(Part _part) {
+  Init();
+  state = WindowState_Update;
 }
 
 void PartsWin::Init() {
   open = true;
+  supplier = SimpleModelField<Supplier>(_("Supplier"), 0, TFFlags_HasPopup);
+  own_sku_field = OwnSKUField(_("Own SKU"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError);
+  name_field = QueriedTextField(_("Item's name"), 0, TFFlags_HasPopup | TFFlags_HasLenValidator | TFFlags_EmptyIsError, "DISTINCT name", "parts", "name");
+  color = SimpleModelField<Color>(_("Color"), 0, TFFlags_HasPopup);
+  quality = RoCombo<Quality>(_("Choose quality"));
+  category = RoCombo<Category>(_("Choose category"));
+  location = QueriedTextField(_("Location"), 0, TFFlags_HasPopup, "DISTINCT location", "parts", "location");
+  device_filter = QueriedTextField(_("Device's model"), 0, TFFlags_HasPopup, "DISTINCT model", "devices", "model");
+  brand_filter = SimpleModelField<Brand>(_("Brand"), 0, TFFlags_HasPopup);
+  device_type_filter = SimpleModelField<DeviceType>(_("Device type"), 0, TFFlags_HasPopup);
 }
 
 void PartsWin::Render() {
-  if (!open)
-    return;
-
-  ImGui::OpenPopup(_("Insert part"));
-
-  if (ImGui::BeginPopupModal(_("Insert part"), &open)) {
-    if (ImGui::BeginTable("split2", 2, ImGuiTableFlags_SizingStretchProp)) {
-      ImGui::TableNextRow();
-      ImGui::TableNextColumn();
-
-      supplier.Render();
-      own_sku_field.Render();
-      name_field.Render();
-      PriceSection("purchase", purch_price);
-      PriceSection("sell", sell_price);
-      QuantitySection();
-
-      ImGui::TableNextColumn();
-
-      color.Render();
-      quality.Render();
-      category.Render();
-      location.Render();
-      CompatibleEntriesBox();
-      Submit();
-
-      Feedback();
-
-      ImGui::EndTable();
-    }
-
-    Filters();
-    CompatibleTablePicker();
-    ImGui::EndPopup();
-  }
+  RenderInsertState();
+  RenderUpdateState();
 }
 
 void PartsWin::Feedback() {
@@ -804,29 +775,33 @@ void PartsWin::ListEntriesInBox(float& _last_btn, float _window, std::unordered_
 }
 
 void PartsWin::Submit() {
-  if (ImGui::ColorButtonEx(_("Submit"), 0.2f, error)) {
-    Part _part;
-    _part.name = name_field.Get();
-    _part.own_sku = own_sku_field.Get();
-    _part.quality = quality.Get();
-    _part.category = category.Get();
-    _part.sell_price = sell_price.amount;
-    _part.sell_price_ex_vat = sell_price.ExVat();
-    _part.color = color.GetFromDb();
-    _part.quantity = quantity;
-    _part.purch_price = purch_price.amount;
-    _part.purch_price_ex_vat = purch_price.ExVat();
-    _part.vat = purch_price.vat_rate;
-    _part.location = location.Get();
-    _part.reserved_quantity = 0;
-    _part.cmptble_devices = std::move(cmptble_devices);
-    _part.cmptble_aliases = std::move(cmptble_aliases);
-
-    _part.InsertModal();
-
+  if (state == WindowState_Insert) {
+    if (ImGui::ColorButtonEx(_("Submit"), 0.2f, error)) {
+      Insert(CreatePart());
+    }
+    // Since we are running this window as modal, we use StackModal
+    StackModal::RenderModal();
   }
-  // Since we are running this window as modal, we use StackModal
-  StackModal::RenderModal();
+}
+
+Part PartsWin::CreatePart() {
+  Part _part;
+  _part.name = name_field.Get();
+  _part.own_sku = own_sku_field.Get();
+  _part.quality = quality.Get();
+  _part.category = category.Get();
+  _part.sell_price = sell_price.amount;
+  _part.sell_price_ex_vat = sell_price.ExVat();
+  _part.color = color.GetFromDb();
+  _part.quantity = quantity;
+  _part.purch_price = purch_price.amount;
+  _part.purch_price_ex_vat = purch_price.ExVat();
+  _part.vat = purch_price.vat_rate;
+  _part.location = location.Get();
+  _part.reserved_quantity = 0;
+  _part.cmptble_devices = std::move(cmptble_devices);
+  _part.cmptble_aliases = std::move(cmptble_aliases);
+  return _part;
 }
 
 void PartsWin::Filters() {
@@ -867,6 +842,70 @@ void PartsWin::LoadDevices() { // edit so we won't be looping through devices to
 
 void PartsWin::FieldsValidate() {
   error = own_sku_field.error || name_field.error;
+}
+
+void PartsWin::RenderSharedBetweenStates() {
+  ImGui::TableNextRow();
+  ImGui::TableNextColumn();
+
+  supplier.Render();
+  own_sku_field.Render();
+  name_field.Render();
+  PriceSection("purchase", purch_price);
+  PriceSection("sell", sell_price);
+  QuantitySection();
+
+  ImGui::TableNextColumn();
+
+  color.Render();
+  quality.Render();
+  category.Render();
+  location.Render();
+  CompatibleEntriesBox();
+  Submit();
+
+  Feedback();
+
+}
+
+void PartsWin::RenderInsertState() {
+  if (state != WindowState_Insert)
+    return;
+
+  if (!open)
+    return;
+
+  ImGui::OpenPopup(_("Insert item"));
+
+  if (ImGui::BeginPopupModal(_("Insert item"), &open)) {
+    if (ImGui::BeginTable("split2", 2, ImGuiTableFlags_SizingStretchProp)) {
+      RenderSharedBetweenStates();
+      ImGui::EndTable();
+    }
+    Filters();
+    CompatibleTablePicker();
+    ImGui::EndPopup();
+  }
+}
+
+Part PartsWin::GetPrevious() {
+  return previous_part;
+}
+
+void PartsWin::RenderUpdateState() {
+  if (state != WindowState_Update)
+    return;
+
+  if (ImGui::BeginTable("Update item", 2, ImGuiTableFlags_SizingStretchProp)) {
+    RenderSharedBetweenStates();
+    ImGui::EndTable();
+  }
+
+  
+}
+
+void PartsWin::Insert(Part _part) const {
+  _part.InsertModal();
 }
 
 CustomDeviceWin::CustomDeviceWin() { 

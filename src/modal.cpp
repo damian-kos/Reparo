@@ -159,16 +159,30 @@ bool RepairModal::ModalContents() {
   return action;
 }
 
-bool PartModal::ModalContents() { 
+bool PartModal::ModalContents() {
   bool action = false;
-  part.View();
-  if (ImGui::Button("Confirm")) {
-    action = true;
-    part.InsertToDb();
-    ImGui::CloseCurrentPopup();
+
+  if (config.state == ModalState_Insert) {
+    part.View();
+    if (ImGui::Button("Confirm")) {
+      action = true;
+      part.InsertToDb();
+      ImGui::CloseCurrentPopup();
+    }
+    if (ImGui::Button("Cancel")) {
+      ImGui::CloseCurrentPopup();
+    }
   }
-  if (ImGui::Button("Cancel")) {
-    ImGui::CloseCurrentPopup();
+
+  if (config.state == ModalState_UpdateWindow) {
+    part_win.Render();
+    if (ImGui::Button("Update")) {
+      ModalConfig _config;
+      _config.Title(_("Confirm update part?"))
+        .State(ModalState_Update);
+      PartModal _modal(part_win.CreatePart(), part_win.GetPrevious(), _config);
+      StackModal::SetModal(_modal);
+    }
   }
   return action;
 }

@@ -73,8 +73,9 @@ public:
 private:
   Repair repair;
 
-  // ModalState_Update
+  // ModalState_UpdateWindow
   RepairWin repair_win;
+  // ModalState_Update
   Repair previous;
 };
 
@@ -123,12 +124,22 @@ private:
 class PartModal : public BaseModal {
  public:
     PartModal(const Part& _part, ModalConfig& _config)
-    : BaseModal(_config), part(_part)  {}
+    : BaseModal(_config), part(_part)  {
+      part_win = PartsWin(part);
+    }
+    
+    PartModal(const Part& _part, const Part& _previous, ModalConfig& _config)
+      : BaseModal(_config), part(_part), previous(_previous) {  }
 
      bool ModalContents() override;
 
  private:
   Part part;
+
+  // ModalState_UpdateWindow
+  PartsWin part_win;
+  // ModalState_Update
+  Part previous;
 };
 
 class DeviceModal : public BaseModal {

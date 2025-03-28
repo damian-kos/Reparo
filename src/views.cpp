@@ -331,6 +331,12 @@ void InventoryView::DefaultRenderItem(const Part & _part) {
 void InventoryView::DefaultAction(Part& _item) {
   std::string _id_str = std::to_string(_item.id);
   ImGui::Selectable(_id_str.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap);
+  if (ImGui::BeginPopupContextItem()) {
+    if (ImGui::Button(_("Edit"))) {
+      _item.UpdateModal();
+    }
+    ImGui::EndPopup();
+  }
 }
 
 void InventoryView::SelectAction(Part& _item) {

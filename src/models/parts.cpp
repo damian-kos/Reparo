@@ -30,13 +30,22 @@ void Part::View() {
 
 void Part::InsertModal() {
   ModalConfig _config;
-  _config.Title(_("Insert new item?"));
+  _config.Title(_("Insert new item?"))
+    .State(ModalState_Insert);;
   PartModal _modal(*this, _config);
   StackModal::SetModal(_modal);
 }
 
 void Part::InsertToDb() { 
   Database::Insert().Part_(*this); 
+}
+
+void Part::UpdateModal() {
+  ModalConfig _config;
+  _config.Title(_("Update item?"))
+    .State(ModalState_UpdateWindow);
+  PartModal _modal(*this, _config);
+  ModalManager::SetModal(_modal);
 }
 
 Part& Part::operator=(InvoiceItem& _item) {

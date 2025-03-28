@@ -148,6 +148,7 @@ private:
 class  PartsWin : public RoWindow {
   public:
     PartsWin();
+    PartsWin(Part _part);
     void Init();
     void Render();
     void Feedback();
@@ -158,9 +159,19 @@ class  PartsWin : public RoWindow {
     template <typename T>
     void ListEntriesInBox(float& last_btn, float window, std::unordered_map<int, T>& entries);
     void Submit();
+    Part CreatePart();
     void Filters();
     void LoadDevices();
     void FieldsValidate();
+    void RenderSharedBetweenStates();
+
+    // WindowState_Insert
+    void RenderInsertState();
+
+    // WindowState_Update
+    Part GetPrevious();
+    void RenderUpdateState();
+
   private:
     // Main insert input fields
     SimpleModelField<Supplier> supplier;
@@ -181,6 +192,15 @@ class  PartsWin : public RoWindow {
     std::unordered_map<int, Device> cmptble_devices;
     std::unordered_map<int, Alias> cmptble_aliases;
     bool error = true;
+
+    // WindowState_Insert
+    void Insert(Part _part) const;
+
+    // WindowState_Update
+    //void Update(Part _part) const;
+    //void CompareParts();
+    Part previous_part;
+    // updates history for part
 };
 
 class CustomDeviceWin : public RoWindow {
