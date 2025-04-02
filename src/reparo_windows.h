@@ -11,6 +11,8 @@
 #include "imguidatechooser.h"
 #include "invoices.h"
 #include "views.h"
+#include "buttons.h"
+
 
 class StackModal;
 
@@ -149,28 +151,35 @@ class  PartsWin : public RoWindow {
   public:
     PartsWin();
     PartsWin(Part _part);
-    void Init();
     void Render();
+    bool IsSubmitPressed();
+
+    Part CreatePart();
+
+    // WindowState_Update
+    Part GetPrevious();
+
+private:
+    void Init();
+    void FieldsValidate();
+    void RenderSharedBetweenStates();
+    void LoadDevices();
+    void Filters();
+    template <typename T>
+    void ListEntriesInBox(float& last_btn, float window, std::unordered_map<int, T>& entries);
     void Feedback();
     void PriceSection(const std::string& _action, Price& _price);
     void QuantitySection();
     void CompatibleTablePicker();
     void CompatibleEntriesBox();
-    template <typename T>
-    void ListEntriesInBox(float& last_btn, float window, std::unordered_map<int, T>& entries);
-    void Submit();
-    Part CreatePart();
-    void Filters();
-    void LoadDevices();
-    void FieldsValidate();
-    void RenderSharedBetweenStates();
 
     // WindowState_Insert
     void RenderInsertState();
+    void SubmitInsert();
 
-    // WindowState_Update
-    Part GetPrevious();
+  
     void RenderUpdateState();
+    void SubmitUpdate();
 
   private:
     // Main insert input fields
@@ -191,6 +200,7 @@ class  PartsWin : public RoWindow {
     std::vector<Device> devices;
     std::unordered_map<int, Device> cmptble_devices;
     std::unordered_map<int, Alias> cmptble_aliases;
+    Buttons submit;
     bool error = true;
 
     // WindowState_Insert

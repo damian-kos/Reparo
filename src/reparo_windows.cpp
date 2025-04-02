@@ -671,11 +671,17 @@ void PartsWin::Init() {
   device_filter = QueriedTextField(_("Device's model"), 0, TFFlags_HasPopup, "DISTINCT model", "devices", "model");
   brand_filter = SimpleModelField<Brand>(_("Brand"), 0, TFFlags_HasPopup);
   device_type_filter = SimpleModelField<DeviceType>(_("Device type"), 0, TFFlags_HasPopup);
+  submit = Buttons(_("Submit"), 0.2f);
 }
 
 void PartsWin::Render() {
-  RenderInsertState();
-  RenderUpdateState();
+  if (state == WindowState_Insert) {
+     RenderInsertState();
+  }
+  else if (state == WindowState_Update) {
+     RenderUpdateState();
+  }
+
 }
 
 void PartsWin::Feedback() {
@@ -749,6 +755,10 @@ void PartsWin::CompatibleEntriesBox() {
   ImGui::EndChild();
 }
 
+bool PartsWin::IsSubmitPressed() {
+  return submit.pressed;
+}
+
 template <typename T>
 void PartsWin::ListEntriesInBox(float& _last_btn, float _window, std::unordered_map<int, T>& _entries) {
   if (_entries.empty())
@@ -774,15 +784,21 @@ void PartsWin::ListEntriesInBox(float& _last_btn, float _window, std::unordered_
   }
 }
 
-void PartsWin::Submit() {
-  if (state == WindowState_Insert) {
-    if (ImGui::ColorButtonEx(_("Submit"), 0.2f, error)) {
-      Insert(CreatePart());
-    }
-    // Since we are running this window as modal, we use StackModal
-    StackModal::RenderModal();
-  }
-}
+//bool PartsWin::Submit() {
+//  bool _submit = false;
+//  if (state == WindowState_Insert) {
+//    if (Button::Submit(_("Submit"), error)) {
+//      Insert(CreatePart());
+//      _submit = true;
+//    }
+//    // Since we are running this window as modal, we use StackModal
+//    StackModal::RenderModal();
+//  }
+//  if (state == WindowState_Update) {
+//    _submit = Button::Submit(_("Submit"), error);
+//  }
+//  return _submit;
+//}
 
 Part PartsWin::CreatePart() {
   Part _part;
@@ -862,7 +878,7 @@ void PartsWin::RenderSharedBetweenStates() {
   category.Render();
   location.Render();
   CompatibleEntriesBox();
-  Submit();
+  //Submit();
 
   Feedback();
 
@@ -880,12 +896,22 @@ void PartsWin::RenderInsertState() {
   if (ImGui::BeginPopupModal(_("Insert item"), &open)) {
     if (ImGui::BeginTable("split2", 2, ImGuiTableFlags_SizingStretchProp)) {
       RenderSharedBetweenStates();
+      SubmitInsert();
       ImGui::EndTable();
     }
     Filters();
     CompatibleTablePicker();
     ImGui::EndPopup();
   }
+}
+
+void PartsWin::SubmitInsert() {
+  submit.Render(error);
+  if (IsSubmitPressed()) {
+    Insert(CreatePart());
+  }
+  // Since we are running this window as modal, we use StackModal
+  StackModal::RenderModal();
 }
 
 Part PartsWin::GetPrevious() {
@@ -898,10 +924,16 @@ void PartsWin::RenderUpdateState() {
 
   if (ImGui::BeginTable("Update item", 2, ImGuiTableFlags_SizingStretchProp)) {
     RenderSharedBetweenStates();
+    SubmitUpdate();  
     ImGui::EndTable();
   }
+}
 
-  
+void PartsWin::SubmitUpdate() {
+  if (state == WindowState_Update) {
+    submit.Render();
+  }
+  StackModal::RenderModal();
 }
 
 void PartsWin::Insert(Part _part) const {

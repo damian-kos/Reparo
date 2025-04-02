@@ -176,13 +176,14 @@ bool PartModal::ModalContents() {
 
   if (config.state == ModalState_UpdateWindow) {
     part_win.Render();
-    if (ImGui::Button("Update")) {
+    if (part_win.IsSubmitPressed()) {
       ModalConfig _config;
       _config.Title(_("Confirm update part?"))
         .State(ModalState_Update);
       PartModal _modal(part_win.CreatePart(), part_win.GetPrevious(), _config);
       StackModal::SetModal(_modal);
     }
+  
   }
   return action;
 }
