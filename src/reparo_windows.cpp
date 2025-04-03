@@ -657,6 +657,7 @@ PartsWin::PartsWin() {
 PartsWin::PartsWin(Part _part) {
   Init();
   state = WindowState_Update;
+  //supplier.FillBuffer(_part.supplier);
 }
 
 void PartsWin::Init() {
@@ -806,6 +807,7 @@ Part PartsWin::CreatePart() {
   _part.own_sku = own_sku_field.Get();
   _part.quality = quality.Get();
   _part.category = category.Get();
+  _part.supplier = supplier.GetFromDb();
   _part.sell_price = sell_price.amount;
   _part.sell_price_ex_vat = sell_price.ExVat();
   _part.color = color.GetFromDb();

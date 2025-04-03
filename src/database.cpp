@@ -378,6 +378,7 @@ TableCreator& TableCreator::PartsTable() {
       own_sku             TEXT NOT NULL UNIQUE,
       quality_id          INTEGER,
       category_id         INTEGER,
+      supplier_id         INTEGER,
       sell_price          REAL,
       sell_price_ex_vat   REAL,
       color_id            INTEGER,

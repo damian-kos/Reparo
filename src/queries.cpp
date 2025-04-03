@@ -112,10 +112,10 @@ namespace Query {
     Part _p = _part;
     int _part_id = -1;
     Database::sql << R"(INSERT INTO parts (name, own_sku, 
-            quality_id, category_id, sell_price, sell_price_ex_vat, color_id, 
+            quality_id, category_id, supplier_id, sell_price, sell_price_ex_vat, color_id, 
             quantity, purch_price, purch_price_ex_vat, vat, location) 
             VALUES (:name, :own_sku, 
-            :quality_id, :category_id, :sell_price, :sell_price_ex_vat, :color_id, 
+            :quality_id, :category_id, :supplier_id, :sell_price, :sell_price_ex_vat, :color_id, 
             :quantity, :purch_price, :purch_price_ex_vat, :vat, :location) 
             RETURNING id)",
       soci::use(_p), soci::into(_part_id);

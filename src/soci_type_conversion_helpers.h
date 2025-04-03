@@ -311,6 +311,7 @@ namespace soci {
       model.own_sku = v.get<std::string>("own_sku");
       model.quality.id = v.get<int>("quality_id", -1);
       model.category.id = v.get<int>("category_id", -1);
+      model.supplier.id = v.get<int>("supplier_id", -1);
       model.sell_price = v.get<double>("sell_price", 0);
       model.sell_price_ex_vat = v.get<double>("sell_price_ex_vat", 0.0);
       model.color.id = v.get<int>("color_id", -1);
@@ -325,11 +326,11 @@ namespace soci {
       // std::cout << Convert::TmToStr(model.updated_at) << std::endl;
 
       // If Part retreived with joined tables // is there a better way to handle this?
-      if (v.get_number_of_columns() > 16) {
+      if (v.get_number_of_columns() > 17) {
         model.color.name = v.get<std::string>("color", "Unknown");
         model.quality.name = v.get<std::string>("quality", "Unknown");
         model.category.name = v.get<std::string>("category", "Unknown");
-
+        model.supplier.name = v.get<std::string>("supplier", "Unknown");
       }
     }
 
@@ -339,6 +340,7 @@ namespace soci {
       v.set("own_sku", model.own_sku);
       v.set("quality_id", model.quality.id);
       v.set("category_id", model.category.id);
+      v.set("supplier_id", model.supplier.id);
       v.set("sell_price", model.sell_price);
       v.set("sell_price_ex_vat", model.sell_price_ex_vat);
       v.set("color_id", model.color.id);

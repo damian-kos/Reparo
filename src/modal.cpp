@@ -183,7 +183,19 @@ bool PartModal::ModalContents() {
       PartModal _modal(part_win.CreatePart(), part_win.GetPrevious(), _config);
       StackModal::SetModal(_modal);
     }
-  
+  }
+
+  if (config.state == ModalState_Update) {
+    part.View();
+    if (ImGui::Button("Confirm")) {
+      action = true;
+     /* repair.UpdateString(previous);
+      repair.UpdateToDb();*/
+      ImGui::CloseCurrentPopup();
+    }
+    if (ImGui::Button("Cancel")) {
+      ImGui::CloseCurrentPopup();
+    }
   }
   return action;
 }

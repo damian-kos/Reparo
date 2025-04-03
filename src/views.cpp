@@ -235,13 +235,13 @@ void RepairView::Filters() {
 }
 
 InventoryView::InventoryView()
-  : BaseTableView<Part>("Inventory view", 16, {})
+  : BaseTableView<Part>("Inventory view", config.headers.size()+1, {})
 {
   Init("Inventory view", ViewStateFlags_Default);
 }
 
 InventoryView::InventoryView(const std::string& _window_id, ViewStateFlags _flags)
-  : BaseTableView<Part>(_window_id, 16, {})
+  : BaseTableView<Part>(_window_id, config.headers.size() + 1, {})
 {
   Init(_window_id, _flags, false);
 }
@@ -253,13 +253,13 @@ RepairItem& InventoryView::GetSelectedItem() {
 
 void InventoryView::Init(const std::string& _window_id, ViewStateFlags _flags, const bool& _is_window) {
   config.window_id = _window_id;
-  config.max_columns = 16;
   config.headers = {
     { "id", "ID"},
     { "name", "Name"},
     { "own_sku", "Own SKU"},
     { "quality", "Quality"},
     { "category", "Category"},
+    { "supplier", "Last Supplier"},
     { "sell_price", "Sell Price"},
     { "sell_price_ex_vat", "Sell Price ex.VAT"},
     { "color", "Color"},
@@ -272,6 +272,7 @@ void InventoryView::Init(const std::string& _window_id, ViewStateFlags _flags, c
     { "created_at", "Created at" },
     { "updated_at", "Updated at" }
   };
+  config.max_columns = config.headers.size() + 1;
   config.is_window = _is_window;
   config.flags = _flags;
 }
@@ -291,6 +292,9 @@ void InventoryView::DefaultRenderItem(const Part & _part) {
 
   ImGui::TableNextColumn();
   ImGui::Text("%s", _part.category.name.c_str());
+
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _part.supplier.name.c_str());
 
   ImGui::TableNextColumn();
   ImGui::Text("%.2f", _part.sell_price);
@@ -361,13 +365,14 @@ void InventoryView::SelectAction(Part& _item) {
 
 void InventoryView::LoadData(const std::string& _orderby, const int& _direction) {
   std::string own_sku = item_filter.GetOwnSKU();
-  data = Database::Select<Part>("DISTINCT p.*, q.quality , rc.category , c.color  ")
+  data = Database::Select<Part>("DISTINCT p.*, q.quality , rc.category , c.color, s.supplier ")
     .From("parts p")
     .LeftJoin("qualities q").On("q.id = p.quality_id")
     .LeftJoin("repair_categories rc").On("rc.id = p.category_id")
     .LeftJoin("colors c").On("c.id = p.color_id")
     .LeftJoin("part_model pm").On("pm.part_id = p.id")
     .LeftJoin("part_model_alias pma").On("pma.part_id = p.id")
+    .LeftJoin("suppliers s").On("s.id = p.supplier_id")
     .Where("p.own_sku")
     .Like(own_sku)
     .AndLike("p.name", item_filter.GetName())

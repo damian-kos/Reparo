@@ -1,6 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include "../../src/models/simple_models.h"
+#include "../../src/models/supplier.h"
 
 struct Device;
 struct Alias;
@@ -14,6 +15,7 @@ public:
   std::string own_sku;
   Quality quality;
   Category category;
+  Supplier supplier;
   double sell_price = 0.0;
   double sell_price_ex_vat = 0.0;
   Color color;
