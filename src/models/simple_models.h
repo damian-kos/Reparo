@@ -110,10 +110,7 @@ struct Color : SimpleModel<Color> {
 };
 
 struct Price {
-  /// <summary>
-  /// Including VAT to get ex. VAT use ExVat()
-  /// </summary>
-  double amount = 0;
+  double amount = 0; // Including VAT to get ex. VAT use ExVat()
   bool ex_vat = false;
   double vat_rate = 20;
 

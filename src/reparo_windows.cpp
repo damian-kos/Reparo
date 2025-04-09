@@ -222,10 +222,11 @@ DeviceWin::DeviceWin() {
 
 DeviceWin::DeviceWin(Device _device) {
   state = WindowState_Update;
+  Init();
   previous_device = _device;
   name.FillBuffer(_device.name);
-  brand_combo = RoCombo<Brand>(_device.brand);
-  type_combo = RoCombo<DeviceType>(_device.type);
+  brand_combo.SetModel(_device.brand);
+  type_combo.SetModel(_device.type);
   colors = Attributes<Color>(_device.id);
   aliases = Attributes<Alias>(_device.id);
 }
@@ -657,7 +658,19 @@ PartsWin::PartsWin() {
 PartsWin::PartsWin(Part _part) {
   Init();
   state = WindowState_Update;
-  //supplier.FillBuffer(_part.supplier);
+  supplier.FillBuffer(_part.supplier.name);
+  own_sku_field.FillBuffer(_part.own_sku);
+  name_field.FillBuffer(_part.name);
+  color.FillBuffer(_part.color.name);
+  quality.SetModel(_part.quality);
+  category.SetModel(_part.category);
+  location.FillBuffer(_part.location);
+  purch_price.amount = _part.purch_price;
+  purch_price.ex_vat = purch_price.ExVat();
+  purch_price.vat_rate = _part.vat;
+  sell_price.amount = _part.sell_price;
+  sell_price.ex_vat = sell_price.ExVat();
+  quantity = _part.quantity;
 }
 
 void PartsWin::Init() {
@@ -666,8 +679,8 @@ void PartsWin::Init() {
   own_sku_field = OwnSKUField(_("Own SKU"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError);
   name_field = QueriedTextField(_("Item's name"), 0, TFFlags_HasPopup | TFFlags_HasLenValidator | TFFlags_EmptyIsError, "DISTINCT name", "parts", "name");
   color = SimpleModelField<Color>(_("Color"), 0, TFFlags_HasPopup);
-  quality = RoCombo<Quality>(_("Choose quality"));
-  category = RoCombo<Category>(_("Choose category"));
+  quality = RoCombo<Quality>(_("Choose quality"), RoComboFlags_HasNone);
+  category = RoCombo<Category>(_("Choose category"), RoComboFlags_HasNone);
   location = QueriedTextField(_("Location"), 0, TFFlags_HasPopup, "DISTINCT location", "parts", "location");
   device_filter = QueriedTextField(_("Device's model"), 0, TFFlags_HasPopup, "DISTINCT model", "devices", "model");
   brand_filter = SimpleModelField<Brand>(_("Brand"), 0, TFFlags_HasPopup);

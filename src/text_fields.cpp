@@ -171,6 +171,8 @@ const void TextField::Clear() {
 }
 
 void TextField::FillBuffer(const std::string& fill) {
+  if (fill == (_("Unknown")))
+    return;
   buffer = fill;
   //Validate();
 }

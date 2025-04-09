@@ -17,10 +17,12 @@ public:
   RoCombo(const std::string& _label = "Empty Combo", RoComboFlags _flags = 0);
   RoCombo(T& _model, RoComboFlags _flags = 0);
   RoCombo(const std::vector<T> _models, RoComboFlags _flags = 0);
+  void IncludeNone();
   void RenderFromBtn();
   bool Render();
   T& Get();
   void SetLabel(const std::string& _label);
+  void SetModel(const T& _model);
 private:
   T model;
   std::vector<T> models;
@@ -32,12 +34,7 @@ private:
 template<typename T>
 inline RoCombo<T>::RoCombo(const std::string& _label, RoComboFlags _flags) : label(_label), flags(_flags) {
   models = Database::Select<T>().From().All();
-  if (flags & RoComboFlags_HasNone) {
-    T _none;
-    _none.id = -1;
-    _none.name = "None";
-    models.insert(models.begin(), _none);
-  }
+  IncludeNone();
 
   if constexpr (std::is_same_v<T, RepairState>) {
     // For RepairState, remove the first element if models is not empty
@@ -50,8 +47,10 @@ inline RoCombo<T>::RoCombo(const std::string& _label, RoComboFlags _flags) : lab
     model = models[0];
 }
 
+
 template<typename T>
 inline RoCombo<T>::RoCombo(T& _model, RoComboFlags _flags) : model(_model), flags(_flags) {
+  label = "##combo";
   models = Database::Select<T>().From().All();
 }
 
@@ -62,6 +61,16 @@ inline RoCombo<T>::RoCombo(const std::vector<T> _models, RoComboFlags _flags) : 
   label = "##combo";
   if (!models.empty())
     model = models[0];
+}
+
+template<typename T>
+inline void RoCombo<T>::IncludeNone() {
+  if (flags & RoComboFlags_HasNone) {
+    T _none;
+    _none.id = -1;
+    _none.name = "None";
+    models.insert(models.begin(), _none);
+  }
 }
 
 template<typename T>
@@ -115,6 +124,17 @@ template<typename T>
 inline void RoCombo<T>::SetLabel(const std::string& _label) {
   if (_label.empty()) { return; }
   label = _label;
+}
+
+template<typename T>
+inline void RoCombo<T>::SetModel(const T& _model) {
+  model = _model;
+  for (int i = 0; i < models.size(); ++i) {
+    if (models[i].id == _model.id) {
+      selected = i;
+      break;
+    }
+  }
 }
 
 template <typename T>

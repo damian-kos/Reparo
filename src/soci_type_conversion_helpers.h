@@ -10,6 +10,7 @@
 #include "../../src/invoices.h"
 #include <iostream>
 #include <soci/soci.h>
+#include "RoLocalization.h"
 //#include <soci/sqlite3/soci-sqlite3.h>
 
 
@@ -165,12 +166,12 @@ namespace soci {
       try {
         // Get optional fields with defaults
         int type_id  = v.get<int>("type_id", -1);
-        std::string type_name = "Unknown";
+        std::string type_name = (_("Unknown"));
         int brand_id = v.get<int>("brand_id", -1);
-        std::string brand_name = "Unknown";
+        std::string brand_name = (_("Unknown"));
         if (columns > 4) {
-          type_name = v.get<std::string>("type", "Unknown");
-          brand_name = v.get<std::string>("brand", "Unknown");
+          type_name = v.get<std::string>("type", (_("Unknown")));
+          brand_name = v.get<std::string>("brand", (_("Unknown")));
         }
 
         DeviceType type{ type_id, type_name };
@@ -319,7 +320,7 @@ namespace soci {
       model.purch_price = v.get<double>("purch_price", 0);
       model.purch_price_ex_vat = v.get<double>("purch_price_ex_vat", 0);
       model.vat = v.get<double>("vat", 0);
-      model.location = v.get<std::string>("location", "N/A");
+      model.location = v.get<std::string>("location", (_("Unknown")));
       model.reserved_quantity = v.get<int>("reserved_quantity", 0);
       model.created_at = v.get<std::tm>("created_at");
       model.updated_at = v.get<std::tm>("updated_at");
@@ -327,10 +328,10 @@ namespace soci {
 
       // If Part retreived with joined tables // is there a better way to handle this?
       if (v.get_number_of_columns() > 17) {
-        model.color.name = v.get<std::string>("color", "Unknown");
-        model.quality.name = v.get<std::string>("quality", "Unknown");
-        model.category.name = v.get<std::string>("category", "Unknown");
-        model.supplier.name = v.get<std::string>("supplier", "Unknown");
+        model.color.name = v.get<std::string>("color", (_("Unknown")));
+        model.quality.name = v.get<std::string>("quality", (_("Unknown")));
+        model.category.name = v.get<std::string>("category", (_("Unknown")));
+        model.supplier.name = v.get<std::string>("supplier", (_("Unknown")));
       }
     }
 
