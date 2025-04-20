@@ -4,6 +4,7 @@
 #include "../../src/database.h"
 #include "../../src/tables.h"
 #include "../../src/invoices.h"
+#include "../../src/LocStrings.h"
 
 const std::string Part::ToString() const{
   return std::to_string(id) + " | " + name + " | " + own_sku;
@@ -12,7 +13,7 @@ const std::string Part::ToString() const{
 void Part::View() { 
   ImGui::Separator();
   ImGui::SeparatorText(_("Item"));
-  ImGui::Text("%s:", _("Own SKU        ")); ImGui::SameLine(); ImGui::Text("%s", own_sku.c_str());
+  ImGui::Text("%s:", LBL_SKU); ImGui::SameLine(); ImGui::Text("%s", own_sku.c_str());
   ImGui::Text("%s:", _("Name           ")); ImGui::SameLine(); ImGui::Text("%s", name.c_str());
   ImGui::Text("%s:", _("Quality        ")); ImGui::SameLine(); ImGui::Text("%s", quality.name.c_str());
   ImGui::Text("%s:", _("Category       ")); ImGui::SameLine(); ImGui::Text("%s", category.name.c_str());
@@ -26,6 +27,23 @@ void Part::View() {
   ImGui::Text("%s:", _("Location       ")); ImGui::SameLine(); ImGui::Text("%s", location.c_str());
   RoTable::TableWrapped(cmptble_devices);
   RoTable::TableWrapped(cmptble_aliases);
+}
+
+void Part::View(const Part& _previous) const {
+  ImGui::Separator();
+  ImGui::SeparatorText(_("Item"));
+  ImGui::TextWrappedColor(own_sku != _previous.own_sku,                       "Own SKU:        %s", own_sku.c_str());
+  ImGui::TextWrappedColor(name != _previous.name,                             "Name:           %s", name.c_str());
+  ImGui::TextWrappedColor(quality.name != _previous.quality.name,             "Quality:        %s", quality.name.c_str());
+  ImGui::TextWrappedColor(category.name != _previous.category.name,           "Category:       %s", category.name.c_str());
+  ImGui::TextWrappedColor(color.name != _previous.color.name,                 "Color:          %s", color.name.c_str());
+  ImGui::TextWrappedColor(quantity != _previous.quantity,                     "Quantity:       %d", quantity);
+  ImGui::TextWrappedColor(purch_price != _previous.purch_price,               "Purchase price: %.2f", purch_price);
+  ImGui::TextWrappedColor(purch_price_ex_vat != _previous.purch_price_ex_vat, "Ex. VAT:        %.2f", purch_price_ex_vat);
+  ImGui::TextWrappedColor(vat != _previous.vat, "VAT:            %.2f", vat);
+  ImGui::TextWrappedColor(sell_price != _previous.sell_price, "Sell Price:     %.2f", sell_price);
+  ImGui::TextWrappedColor(sell_price_ex_vat != _previous.sell_price_ex_vat, "Ex. VAT:        %.2f", sell_price_ex_vat);
+  ImGui::TextWrappedColor(location != _previous.location, "Location:       %s", location.c_str());
 }
 
 void Part::InsertModal() {

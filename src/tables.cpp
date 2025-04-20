@@ -116,3 +116,15 @@ void RoTable::TableWithDevices(const std::vector<Device>& _devices, std::unorder
 
   ImGui::EndTable();
 }
+
+void RoTable::SideBySideText(const std::string& _label, const std::vector<std::string>& _first, const std::vector<std::string>& _second) {
+  if (ImGui::BeginTable(_label.c_str(), 2)) {
+    for (auto& _text : _first) {
+      ImGui::TableNextColumn();
+      ImGui::TextWrapped("%s", _text.c_str());
+    }
+    ImGui::EndTable();
+  }
+}
+
+

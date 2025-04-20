@@ -15,6 +15,8 @@ public:
   template <typename T>
   static void TableWrapped(const T& _values);
 
+  static void SideBySideText(const std::string& _label, const std::vector<std::string>& _first, const std::vector<std::string>& _second);
+
  private:
   template <typename T>
   static void ProcessIterators(const std::vector<T>& _values);

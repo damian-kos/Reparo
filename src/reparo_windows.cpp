@@ -80,10 +80,8 @@ void CustomerWin::Feedback() {
 void CustomerWin::Submit() {
   ImGui::BeginDisabled(error);
   if (ImGui::Button(_("Submit Customer Details"))) {
-
     Customer customer = CreateCustomer();
     customer.InsertModal();
-
   }
   ImGui::EndDisabled();
 
@@ -658,6 +656,7 @@ PartsWin::PartsWin() {
 PartsWin::PartsWin(Part _part) {
   Init();
   state = WindowState_Update;
+  previous_part = _part;
   supplier.FillBuffer(_part.supplier.name);
   own_sku_field.FillBuffer(_part.own_sku);
   name_field.FillBuffer(_part.name);
