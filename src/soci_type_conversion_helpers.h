@@ -320,7 +320,7 @@ namespace soci {
       model.purch_price = v.get<double>("purch_price", 0);
       model.purch_price_ex_vat = v.get<double>("purch_price_ex_vat", 0);
       model.vat = v.get<double>("vat", 0);
-      model.location = v.get<std::string>("location", (_("Unknown")));
+      model.location = v.get<std::string>("location", "");
       model.reserved_quantity = v.get<int>("reserved_quantity", 0);
       model.created_at = v.get<std::tm>("created_at");
       model.updated_at = v.get<std::tm>("updated_at");
@@ -328,10 +328,10 @@ namespace soci {
 
       // If Part retreived with joined tables // is there a better way to handle this?
       if (v.get_number_of_columns() > 17) {
-        model.color.name = v.get<std::string>("color", (_("Unknown")));
-        model.quality.name = v.get<std::string>("quality", (_("Unknown")));
-        model.category.name = v.get<std::string>("category", (_("Unknown")));
-        model.supplier.name = v.get<std::string>("supplier", (_("Unknown")));
+        //model.color.name = v.get<std::string>("color", (_("Unknown")));
+        //model.quality.name = v.get<std::string>("quality", (_("Unknown")));
+        //model.category.name = v.get<std::string>("category", (_("Unknown")));
+        //model.supplier.name = v.get<std::string>("supplier", (_("Unknown")));
       }
     }
 

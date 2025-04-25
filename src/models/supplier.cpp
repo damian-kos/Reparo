@@ -2,6 +2,7 @@
 #include "imgui.h"
 #include "../../src/RoLocalization.h"
 #include "../../src/database.h"
+#include "../../src/LocStrings.h"
 
 Supplier::Supplier() { }
 
@@ -13,6 +14,10 @@ const std::string Supplier::ToString(const std::string _delimiter) const {
   std::string _str = std::to_string(id) + _delimiter + name;
   _str += address.ToString(_delimiter);
   return _str;
+}
+
+const char* Supplier::GetForCell() const {
+  return name.empty() ? UNKOWN : name.c_str();
 }
 
 void Supplier::View() {

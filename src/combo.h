@@ -117,6 +117,9 @@ template <typename T> inline bool RoCombo<T>::Render() {
 
 template<typename T>
 inline T& RoCombo<T>::Get() {
+  if (model.name == "None") { // So if none is being choosen, the model's data remains empty
+    model.name = "";
+  }
   return model;
 }
 

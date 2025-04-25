@@ -32,8 +32,8 @@ public:
   static constexpr std::string_view table = "parts";
   static inline const std::string column = "own_sku";
 
+  std::vector<ModelDataView> CreateViewData(const Part& _previous);
   void View();
-  void View(const Part& _previous) const;
   void InsertModal();
   void InsertToDb();
   void UpdateModal();
@@ -44,6 +44,5 @@ public:
 
   Part& operator=(InvoiceItem& _item);
 
-private:
-
+  const char* GetLocationForCell() const;
 };

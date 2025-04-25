@@ -6,6 +6,12 @@
 class Database;
 class ModalManager;
 
+struct ModelDataView {
+  std::string label;
+  std::string data;
+  bool modified = false;
+};
+
 // Struct to hold ID and Name
 struct SimpleModelData {
   int id;
@@ -38,6 +44,7 @@ public:
   static const std::string& Column() { return Derived::column; }
   static const std::string& WindowTitle() { return Derived::window_title; }
   const std::string ToString() const;
+  const char* GetForCell() const;
   void UpdateInDb();
   void DeleteInDb();
   void EditModal();

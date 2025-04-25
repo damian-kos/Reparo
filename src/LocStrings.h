@@ -1,6 +1,8 @@
 #pragma once
 
 // Buttons
+#define BTN_CONFIRM              _("Confirm") 
+#define BTN_CANCEL               _("Cancel")
 
 // Part field labels
 #define LBL_ITEM_TITLE           _("Item")
@@ -15,3 +17,6 @@
 #define LBL_VAT                  _("VAT")
 #define LBL_SELL_PRICE           _("Sell Price")
 #define LBL_LOCATION             _("Location")
+
+// Misc
+#define UNKOWN                   _("Unknown")

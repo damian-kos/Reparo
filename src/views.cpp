@@ -24,7 +24,6 @@ CustomerView::~CustomerView() {
   std::cout << "Customers view destroyed" << std::endl;
 }
 
-
 void CustomerView::DefaultRenderItem(const Customer& customer) {
   ImGui::TableNextColumn();
   ActionsOnTable(const_cast<Customer&>(customer));
@@ -277,7 +276,7 @@ void InventoryView::Init(const std::string& _window_id, ViewStateFlags _flags, c
   config.flags = _flags;
 }
 
-void InventoryView::DefaultRenderItem(const Part & _part) {
+void InventoryView::DefaultRenderItem(const Part& _part) {
   ImGui::TableNextColumn();
   ActionsOnTable(const_cast<Part&>(_part));
 
@@ -288,13 +287,13 @@ void InventoryView::DefaultRenderItem(const Part & _part) {
   ImGui::Text("%s", _part.own_sku.c_str());
 
   ImGui::TableNextColumn();
-  ImGui::Text("%s", _part.quality.name.c_str());
+  ImGui::Text("%s", _part.quality.GetForCell());
 
   ImGui::TableNextColumn();
-  ImGui::Text("%s", _part.category.name.c_str());
+  ImGui::Text("%s", _part.category.GetForCell());
 
   ImGui::TableNextColumn();
-  ImGui::Text("%s", _part.supplier.name.c_str());
+  ImGui::Text("%s", _part.supplier.GetForCell());
 
   ImGui::TableNextColumn();
   ImGui::Text("%.2f", _part.sell_price);
@@ -303,7 +302,7 @@ void InventoryView::DefaultRenderItem(const Part & _part) {
   ImGui::Text("%.2f", _part.sell_price_ex_vat);
 
   ImGui::TableNextColumn();
-  ImGui::Text("%s", _part.color.name.c_str());
+  ImGui::Text("%s", _part.color.GetForCell());
 
   ImGui::TableNextColumn();
   ImGui::Text("%d", _part.quantity);
@@ -318,7 +317,7 @@ void InventoryView::DefaultRenderItem(const Part & _part) {
   ImGui::Text("%.2f", _part.vat);
 
   ImGui::TableNextColumn();
-  ImGui::Text("%s", _part.location.c_str());
+  ImGui::Text("%s", _part.GetLocationForCell());
 
   ImGui::TableNextColumn();
   ImGui::Text("%d", _part.reserved_quantity);
@@ -509,4 +508,3 @@ void DevicesView::Filters() {
     LoadData();
   }
 }
-

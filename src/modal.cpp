@@ -1,4 +1,6 @@
 #include "modal.h"
+#include "tables.h"
+#include "LocStrings.h"
 
 ModalConfig& ModalConfig::Title(const std::string& _title) {
   is_on = true;
@@ -163,6 +165,7 @@ bool PartModal::ModalContents() {
   bool action = false;
 
   if (config.state == ModalState_Insert) {
+    RoTable::SideBySideText(_("New Item"), view_data);
     part.View();
     if (ImGui::Button("Confirm")) {
       action = true;
@@ -186,14 +189,15 @@ bool PartModal::ModalContents() {
   }
 
   if (config.state == ModalState_Update) {
+    RoTable::SideBySideText(_("Update Item"), view_data);
     part.View();
-    if (ImGui::Button("Confirm")) {
+    if (ImGui::Button(BTN_CONFIRM)) {
       action = true;
      /* repair.UpdateString(previous);
       repair.UpdateToDb();*/
       ImGui::CloseCurrentPopup();
     }
-    if (ImGui::Button("Cancel")) {
+    if (ImGui::Button(BTN_CANCEL)) {
       ImGui::CloseCurrentPopup();
     }
   }

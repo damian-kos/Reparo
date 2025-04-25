@@ -15,7 +15,7 @@ public:
   template <typename T>
   static void TableWrapped(const T& _values);
 
-  static void SideBySideText(const std::string& _label, const std::vector<std::string>& _first, const std::vector<std::string>& _second);
+  static void SideBySideText(const std::string& _label, const std::vector<ModelDataView>& _data);
 
  private:
   template <typename T>

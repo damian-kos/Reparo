@@ -117,11 +117,16 @@ void RoTable::TableWithDevices(const std::vector<Device>& _devices, std::unorder
   ImGui::EndTable();
 }
 
-void RoTable::SideBySideText(const std::string& _label, const std::vector<std::string>& _first, const std::vector<std::string>& _second) {
-  if (ImGui::BeginTable(_label.c_str(), 2)) {
-    for (auto& _text : _first) {
+void RoTable::SideBySideText(const std::string&  _label, const std::vector<ModelDataView>& _data) {
+  ImGui::SeparatorText(_label.c_str());
+  if (ImGui::BeginTable(_label.c_str(), 2, ImGuiTableFlags_RowBg)) {
+    for (auto& _record: _data) {
       ImGui::TableNextColumn();
-      ImGui::TextWrapped("%s", _text.c_str());
+      ImGui::TextWrapped("%s", _record.label.c_str());
+      ImGui::TableNextColumn();
+      ImGui::TextWrappedColor(_record.modified, "%s", _record.data.c_str());
+      if(_record.modified)
+        ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ImGui::GetColorU32(ImVec4(1.0, 0.9, 0.0, 0.1)));
     }
     ImGui::EndTable();
   }

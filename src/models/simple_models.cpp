@@ -11,6 +11,10 @@ const std::string SimpleModel<Derived>::ToString() const {
   return std::to_string(id) + " | " + name;
 }
 
+template<typename Derived>
+const char* SimpleModel<Derived>::GetForCell() const {
+  return name.empty() ? _("Unkown") : name.c_str();
+}
 
 template <typename Derived>
 void SimpleModel<Derived>::UpdateInDb() {

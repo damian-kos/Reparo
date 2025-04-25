@@ -7,6 +7,7 @@ public:
   Supplier();
   Supplier& GetSupplier();
   const std::string ToString(std::string _delimiter = " | ") const;
+  const char* GetForCell() const;
   void View();
   void InsertToDb();
   void Clear();

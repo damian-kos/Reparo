@@ -4,6 +4,8 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <sstream>
+#include <iomanip>
 
 
 
@@ -23,5 +25,11 @@ namespace Convert {
     if (!ContainsItemWithId(vec, item.id)) {
       vec.push_back(item);
     }
+  }
+
+  inline std::string to_string_2dp(double val) {
+    std::ostringstream ss;
+    ss << std::fixed << std::setprecision(2) << val;
+    return ss.str();
   }
 }

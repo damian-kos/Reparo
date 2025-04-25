@@ -126,10 +126,13 @@ class PartModal : public BaseModal {
     PartModal(const Part& _part, ModalConfig& _config)
     : BaseModal(_config), part(_part)  {
       part_win = PartsWin(part);
+      view_data = part.CreateViewData(previous);
     }
     
     PartModal(const Part& _part, const Part& _previous, ModalConfig& _config)
-      : BaseModal(_config), part(_part), previous(_previous) {  }
+      : BaseModal(_config), part(_part), previous(_previous) {  
+      view_data = part.CreateViewData(previous);
+    }
 
      bool ModalContents() override;
 
@@ -140,6 +143,7 @@ class PartModal : public BaseModal {
   PartsWin part_win;
   // ModalState_Update
   Part previous;
+  std::vector<ModelDataView> view_data;
 };
 
 class DeviceModal : public BaseModal {
