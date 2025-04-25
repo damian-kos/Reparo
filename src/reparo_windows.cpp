@@ -653,7 +653,7 @@ PartsWin::PartsWin() {
   Init();
 }
 
-PartsWin::PartsWin(Part _part) {
+PartsWin::PartsWin(Part& _part) {
   Init();
   state = WindowState_Update;
   previous_part = _part;
@@ -815,6 +815,10 @@ void PartsWin::ListEntriesInBox(float& _last_btn, float _window, std::unordered_
 
 Part PartsWin::CreatePart() {
   Part _part;
+
+  if (state == WindowState_Update)
+    _part.id = previous_part.id;
+
   _part.name = name_field.Get();
   _part.own_sku = own_sku_field.Get();
   _part.quality = quality.Get();

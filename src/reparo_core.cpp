@@ -98,6 +98,8 @@ void ReparoCore::InitializeTableBtns() {
       {"Create Part Model Table",                 []() { Database::Create().PartModelTable(); }},
       {"Create Part Model Alias Table",           []() { Database::Create().PartModelAliasTable(); }},
       {"Create Repair Updates Table",             []() { Database::Create().RepairUpdatesTable(); }},
+      {"Create Trigger Context Table",            []() { Database::Create().TriggerContext(); }},
+
 
     };
   //  std::cout << "Initialized table buttons with " << table_config.size() << " entries." << std::endl;

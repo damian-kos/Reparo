@@ -544,6 +544,31 @@ TableCreator& TableCreator::PartsHistoryTable() {
     );
   )";
   Database::ExecuteTransaction(_sql);
+
+  Database::OpenDb();
+  std::string create_trigger_sql = R"(
+    -- Modify first trigger to only fire for manual updates (action_id = 2)
+    CREATE TRIGGER after_item_updated_manually AFTER UPDATE ON parts
+    BEGIN
+        -- Insert when quantity increased
+        INSERT INTO parts_history (
+            part_id, operation, quantity, action_id, notes, created_at
+        )
+        SELECT 
+            OLD.id, 'Add', NEW.quantity - OLD.quantity, 2, 'Stock adjustment', CURRENT_TIMESTAMP
+        WHERE NEW.quantity > OLD.quantity AND (SELECT trigger FROM trigger_context) = 2;
+    
+        -- Insert when quantity decreased
+        INSERT INTO parts_history (
+            part_id, operation, quantity, action_id, notes, created_at
+        )
+        SELECT 
+            OLD.id, 'Deduct', OLD.quantity - NEW.quantity, 2, 'Stock adjustment', CURRENT_TIMESTAMP
+        WHERE NEW.quantity < OLD.quantity AND (SELECT trigger FROM trigger_context) = 2;
+    END;
+  )";
+  Database::ExecuteTransaction(create_trigger_sql);
+
   return *this;
 }
 
@@ -815,6 +840,29 @@ TableCreator& TableCreator::RepairUpdatesTable() {
   Database::ExecuteTransaction(_sql);
   return *this;
 
+}
+
+TableCreator& TableCreator::TriggerContext() {
+  std::string _sql = R"(
+    CREATE TABLE IF NOT EXISTS trigger_context (
+      id       INTEGER PRIMARY KEY,
+      trigger  INTEGER NOT NULL DEFAULT 0
+    );
+  )";
+
+  Database::ExecuteTransaction(_sql);
+
+  Database::OpenDb();
+  // Insert the default row only if it doesn't exist
+  std::string insert_sql = R"(
+    INSERT INTO trigger_context (id, trigger)
+    SELECT 1, 0
+    WHERE NOT EXISTS (SELECT 1 FROM trigger_context WHERE id = 1);
+  )";
+
+  Database::ExecuteTransaction(insert_sql);
+
+  return *this;
 }
 
 Inserter& Inserter::Customer_(Customer& customer) {
@@ -1144,5 +1192,19 @@ Updater& Updater::Device_(Device& _device) {
       Query::UpdateColors(_color_updates, _device.id);
     },
     "Update device (Device: " + _device.ToString() + ")"
+  );
+}
+
+Updater& Updater::Part_(Part& _part) {
+  return ExecuteTransaction(
+    [&_part]() {
+      Query::SetTriggerContext(2);
+      Query::UpdateItem(_part);
+      
+      /*Query::UpdateItemDevices(_part);
+      Query::UpdateItemAliases(_part);*/
+      Query::ResetTriggerContext();
+    },
+    "Update part (Part: " + _part.ToString() + ")"
   );
 }

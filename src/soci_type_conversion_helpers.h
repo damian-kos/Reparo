@@ -328,10 +328,10 @@ namespace soci {
 
       // If Part retreived with joined tables // is there a better way to handle this?
       if (v.get_number_of_columns() > 17) {
-        //model.color.name = v.get<std::string>("color", (_("Unknown")));
-        //model.quality.name = v.get<std::string>("quality", (_("Unknown")));
-        //model.category.name = v.get<std::string>("category", (_("Unknown")));
-        //model.supplier.name = v.get<std::string>("supplier", (_("Unknown")));
+        model.color.name = v.get<std::string>("color", "");
+        model.quality.name = v.get<std::string>("quality", "");
+        model.category.name = v.get<std::string>("category", "");
+        model.supplier.name = v.get<std::string>("supplier", "");
       }
     }
 

@@ -37,6 +37,7 @@ public:
   void InsertModal();
   void InsertToDb();
   void UpdateModal();
+  void UpdateToDb();
 
   operator bool() const {
     return id > 0;

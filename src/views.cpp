@@ -271,7 +271,7 @@ void InventoryView::Init(const std::string& _window_id, ViewStateFlags _flags, c
     { "created_at", "Created at" },
     { "updated_at", "Updated at" }
   };
-  config.max_columns = config.headers.size() + 1;
+  config.max_columns = config.headers.size() ;
   config.is_window = _is_window;
   config.flags = _flags;
 }

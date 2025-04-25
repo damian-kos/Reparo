@@ -123,6 +123,19 @@ namespace Query {
     return _part_id;
   }
 
+  int UpdateItem(Part& _part) {
+    Part _p = _part;
+    int _part_id = _p.id;
+    Database::sql << R"(UPDATE parts 
+            SET name = :name, own_sku = :own_sku, quality_id = :quality_id, category_id = :category_id, 
+            supplier_id = :supplier_id, sell_price = :sell_price, sell_price_ex_vat = :sell_price_ex_vat, 
+            color_id = :color_id, quantity = :quantity, purch_price = :purch_price, purch_price_ex_vat = :purch_price_ex_vat, 
+            vat = :vat, location = :location 
+            WHERE id = :id)",
+      soci::use(_p);
+    return _part_id;
+  }
+
   int UpdateItem(InvoiceItem& _item) {
     InvoiceItem _i = _item;
     int _item_id = _i.id;
@@ -330,6 +343,15 @@ namespace Query {
       SET model = :model, brand_id = :brand_id, type_id = :type_id
       WHERE id = :id)",
       soci::use(_d);
+  }
+
+  void SetTriggerContext(const int& _context) {
+    Database::sql << "UPDATE trigger_context SET trigger = :context WHERE id = 1",
+      soci::use(_context);
+  }
+
+  void ResetTriggerContext() {
+    Database::sql << "UPDATE trigger_context SET trigger = 0 WHERE id = 1";
   }
 
   template <typename T>

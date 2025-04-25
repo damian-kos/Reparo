@@ -150,7 +150,7 @@ private:
 class  PartsWin : public RoWindow {
   public:
     PartsWin();
-    PartsWin(Part _part);
+    PartsWin(Part& _part);
     void Render();
     bool IsSubmitPressed();
 

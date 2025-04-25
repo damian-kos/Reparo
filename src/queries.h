@@ -50,6 +50,8 @@ namespace Query {
   void UpdateDevice(Device& _device);
   template <typename T>
   int InsertSimpleModel(T& _model);
+  void SetTriggerContext(const int& _context);
+  void ResetTriggerContext();
 
   template <typename T>
   std::vector<T> GetToInsert(std::set<T>& _new_set, std::vector<T>& _existing_set) {

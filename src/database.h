@@ -66,6 +66,7 @@ public:
   TableCreator& PartModelTable();
   TableCreator& PartModelAliasTable();
   TableCreator& RepairUpdatesTable();
+  TableCreator& TriggerContext();
 };
 
 class Inserter {
@@ -122,6 +123,7 @@ public:
   Updater& Repair_(Repair& repair);
   Updater& Customer_(Customer& _customer);
   Updater& Device_(Device& _device);
+  Updater& Part_(Part& _part);
 
 private:
   template<typename Func>

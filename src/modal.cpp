@@ -193,8 +193,8 @@ bool PartModal::ModalContents() {
     part.View();
     if (ImGui::Button(BTN_CONFIRM)) {
       action = true;
-     /* repair.UpdateString(previous);
-      repair.UpdateToDb();*/
+     // repair.UpdateString(previous);
+      part.UpdateToDb();
       ImGui::CloseCurrentPopup();
     }
     if (ImGui::Button(BTN_CANCEL)) {

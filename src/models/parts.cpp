@@ -54,6 +54,10 @@ void Part::UpdateModal() {
   ModalManager::SetModal(_modal);
 }
 
+void Part::UpdateToDb() {
+  Database::Update().Part_(*this);
+}
+
 Part& Part::operator=(InvoiceItem& _item) {
   own_sku = _item.own_sku;
   name = _item.name;

@@ -137,7 +137,7 @@ void TextField::Validate() {
 void TextField::EmptyBufferError() {
   if (ro_flags & TFFlags_EmptyIsError && buffer.empty())
     error = true;
-
+  
   has_error_with_content = error && buffer.size() > 0;
 }
 
@@ -174,7 +174,7 @@ void TextField::FillBuffer(const std::string& fill) {
   if (fill == (_("Unknown")))
     return;
   buffer = fill;
-  //Validate();
+  Validate();
 }
 
 Customer PhoneField::Render() {
