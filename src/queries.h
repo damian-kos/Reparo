@@ -39,6 +39,8 @@ namespace Query {
   int UpdateRepairPart(RepairItem& _item);
   void InsertItemDevices(Part& _part);
   void InsertItemAliases(Part& _part);
+  void UpdateItemDevices(Part& _part);
+  void UpdateItemAliases(Part& _part);
   int InsertRepair(Repair& repair);
   int InsertCustomDevice(Repair& repair);
   void InsertRepairPart(RepairItem& _item);

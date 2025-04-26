@@ -115,7 +115,7 @@ void Repair::InsertModal() {
 void Repair::InsertToDb()  {
   Database::Insert().Repair_(*this);
 }
-
+ 
 void Repair::UpdateModal() {
   ModalConfig _config;
   _config.Title(_("Edit repair?"))

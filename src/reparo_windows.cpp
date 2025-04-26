@@ -749,7 +749,7 @@ void PartsWin::QuantitySection() {
 }
 
 void PartsWin::CompatibleTablePicker() {
-  RoTable::TableWithDevices(devices, cmptble_devices, cmptble_aliases);
+  RoTable::TableWithDevices(devices, device_entries, alias_entries);
 }
 
 void PartsWin::CompatibleEntriesBox() {
@@ -760,10 +760,10 @@ void PartsWin::CompatibleEntriesBox() {
   float _last_btn = ImGui::GetCursorPosX(); // Initialize with the starting cursor position of the _window
 
   ImGui::SeparatorText(_("Devices"));
-  ListEntriesInBox<Device>(_last_btn, _window, cmptble_devices);
+  ListEntriesInBox<Device>(_last_btn, _window, device_entries);
 
   ImGui::SeparatorText(_("Aliases"));
-  ListEntriesInBox<Alias>(_last_btn, _window, cmptble_aliases);
+  ListEntriesInBox<Alias>(_last_btn, _window, alias_entries);
 
   ImGui::EndChild();
 }
@@ -796,6 +796,31 @@ void PartsWin::ListEntriesInBox(float& _last_btn, float _window, std::unordered_
     ++it;
   }
 }
+
+template <typename T>
+void PartsWin::ListEntriesInBox(float& _last_btn, float _window, std::vector<T>& _entries) {
+  if (_entries.empty())
+    return;
+
+  for (auto it = _entries.begin(); it != _entries.end(); ) {
+    // Access the name directly if T has a `name` member
+    if (ImGui::Button(it->name.c_str())) {
+      it = _entries.erase(it);  // Remove the element from the vector
+      continue;
+    }
+
+    auto next_it = std::next(it, 1);
+    if (next_it != _entries.end()) {
+      _last_btn = ImGui::GetItemRectMax().x + (ImGui::CalcTextSize(next_it->name.c_str()).x * 1.2);
+
+      if (_last_btn < _window)
+        ImGui::SameLine();
+    }
+
+    ++it;
+  }
+}
+
 
 //bool PartsWin::Submit() {
 //  bool _submit = false;
@@ -833,8 +858,8 @@ Part PartsWin::CreatePart() {
   _part.vat = purch_price.vat_rate;
   _part.location = location.Get();
   _part.reserved_quantity = 0;
-  _part.cmptble_devices = std::move(cmptble_devices);
-  _part.cmptble_aliases = std::move(cmptble_aliases);
+  _part.device_entries = std::move(device_entries);
+  _part.alias_entries = std::move(alias_entries);
   return _part;
 }
 

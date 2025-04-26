@@ -30,8 +30,8 @@ std::vector<ModelDataView> Part::CreateViewData(const Part& _previous) {
 }
 
 void Part::View() {
-  RoTable::TableWrapped(cmptble_devices);
-  RoTable::TableWrapped(cmptble_aliases);
+  RoTable::TableWrapped(device_entries);
+  RoTable::TableWrapped(alias_entries);
 }
 
 void Part::InsertModal() {

@@ -167,6 +167,8 @@ private:
     void Filters();
     template <typename T>
     void ListEntriesInBox(float& last_btn, float window, std::unordered_map<int, T>& entries);
+    template <typename T>
+    void ListEntriesInBox(float& last_btn, float window, std::vector<T>& entries);
     void Feedback();
     void PriceSection(const std::string& _action, Price& _price);
     void QuantitySection();
@@ -198,8 +200,8 @@ private:
     SimpleModelField<Brand> brand_filter;
     SimpleModelField<DeviceType> device_type_filter;
     std::vector<Device> devices;
-    std::unordered_map<int, Device> cmptble_devices;
-    std::unordered_map<int, Alias> cmptble_aliases;
+    std::vector<Device> device_entries;
+    std::vector<Alias> alias_entries;
     Buttons submit;
     bool error = true;
 

@@ -11,7 +11,7 @@ public:
 
   template <typename T>
   static void SimpleModel(std::vector<T>& models);
-  static void TableWithDevices(const std::vector<Device>& _devices, std::unordered_map<int, Device>& _cmptbl_devices, std::unordered_map<int, Alias>& _cmptbl_aliases);
+  static void TableWithDevices(const std::vector<Device>& _devices, std::vector<Device>& _cmptbl_devices, std::vector<Alias>& _cmptbl_aliases);
   template <typename T>
   static void TableWrapped(const T& _values);
 

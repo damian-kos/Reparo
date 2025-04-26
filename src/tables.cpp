@@ -57,7 +57,7 @@ void RoTable::Addresses(const std::vector<std::string>& _first, std::string _lab
   }
 }
 
-void RoTable::TableWithDevices(const std::vector<Device>& _devices, std::unordered_map<int, Device>& _cmptbl_devices, std::unordered_map<int, Alias>& _cmptbl_aliases) {
+void RoTable::TableWithDevices(const std::vector<Device>& _devices, std::vector<Device>& _cmptbl_devices, std::vector<Alias>& _cmptbl_aliases) {
   float window = ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x;
   ImVec2 size = ImGui::CalcTextSize("Apple Watch Series 2 Aluminium 38mm");
   int columns = window / (size.x * 1.2) - 1;
@@ -65,7 +65,7 @@ void RoTable::TableWithDevices(const std::vector<Device>& _devices, std::unorder
   if (columns <= 0)
     return;
 
-  if (!ImGui::BeginTable("split1", columns,  ImGuiTableFlags_SizingFixedFit |
+  if (!ImGui::BeginTable("split1", columns, ImGuiTableFlags_SizingFixedFit |
     ImGuiTableFlags_NoSavedSettings | ImGuiTableFlags_Borders |
     ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchSame))
     return;
@@ -76,10 +76,19 @@ void RoTable::TableWithDevices(const std::vector<Device>& _devices, std::unorder
       continue;
 
     if (ImGui::Selectable(device.name.c_str(), false, ImGuiSelectableFlags_DontClosePopups)) {
-      std::erase_if(_cmptbl_aliases, [&](const auto& pair) {
-        return device.id == pair.second.link_id;
+      // Remove alias entries linked to the device id
+      _cmptbl_aliases.erase(std::remove_if(_cmptbl_aliases.begin(), _cmptbl_aliases.end(), [&](const Alias& alias) {
+        return device.id == alias.link_id;
+        }), _cmptbl_aliases.end());
+
+      // Check if device is already in _cmptbl_devices (by device id)
+      auto device_it = std::find_if(_cmptbl_devices.begin(), _cmptbl_devices.end(), [&](const Device& d) {
+        return d.id == device.id;
         });
-      _cmptbl_devices.emplace(device.id, device);
+
+      if (device_it == _cmptbl_devices.end()) { // Device not found, insert it
+        _cmptbl_devices.push_back(device);
+      }
     }
 
     if (!ImGui::BeginPopupContextItem())
@@ -90,25 +99,25 @@ void RoTable::TableWithDevices(const std::vector<Device>& _devices, std::unorder
       continue;
     }
 
-
-    //static std::vector<bool> selection(device.aliases.size(), false);
-
     for (size_t i = 0; i < device.aliases.size(); ++i) {
       auto& alias = device.aliases[i];
 
       if (!ImGui::Selectable(alias.name.c_str(), false, ImGuiSelectableFlags_DontClosePopups))
         continue;
 
-      std::erase_if(_cmptbl_devices, [&](const auto& pair) {
-        return pair.first == alias.link_id;
+      // Remove device entries linked to alias
+      _cmptbl_devices.erase(std::remove_if(_cmptbl_devices.begin(), _cmptbl_devices.end(), [&](const Device& d) {
+        return d.id == alias.link_id;
+        }), _cmptbl_devices.end());
+
+      // Check if alias is already in _cmptbl_aliases (by alias id)
+      auto alias_it = std::find_if(_cmptbl_aliases.begin(), _cmptbl_aliases.end(), [&](const Alias& a) {
+        return a.id == alias.id;
         });
 
-      // Older solution left as on above possibly caused a vector out-of-range bug ?
-      //auto link_it = _cmptbl_devices.find(alias.link_id);
-      //if (link_it != _cmptbl_devices.end())
-      //  _cmptbl_devices.erase(link_it);
-
-      _cmptbl_aliases.emplace(alias.id, alias);
+      if (alias_it == _cmptbl_aliases.end()) { // Alias not found, insert it
+        _cmptbl_aliases.push_back(alias);
+      }
     }
 
     ImGui::EndPopup();

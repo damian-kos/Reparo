@@ -184,7 +184,7 @@ namespace Query {
 
   void InsertItemDevices(Part& _part) {
     Part _p = _part;
-    for (auto& [key, value] : _p.cmptble_devices) {
+    for (auto& value: _p.device_entries) {
       Database::sql << R"(INSERT INTO part_model (part_id, model_id)
             VALUES (:part_id, :model_id))",
         soci::use(_part.id),
@@ -194,9 +194,19 @@ namespace Query {
 
   void InsertItemAliases(Part& _part) {
     Part _p = _part;
-    for (auto& [key, value] : _p.cmptble_aliases) {
+    for (auto& value : _p.alias_entries) {
       Database::sql << R"(INSERT INTO part_model_alias (part_id, alias_id)
             VALUES (:part_id, :alias_id))",
+        soci::use(_part.id),
+        soci::use(value.id);
+    }
+  }
+
+  void UpdateItemDevices(Part& _part) {
+    Part _p = _part;
+    for (auto& value : _p.alias_entries) {
+      Database::sql << R"(UPDATE part_model SET model_id = :model_id
+            WHERE part_id = :part_id AND model_id = :model_id)",
         soci::use(_part.id),
         soci::use(value.id);
     }

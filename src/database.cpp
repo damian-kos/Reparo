@@ -1199,8 +1199,13 @@ Updater& Updater::Part_(Part& _part) {
   return ExecuteTransaction(
     [&_part]() {
       Query::SetTriggerContext(2);
-      Query::UpdateItem(_part);
-      
+      //Query::UpdateItem(_part);
+      std::set<Device> _new_aliases(_part.device_entries.begin(), _part.device_entries.end());
+
+      //auto _alias_updates = DBGet::GetItemsToUpdate<Alias>(
+      //  _new_aliases,
+      //  "SELECT * FROM aliases WHERE model_id = :id",
+      //  _part.id);
       /*Query::UpdateItemDevices(_part);
       Query::UpdateItemAliases(_part);*/
       Query::ResetTriggerContext();

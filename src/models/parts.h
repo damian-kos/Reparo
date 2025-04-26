@@ -25,8 +25,10 @@ public:
   double vat = 0.0;
   std::string location;
   int reserved_quantity = 0;
-  std::unordered_map<int, Device> cmptble_devices;
-  std::unordered_map<int, Alias> cmptble_aliases;
+  //std::unordered_map<int, Device> cmptble_devices;
+  //std::unordered_map<int, Alias> cmptble_aliases;
+  std::vector<Device> device_entries;
+  std::vector<Alias> alias_entries;
   std::tm created_at = {};
   std::tm updated_at = {};
   static constexpr std::string_view table = "parts";
