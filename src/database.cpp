@@ -1199,15 +1199,29 @@ Updater& Updater::Part_(Part& _part) {
   return ExecuteTransaction(
     [&_part]() {
       Query::SetTriggerContext(2);
-      //Query::UpdateItem(_part);
-      std::set<Device> _new_aliases(_part.device_entries.begin(), _part.device_entries.end());
 
-      //auto _alias_updates = DBGet::GetItemsToUpdate<Alias>(
-      //  _new_aliases,
-      //  "SELECT * FROM aliases WHERE model_id = :id",
-      //  _part.id);
-      /*Query::UpdateItemDevices(_part);
-      Query::UpdateItemAliases(_part);*/
+      Query::UpdateItem(_part);
+
+      std::set<Device> _new_devices(_part.device_entries.begin(), _part.device_entries.end());
+
+      auto _device_updates = DBGet::GetItemsToUpdate<Device>(
+        _new_devices,
+        R"(SELECT devices.* FROM devices
+          LEFT JOIN part_model ON devices.id = part_model.model_id
+          WHERE part_model.part_id = :id)",
+        _part.id);
+      Query::UpdateItemDevices(_device_updates, _part.id);
+
+      std::set<Alias> _new_aliases(_part.alias_entries.begin(), _part.alias_entries.end());
+
+      auto _alias_updates = DBGet::GetItemsToUpdate<Alias>(
+        _new_aliases,
+        R"(SELECT aliases.* FROM aliases
+          LEFT JOIN part_model_alias ON aliases.id = part_model_alias.alias_id
+          WHERE part_model_alias.part_id = :id)",
+        _part.id);
+      Query::UpdateItemAliases(_alias_updates, _part.id);
+
       Query::ResetTriggerContext();
     },
     "Update part (Part: " + _part.ToString() + ")"

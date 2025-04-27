@@ -39,8 +39,8 @@ namespace Query {
   int UpdateRepairPart(RepairItem& _item);
   void InsertItemDevices(Part& _part);
   void InsertItemAliases(Part& _part);
-  void UpdateItemDevices(Part& _part);
-  void UpdateItemAliases(Part& _part);
+  void UpdateItemDevices(UpdateSet<Device>& _device_entries, int& _id);
+  void UpdateItemAliases(UpdateSet<Alias>& _device_entries, int& _id);
   int InsertRepair(Repair& repair);
   int InsertCustomDevice(Repair& repair);
   void InsertRepairPart(RepairItem& _item);
@@ -62,7 +62,7 @@ namespace Query {
     std::set_difference(_new_set.begin(), _new_set.end(),
       _existing_set.begin(), _existing_set.end(),
       std::back_inserter(_to_insert));
-
+    
     return _to_insert;
   }
 

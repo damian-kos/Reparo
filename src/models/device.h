@@ -43,5 +43,10 @@ struct Device {
     this->name = other.name;
     return *this;
   }
+
+  bool operator<(const Device& other) const {
+    if (id != other.id) return id < other.id;
+    return name < other.name;
+  }
 };
 

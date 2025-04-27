@@ -670,6 +670,17 @@ PartsWin::PartsWin(Part& _part) {
   sell_price.amount = _part.sell_price;
   sell_price.ex_vat = sell_price.ExVat();
   quantity = _part.quantity;
+  std::string _item_id = "pm.part_id = " + std::to_string(_part.id);
+  device_entries = Database::Select<Device>("devices.*")
+    .From()
+    .InnerJoin("part_model pm")
+    .On("pm.model_id = devices.id")
+    .Where(_item_id).All();
+  alias_entries = Database::Select<Alias>("aliases.*")
+    .From()
+    .InnerJoin("part_model_alias pm")
+    .On("pm.alias_id = aliases.id")
+    .Where(_item_id).All();
 }
 
 void PartsWin::Init() {
@@ -970,6 +981,8 @@ void PartsWin::RenderUpdateState() {
     SubmitUpdate();  
     ImGui::EndTable();
   }
+  Filters();
+  CompatibleTablePicker();
 }
 
 void PartsWin::SubmitUpdate() {

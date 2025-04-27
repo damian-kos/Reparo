@@ -202,12 +202,30 @@ namespace Query {
     }
   }
 
-  void UpdateItemDevices(Part& _part) {
-    Part _p = _part;
-    for (auto& value : _p.alias_entries) {
-      Database::sql << R"(UPDATE part_model SET model_id = :model_id
-            WHERE part_id = :part_id AND model_id = :model_id)",
-        soci::use(_part.id),
+  void UpdateItemDevices(UpdateSet<Device>& _device_entries, int& _id) {
+    for (auto& value : _device_entries.to_insert) {
+      Database::sql << R"(INSERT INTO part_model (part_id, model_id)
+            VALUES (:part_id, :model_id))",
+        soci::use(_id),
+        soci::use(value.id);
+    }
+    for (auto& value : _device_entries.to_delete) {
+      Database::sql << R"(DELETE FROM part_model WHERE part_id = :part_id AND model_id = :model_id)",
+        soci::use(_id),
+        soci::use(value.id);
+    }
+  }
+
+  void UpdateItemAliases(UpdateSet<Alias>& _alias_entries, int& _id) {
+    for (auto& value : _alias_entries.to_insert) {
+      Database::sql << R"(INSERT INTO part_model_alias (part_id, alias_id)
+            VALUES (:part_id, :alias_id))",
+        soci::use(_id),
+        soci::use(value.id);
+    }
+    for (auto& value : _alias_entries.to_delete) {
+      Database::sql << R"(DELETE FROM part_model_alias WHERE part_id = :part_id AND alias_id = :alias_id)",
+        soci::use(_id),
         soci::use(value.id);
     }
   }
