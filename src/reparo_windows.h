@@ -254,7 +254,7 @@ private:
   RoDate create_date;
   SimpleModelField<Supplier> supplier_field;
   Supplier supplier;
-  std::vector<InvoiceItem> items;
+  ItemsContainer<InvoiceItem> invoice_items;
   bool error = true;
 };
 

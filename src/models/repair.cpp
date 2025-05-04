@@ -21,7 +21,7 @@ void Repair::RenderRepairItemsTable(ItemsContainer<RepairItem>& _items, const bo
   // Similar table in PurchaseInvoiceWin - can we merge?
   ImGui::SeparatorText(_("Assigned items"));
   double _total_net = 0;
-  _items.total.amount = 0;
+  //_items.total.amount = 0;
   static ImGuiTableFlags _flags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Reorderable | ImGuiTableFlags_Hideable | ImGuiTableFlags_Resizable | ImGuiTableFlags_SizingStretchProp;
   if (ImGui::BeginTable("Assigned items", 7, _flags)) {
     std::vector<std::string> headers = { _("ID"), _("Name"), _("Quantity"), _("Sell price ex. VAT"), _("VAT"), _("Total Net"), _("Total") };
@@ -43,7 +43,8 @@ void Repair::RenderRepairItemsTable(ItemsContainer<RepairItem>& _items, const bo
       if (_removable && ImGui::BeginPopupContextItem(_label.c_str(), ImGuiPopupFlags_MouseButtonRight)) {
         //if (ImGui::BeginPopupContextItem(_label.c_str(), ImGuiPopupFlags_MouseButtonRight)) {
           if (ImGui::Button(_("Remove"))) {
-            it = _items.records.erase(it); // Erase the element and update the iterator
+            _items.Erase(it);
+            //it = _items.records.erase(it); // Erase the element and update the iterator
             ImGui::CloseCurrentPopup();
             ImGui::EndPopup();
             continue; // Skip the increment of the iterator
@@ -57,11 +58,18 @@ void Repair::RenderRepairItemsTable(ItemsContainer<RepairItem>& _items, const bo
       RenderItemsTableRow(it->quantity, _compare ? _second.records[_index - 1].quantity : 0, "%d", _compare);
       RenderItemsTableRow(it->part.sell_price_ex_vat, _compare ? _second.records[_index - 1].part.sell_price_ex_vat : 0.0, "%.2f", _compare);
       RenderItemsTableRow(it->part.vat, _compare ? _second.records[_index - 1].part.vat : 0.0, "%2.0f", _compare);
-      RenderItemsTableRow(it->total_net, _compare ? _second.records[_index - 1].total_net : 0.0, "%.2f", _compare);
-      RenderItemsTableRow(it->total, _compare ? _second.records[_index - 1].total : 0.0, "%.2f", _compare);
+      
+      // Old
+      // RenderItemsTableRow(it->total_net, _compare ? _second.records[_index - 1].total_net : 0.0, "%.2f", _compare);
+      // RenderItemsTableRow(it->total, _compare ? _second.records[_index - 1].total : 0.0, "%.2f", _compare);
 
-      _items.total.amount += it->total;
-      _total_net += it->total_net;
+      // New
+      RenderItemsTableRow(it->price.ExVat(), _compare ? _second.records[_index - 1].total_net : 0.0, "%.2f", _compare);
+      RenderItemsTableRow(it->price.amount, _compare ? _second.records[_index - 1].total : 0.0, "%.2f", _compare);
+      _total_net += it->price.ExVat();
+
+      //_items.total.amount += it->total;
+      //_total_net += it->total_net;
 
       ++it;
     }

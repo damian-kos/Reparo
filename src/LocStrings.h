@@ -20,3 +20,7 @@
 
 // Misc
 #define UNKOWN                   _("Unknown")
+
+// Views
+//// Purchase Invoice 
+#define VIEW_PURCHASE_INVOICE    _("Purchase Invoice")

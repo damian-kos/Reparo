@@ -176,6 +176,15 @@ private:
   RoCombo<Brand> brand_filter;
 };
 
+class PurchaseInvoiceView : public BaseTableView<PurchaseInvoice> {
+public:
+  explicit PurchaseInvoiceView();
+
+private:
+  void Init();
+
+};
+
 template<typename T>
 inline void BaseTableView<T>::LoadData(const std::string & _orderby, const int& _direction) {
 }

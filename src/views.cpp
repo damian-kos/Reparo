@@ -2,6 +2,7 @@
 #include "RoLocalization.h"
 #include "conversion.h"
 #include "database.h"
+#include "LocStrings.h"
 
 CustomerView::CustomerView() 
   : BaseTableView<Customer>(
@@ -192,6 +193,7 @@ void RepairView::LoadData(const std::string& _orderby, const int& _direction) {
       .On("rp.part_id = p.id")
       .Where("repair_id", std::to_string(record.id))
       .All();
+    record.items.CalcTotal();
   }
 }
 
@@ -507,4 +509,30 @@ void DevicesView::Filters() {
   if (brand_filter.Render()) {
     LoadData();
   }
+}
+
+PurchaseInvoiceView::PurchaseInvoiceView() 
+  : BaseTableView<PurchaseInvoice>(VIEW_PURCHASE_INVOICE, config.headers.size() + 1, {})
+{
+  Init();
+}
+
+void PurchaseInvoiceView::Init() {
+  config.window_id = VIEW_PURCHASE_INVOICE;
+  config.headers = {
+    { "id", "ID"},
+    { "external_id", "External ID"},
+    { "name", "Name"},
+    { "supplier", "Supplier"},
+    { "total_net", "Total net"},
+    { "total_vat", "Total VAT"},
+    { "total", "Total"},
+    { "state", "State"},
+    { "purchased_at", "Purchased at"},
+    { "created_at", "Created at"},
+    { "updated_at", "Updated at"}
+  };
+  config.max_columns = config.headers.size() + 1;
+  config.is_window = true;
+  config.flags = ViewStateFlags_Default;
 }

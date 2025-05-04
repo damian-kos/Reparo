@@ -385,7 +385,7 @@ RepairWin::RepairWin(Repair& _repair) {
   vis_note.FillBuffer(_repair.vis_note);
   hid_note.FillBuffer(_repair.hid_note);
   price = _repair.price;
-  items.records = _repair.items.records;
+  items = _repair.items;
   price_can_be_zero = true;
   repair_state = RoCombo<RepairState>(_("Update repair state"));
   updates_history = Database::Select<RepairUpdate>("note, created_at").From("repair_updates").Where("repair_id = " + std::to_string(_repair.id)).OrderBy("id", 0).All();
@@ -433,8 +433,7 @@ void RepairWin::ItemAssign() {
   RepairItem& _item = _view.GetSelectedItem();
   if (_item.assign) {
     RepairItem _new = _item;
-    //items.push_back(_item);
-    Convert::PushBackIfUnique(items.records, _item);
+    items.PushUnique(_item);
     _item.Clear();
   }
 }
@@ -1191,14 +1190,14 @@ void PurchaseInvoiceWin::RenderInvoiceTableHeaders() {
 
 void PurchaseInvoiceWin::RenderInvoiceTableRows() {
   int i = 0;
-  for (auto it = items.begin(); it != items.end(); ) {
+  for (auto it = invoice_items.records.begin(); it != invoice_items.records.end(); ) {
     ImGui::TableNextRow();
     ImGui::TableNextColumn();
     std::string _label = std::to_string(++i);
     ImGui::Selectable(_label.c_str(), false, ImGuiSelectableFlags_SpanAllColumns);
     if (ImGui::BeginPopupContextItem(_label.c_str() , ImGuiPopupFlags_MouseButtonRight)) {
       if (ImGui::Button(_("Remove"))) {
-        it = items.erase(it); // Erase the element and update the iterator
+        invoice_items.Erase(it); // Erase the element and update the iterator
         ImGui::CloseCurrentPopup();
         ImGui::EndPopup();
         continue; // Skip the increment of the iterator
@@ -1234,7 +1233,8 @@ void PurchaseInvoiceWin::RenderAddItemButton() {
     _item_picker.Render();
     ImGui::BeginDisabled(_item_picker.error);
     if (ImGui::Button(_("Add to invoice"))) {
-      items.push_back(_item_picker.GetPart());
+      // Allow to push non unique for now. Becuase brand new items might be pushed and they will have id -1.
+      invoice_items.Push(_item_picker.GetPart());
       _item_picker.Clear();
       ImGui::CloseCurrentPopup();
     }
@@ -1253,7 +1253,7 @@ void PurchaseInvoiceWin::Submit() {
     _invoice.arrived_at = arrival_date.date;
     _invoice.created_at = create_date.date;
     _invoice.supplier = supplier;
-    _invoice.items = items;
+    _invoice.items = invoice_items;
     _invoice.InsertToDb();
 
     ResetFields();
@@ -1269,7 +1269,7 @@ void PurchaseInvoiceWin::ResetFields() {
   arrival_date.Clear();
   supplier_field.Clear();
   supplier.Clear();
-  items.clear();
+  invoice_items.Clear();
   error = false;
 }
 
@@ -1289,7 +1289,7 @@ void PurchaseInvoiceWin::FieldsValidate() {
   purchase_date.warning = ImGui::DateInvalid(purchase_date.date);
   arrival_date.warning = ImGui::DateInvalid(arrival_date.date);
 
-  error = invoice_number.error || supplier_field.error || items.empty();
+  error = invoice_number.error || supplier_field.error || invoice_items.records.empty();
 }
 
 SupplierWin::SupplierWin() 

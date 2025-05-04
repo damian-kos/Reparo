@@ -227,6 +227,9 @@ void RepairItemPicker::Render() {
   if (ImGui::Button(_("Assign part"))) {
     repair_item.total_net = repair_item.quantity * repair_item.part.sell_price_ex_vat;
     repair_item.total = repair_item.total_net + (repair_item.total_net * repair_item.part.vat / 100);
+    repair_item.price.vat_rate = repair_item.part.vat;
+    repair_item.price.amount = repair_item.total_net + (repair_item.total_net * repair_item.part.vat / 100);
+    repair_item.price.ExVat();
     repair_item.assign = true;
   }
 }

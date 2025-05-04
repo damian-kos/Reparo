@@ -459,8 +459,13 @@ namespace soci {
       model.quantity = v.get<int>("quantity", -1);
       model.part.sell_price_ex_vat = v.get<double>("sell_price_ex_vat");
       model.part.vat = v.get<double>("vat");
-      model.total_net = model.part.sell_price_ex_vat * model.quantity;
-      model.total = model.total_net * ( 1 + (model.part.vat / 100));
+      // model.total_net = model.part.sell_price_ex_vat * model.quantity;
+      // model.total = model.total_net * ( 1 + (model.part.vat / 100));
+
+      // New
+      model.price.amount = model.part.sell_price_ex_vat * (model.part.vat / 100 + 1) * model.quantity;
+      model.price.vat_rate = model.part.vat;
+
       if (v.get_number_of_columns() > 5) {
         model.part.name = v.get<std::string>("name");
       }

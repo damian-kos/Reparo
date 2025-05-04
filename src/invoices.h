@@ -3,6 +3,7 @@
 #include "../../src/models/supplier.h"
 
 #include "../../src/models/simple_models.h"
+#include "../../src/conversion.h"
 #include <string>
 
 struct SelectableItem {
@@ -28,6 +29,7 @@ struct RepairItem : public SelectableItem {
   bool assign = false; // assigns to repair reserved parts
   double total_net;
   double total;
+  Price price;
   const std::string ToString() const;
   void Clear();
 
@@ -44,6 +46,36 @@ class ItemsContainer {
 public:
   std::vector<T> records;
   Price total; // total price of all items
+
+  void PushUnique(const T& _item) {
+    Convert::PushBackIfUnique(records, _item);
+    total.amount += _item.total;
+  }
+
+  void Push(const T& _item) {
+    records.push_back(_item);
+    total.amount += _item.total;
+  }
+
+  template <typename Iterator> 
+  void Erase(Iterator& it) {
+    if (it != records.end()) {
+      total.amount -= it->price.amount;
+      it = records.erase(it);
+    }
+  }
+
+  void Clear() {
+    records.clear();
+    total.amount = 0;
+  }
+
+  void CalcTotal() {
+    total.amount = 0;
+    for (const auto& item : records) {
+      total.amount += item.price.amount;
+    }
+  }
 };
 
 class Invoice {
@@ -62,11 +94,10 @@ public:
   Supplier supplier;
   const std::string ToString() const;
   void InsertToDb();
-  std::vector<InvoiceItem> items;
+  ItemsContainer<InvoiceItem> items;
   static constexpr std::string_view table = "purchase_invoices";
   static inline const std::string column = "invoice_number";
   operator bool() const {
     return id > 0 && !name.empty();
   }
 };
-

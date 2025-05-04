@@ -32,6 +32,7 @@ public:
   static constexpr std::string_view table = "repairs";
   const std::string ToString() const;
   static void RenderRepairItemsTable(ItemsContainer<RepairItem>& _items, const bool _removable = false, const ItemsContainer<RepairItem>& _second = {});
+
   void View();
   void View(const Repair& _previous) ;
   void InsertModal();
