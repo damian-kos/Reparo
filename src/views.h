@@ -10,6 +10,8 @@
 #include "combo.h"
 #include "base_window.h"
 #include "invoices.h"
+#include "LocStrings.h"
+
 
 enum ViewStateFlags_ {
   ViewStateFlags_Default          = 1 << 1,
@@ -97,7 +99,7 @@ protected:
       RemoveMultipleAction(_item);
     }
   }
-  virtual void DefaultAction(T& _item) {}
+  virtual void DefaultAction(T& _item);
   virtual void SelectAction(T& _item) {}
   virtual void RemoveMultipleAction(T& _item) {}
   std::vector<T> data;
@@ -182,8 +184,22 @@ public:
 
 private:
   void Init();
+  void DefaultRenderItem(const PurchaseInvoice& _invoice);
+  void LoadData(const std::string& _orderby = "", const int& _direction = 0) override;
 
 };
+
+template<typename T>
+inline void BaseTableView<T>::DefaultAction(T& _item) {
+  std::string _id_str = std::to_string(_item.id);
+  ImGui::Selectable(_id_str.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap);
+  if (ImGui::BeginPopupContextItem()) {
+    if (ImGui::Button(BTN_UPDATE)) {
+      _item.UpdateModal();
+    }
+    ImGui::EndPopup();
+  }
+}
 
 template<typename T>
 inline void BaseTableView<T>::LoadData(const std::string & _orderby, const int& _direction) {

@@ -82,6 +82,6 @@ template struct SimpleModel<DeviceType>;
 template struct SimpleModel<Color>;
 template struct SimpleModel<Quality>;
 
-double Price::ExVat() {
+double Price::ExVat() const {
   return amount / (1 + (vat_rate / 100));
 }

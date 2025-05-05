@@ -15,6 +15,9 @@ void PurchaseInvoice::InsertToDb() {
   Database::Insert().PurchaseInvoice_(*this);
 }
 
+void PurchaseInvoice::UpdateModal() {
+}
+
 const std::string RepairItem::ToString() const {
   return std::to_string(id) + " | " + part.name + " | " + std::to_string(part.sell_price) + " | " + part.ToString();;
 }

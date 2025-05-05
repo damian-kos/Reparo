@@ -2,7 +2,6 @@
 #include "RoLocalization.h"
 #include "conversion.h"
 #include "database.h"
-#include "LocStrings.h"
 
 CustomerView::CustomerView() 
   : BaseTableView<Customer>(
@@ -522,17 +521,64 @@ void PurchaseInvoiceView::Init() {
   config.headers = {
     { "id", "ID"},
     { "external_id", "External ID"},
-    { "name", "Name"},
+    { "invoice_number", "Invoice Number"},
     { "supplier", "Supplier"},
     { "total_net", "Total net"},
-    { "total_vat", "Total VAT"},
     { "total", "Total"},
-    { "state", "State"},
     { "purchased_at", "Purchased at"},
     { "created_at", "Created at"},
-    { "updated_at", "Updated at"}
+    { "arrived_at", "Arrived at"}
   };
-  config.max_columns = config.headers.size() + 1;
+  config.max_columns = config.headers.size();
   config.is_window = true;
   config.flags = ViewStateFlags_Default;
+  LoadData();
+}
+
+void PurchaseInvoiceView::DefaultRenderItem(const PurchaseInvoice& _invoice) {
+  ImGui::TableNextColumn();
+  ActionsOnTable(const_cast<PurchaseInvoice&>(_invoice));
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _invoice.external_id.c_str());
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _invoice.name.c_str());
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _invoice.supplier.name.c_str());
+  ImGui::TableNextColumn();
+  ImGui::Text("%.2f", _invoice.items.total.ExVat());
+  ImGui::TableNextColumn();
+  ImGui::Text("%.2f", _invoice.items.total.amount);
+  ImGui::TableNextColumn();
+  std::string _purchased_at = Convert::TmToStr(_invoice.purchased_at);
+  ImGui::Text("%s", _purchased_at.c_str());
+  ImGui::TableNextColumn();
+  std::string _created_at = Convert::TmToStr(_invoice.created_at);
+  ImGui::Text("%s", _created_at.c_str());
+  ImGui::TableNextColumn();
+  std::string _updated_at = Convert::TmToStr(_invoice.arrived_at);
+  ImGui::Text("%s", _updated_at.c_str());
+}
+
+void PurchaseInvoiceView::LoadData(const std::string& _orderby, const int& _direction) {
+  data = Database::Select<PurchaseInvoice>(R"(pi.*, s.supplier, 
+      SUM(pii.purchase_price) AS total,
+      SUM(pii.purchase_price_ex_vat) AS total_net)")
+    .From("purchase_invoices pi")
+    .LeftJoin("suppliers s").On("s.id = pi.supplier_id")
+    .LeftJoin("purchase_invoice_items pii").On("pi.id = pii.purchase_invoice_id")
+    .GroupBy("pi.id")
+    .OrderBy(_orderby, _direction)
+    .All();
+  for (auto& _invoice : data) {
+    std::string _id_str = std::to_string(_invoice.id);
+    _invoice.items.records = Database::Select<InvoiceItem>("pii.*")
+      .From("purchase_invoice_items pii")
+      .Where("pii.purchase_invoice_id", _id_str)
+      .All();
+    std::cout << Database::Select<InvoiceItem>("pi.*")
+      .From("purchase_invoice_items pi")
+      .Where("purchase_invoice_id", _id_str)
+      .GetSql() << std::endl;
+    _invoice.items.CalcTotal();
+  }
 }

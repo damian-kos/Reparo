@@ -3,6 +3,7 @@
 // Buttons
 #define BTN_CONFIRM              _("Confirm") 
 #define BTN_CANCEL               _("Cancel")
+#define BTN_UPDATE               _("Update")
 
 // Part field labels
 #define LBL_ITEM_TITLE           _("Item")

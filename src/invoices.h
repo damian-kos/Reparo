@@ -94,6 +94,7 @@ public:
   Supplier supplier;
   const std::string ToString() const;
   void InsertToDb();
+  void UpdateModal();
   ItemsContainer<InvoiceItem> items;
   static constexpr std::string_view table = "purchase_invoices";
   static inline const std::string column = "invoice_number";

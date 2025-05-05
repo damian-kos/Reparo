@@ -48,6 +48,9 @@ void WindowFactory::AddWindow(const std::string& _window) {
   else if (_window == "parts_view") {
     windows[_window] = std::make_unique<InventoryView>();
   }
+  else if (_window == "purchase_invoices_view") {
+    windows[_window] = std::make_unique<PurchaseInvoiceView>();
+  }
   else if (_window == "categories") {
     windows[_window] = std::make_unique<SimpleModelWin<Category>>();
   }

@@ -430,7 +430,7 @@ TableCreator& TableCreator::PurchaseInvoicesTable() {
     CREATE TABLE IF NOT EXISTS purchase_invoices (
       id                 INTEGER PRIMARY KEY,
       invoice_number     TEXT NOT NULL,
-      external_id,       TEXT,
+      external_id        TEXT,
       supplier_id        INTEGER,
       purchased_at       DATETIME DEFAULT CURRENT_TIMESTAMP,
       arrived_at         DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -450,7 +450,7 @@ TableCreator& TableCreator::PurchaseInvoicesItemsTable() {
   std::string _sql = R"(
     CREATE TABLE IF NOT EXISTS purchase_invoice_items (
     id                      INTEGER PRIMARY KEY,
-    purchase_invoice_id     TEXT NOT NULL,
+    purchase_invoice_id     INTEGER NOT NULL,
     part_id                 INTEGER,
     supplier_sku            TEXT,
     name                    TEXT,  -- Used when part doesn't exist yet
@@ -988,6 +988,7 @@ Inserter& Inserter::PurchaseInvoice_(PurchaseInvoice& _invoice) {
         Query::InsertSupplier(_invoice.supplier);
       Query::InsertPurchaseInvoice(_invoice);
 
+      /// Finished here
       for (auto& item : _invoice.items.records) {
         item.purchase_invoice_id = _invoice.id;
         // Trigger for other logic

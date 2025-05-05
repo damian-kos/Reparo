@@ -121,5 +121,5 @@ struct Price {
   bool ex_vat = false;
   double vat_rate = 20;
 
-  double ExVat();
+  double ExVat() const;
 };

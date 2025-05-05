@@ -64,8 +64,8 @@ void Repair::RenderRepairItemsTable(ItemsContainer<RepairItem>& _items, const bo
       // RenderItemsTableRow(it->total, _compare ? _second.records[_index - 1].total : 0.0, "%.2f", _compare);
 
       // New
-      RenderItemsTableRow(it->price.ExVat(), _compare ? _second.records[_index - 1].total_net : 0.0, "%.2f", _compare);
-      RenderItemsTableRow(it->price.amount, _compare ? _second.records[_index - 1].total : 0.0, "%.2f", _compare);
+      RenderItemsTableRow(it->price.ExVat(), _compare ? _second.records[_index - 1].price.ExVat() : 0.0, "%.2f", _compare);
+      RenderItemsTableRow(it->price.amount, _compare ? _second.records[_index - 1].price.amount : 0.0, "%.2f", _compare);
       _total_net += it->price.ExVat();
 
       //_items.total.amount += it->total;

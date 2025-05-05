@@ -10,10 +10,11 @@ public:
   void Customer();
   void StockReceived();
   void SupplierRecord();
-  void AttributesView();
-  void InventoryView();
-  void DevicesView();
-  void RepairsView();
   void CustomersView();
+  void RepairsView();
+  void DevicesView();
+  void InventoryView();
+  void PurchaseInvoicesView();
+  void AttributesView();
 private:
 };

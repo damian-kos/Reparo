@@ -391,6 +391,7 @@ namespace soci {
       if (ind == i_null) {
         throw std::runtime_error("Null value fetched from database");
       }
+      model.id = v.get<int>("id");
       model.purchase_invoice_id = v.get<int>("purchase_invoice_id");
       model.part.id = v.get<int>("part_id", -1);
       model.supplier_sku = v.get<std::string>("supplier_sku", "");
@@ -403,6 +404,7 @@ namespace soci {
     }
 
     static void to_base(InvoiceItem& model, values& v, indicator& ind) {
+      v.set("id", model.id);
       v.set("purchase_invoice_id", model.purchase_invoice_id);
       v.set("part_id", model.part.id, model.part.id == -1 ? i_null : i_ok);
       v.set("supplier_sku", model.supplier_sku, model.supplier_sku.empty() ? i_null : i_ok);
@@ -432,6 +434,9 @@ namespace soci {
       model.purchased_at = v.get<tm>("purchased_at");
       model.arrived_at = v.get<tm>("arrived_at");
       model.created_at = v.get<tm>("created_at");
+      if (v.get_number_of_columns() > 8) {
+        model.supplier.name = v.get<std::string>("supplier", "");
+      }
     }
 
     static void to_base(PurchaseInvoice& model, values& v, indicator& ind) {
