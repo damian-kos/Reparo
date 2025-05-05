@@ -213,4 +213,3 @@ bool CustomDeviceModal::ModalContents() {
   device_win.Render();
   return false;
 }
-

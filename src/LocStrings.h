@@ -19,6 +19,11 @@
 #define LBL_SELL_PRICE           _("Sell Price")
 #define LBL_LOCATION             _("Location")
 
+// PurchaseInvoiceWin
+#define LBL_CREATE_INVOICE       _("Create Invoice")
+#define LBL_INSERT_TITLE         _("Insert new invoice")
+#define TXT_INVOICE_NUMBER       _("Are you sure you want to insert invoice?")
+
 // Misc
 #define UNKOWN                   _("Unknown")
 

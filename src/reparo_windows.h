@@ -242,9 +242,11 @@ public:
   void RenderInvoiceTableRows();
   void RenderAddItemButton();
   void Submit();
+  PurchaseInvoice CreatePurchaseInvoice();
   void ResetFields();
 
 private:
+  void Insert(PurchaseInvoice _invoice) const;
   void Feedback();
   void FieldsValidate();
   SimpleModelField<PurchaseInvoice> invoice_number;

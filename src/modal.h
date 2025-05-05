@@ -174,6 +174,18 @@ private:
   DeviceWin device_win;
 };
 
+template <typename T>
+class ConfirmCancelModal : public BaseModal {
+public:
+  ConfirmCancelModal(const T& _model, ModalConfig& _config)
+    : BaseModal(_config), model(_model) {
+  }
+
+  bool ModalContents() override;
+private:
+  T model;
+};
+
 /// <summary>
 /// ModalManager is running in reparo_core. If we want to use modal in modal use StackModalManager within Model's Render() methods.
 /// </summary>
@@ -265,4 +277,22 @@ inline bool SimpleModelModal<T>::ModalContents() {
     ImGui::CloseCurrentPopup();
   }
   return _action;
+}
+
+template<typename T>
+inline bool ConfirmCancelModal<T>::ModalContents() {
+  bool action = false;
+
+  if (config.state == ModalState_Insert) {
+    model.View();
+    if (ImGui::Button(BTN_CONFIRM)) {
+      action = true;
+      model.InsertToDb();
+      ImGui::CloseCurrentPopup();
+    }
+    if (ImGui::Button(BTN_CANCEL)) {
+      ImGui::CloseCurrentPopup();
+    }
+  }
+  return action;
 }

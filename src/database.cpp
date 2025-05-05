@@ -988,7 +988,6 @@ Inserter& Inserter::PurchaseInvoice_(PurchaseInvoice& _invoice) {
         Query::InsertSupplier(_invoice.supplier);
       Query::InsertPurchaseInvoice(_invoice);
 
-      /// Finished here
       for (auto& item : _invoice.items.records) {
         item.purchase_invoice_id = _invoice.id;
         // Trigger for other logic

@@ -84,7 +84,6 @@ void CustomerWin::Submit() {
     customer.InsertModal();
   }
   ImGui::EndDisabled();
-
 }
 
 void CustomerWin::FillBuffersByPhone(Customer&  _customer) {
@@ -1245,20 +1244,26 @@ void PurchaseInvoiceWin::RenderAddItemButton() {
 
 void PurchaseInvoiceWin::Submit() {
   ImGui::BeginDisabled(error);
-  if (ImGui::Button(_("Create Invoice"))) {
-    PurchaseInvoice _invoice;
-    _invoice.name = invoice_number.Get();
-    _invoice.external_id = external_id.Get();
-    _invoice.purchased_at = purchase_date.date;
-    _invoice.arrived_at = arrival_date.date;
-    _invoice.created_at = create_date.date;
-    _invoice.supplier = supplier;
-    _invoice.items = invoice_items;
-    _invoice.InsertToDb();
+  if (ImGui::Button(LBL_CREATE_INVOICE)) {
+    PurchaseInvoice _invoice = CreatePurchaseInvoice();
+    Insert(_invoice);
 
-    ResetFields();
+    //ResetFields();
   }
   ImGui::EndDisabled();
+  StackModal::RenderModal();
+}
+
+PurchaseInvoice PurchaseInvoiceWin::CreatePurchaseInvoice() {
+  PurchaseInvoice _invoice;
+  _invoice.name = invoice_number.Get();
+  _invoice.external_id = external_id.Get();
+  _invoice.purchased_at = purchase_date.date;
+  _invoice.arrived_at = arrival_date.date;
+  _invoice.created_at = create_date.date;
+  _invoice.supplier = supplier;
+  _invoice.items = invoice_items;
+  return _invoice;
 }
 
 void PurchaseInvoiceWin::ResetFields() {
@@ -1271,6 +1276,10 @@ void PurchaseInvoiceWin::ResetFields() {
   supplier.Clear();
   invoice_items.Clear();
   error = false;
+}
+
+void PurchaseInvoiceWin::Insert(PurchaseInvoice _invoice) const {
+  _invoice.InsertModal();
 }
 
 void PurchaseInvoiceWin::Feedback() {

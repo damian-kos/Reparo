@@ -85,7 +85,8 @@ public:
   tm purchased_at;
   tm arrived_at;
   tm created_at;
-
+  virtual void InsertToDb() {};
+  virtual void View() ;
 };
 
 class PurchaseInvoice : public Invoice {
@@ -93,7 +94,9 @@ public:
   std::string external_id;
   Supplier supplier;
   const std::string ToString() const;
-  void InsertToDb();
+  void View() override;
+  void InsertToDb() override;
+  void InsertModal();
   void UpdateModal();
   ItemsContainer<InvoiceItem> items;
   static constexpr std::string_view table = "purchase_invoices";
