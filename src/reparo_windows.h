@@ -179,7 +179,7 @@ private:
     void RenderInsertState();
     void SubmitInsert();
 
-  
+    // WindowState_Update
     void RenderUpdateState();
     void SubmitUpdate();
 
@@ -229,6 +229,8 @@ private:
 class PurchaseInvoiceWin : public RoWindow {
 public:
   PurchaseInvoiceWin();
+  PurchaseInvoiceWin(PurchaseInvoice& _invoice);
+
   void Init();
   void Render();
 
@@ -258,6 +260,9 @@ private:
   Supplier supplier;
   ItemsContainer<InvoiceItem> invoice_items;
   bool error = true;
+
+  // WindowState_Update
+  PurchaseInvoice previous_invoice;
 };
 
 class SupplierWin : public RoWindow {

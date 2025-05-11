@@ -213,3 +213,21 @@ bool CustomDeviceModal::ModalContents() {
   device_win.Render();
   return false;
 }
+
+bool PurchaseInvoiceModal::ModalContents() {
+  bool action = false;
+  
+  if (config.state == ModalState_UpdateWindow) {
+    invoice_win.Render();
+    //if (invoice_win.IsSubmitPressed()) {
+      //ModalConfig _config;
+      //_config.Title(LBL_PI_UPDATE_TITLE)
+        //.Msg(TXT_PI_UPDATE_MSG)
+        //.State(ModalState_Update);
+      //ConfirmCancelModal _modal(*this, _config);
+      //StackModal::SetModal(_modal);
+    //}
+  }
+  
+  return action;
+}

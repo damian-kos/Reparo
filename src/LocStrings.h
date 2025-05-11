@@ -21,8 +21,10 @@
 
 // PurchaseInvoiceWin
 #define LBL_CREATE_INVOICE       _("Create Invoice")
-#define LBL_INSERT_TITLE         _("Insert new invoice")
-#define TXT_INVOICE_NUMBER       _("Are you sure you want to insert invoice?")
+#define LBL_PI_INSERT_TITLE      _("Insert new invoice")
+#define LBL_PI_UPDATE_TITLE      _("Update invoice")
+#define TXT_PI_INSERT_MSG        _("Are you sure you want to insert invoice?")
+#define TXT_PI_UPDATE_MSG        _("Are you sure you want to update invoice?")
 
 // Misc
 #define UNKOWN                   _("Unknown")

@@ -23,7 +23,7 @@ const std::string PurchaseInvoice::ToString() const {
 }
 
 void PurchaseInvoice::View() {
-  ImGui::Text(TXT_INVOICE_NUMBER);
+  ImGui::Text(TXT_PI_INSERT_MSG);
 }
 
 void PurchaseInvoice::InsertToDb() {
@@ -32,13 +32,22 @@ void PurchaseInvoice::InsertToDb() {
 
 void PurchaseInvoice::InsertModal() {
   ModalConfig _config;
-  _config.Title(LBL_INSERT_TITLE)
+  _config.Title(LBL_PI_INSERT_TITLE)
+    .Msg(TXT_PI_INSERT_MSG)
     .State(ModalState_Insert);
   ConfirmCancelModal _modal(*this, _config);
   StackModal::SetModal(_modal);
 }
 
 void PurchaseInvoice::UpdateModal() {
+  ModalConfig _config;
+  _config.Title(LBL_PI_UPDATE_TITLE)
+    .State(ModalState_UpdateWindow);
+  PurchaseInvoiceModal _modal(*this, _config);
+  ModalManager::SetModal(_modal);
+}
+
+void PurchaseInvoice::UpdateToDb() {
 }
 
 const std::string RepairItem::ToString() const {

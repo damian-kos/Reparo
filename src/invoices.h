@@ -86,7 +86,7 @@ public:
   tm arrived_at;
   tm created_at;
   virtual void InsertToDb() {};
-  virtual void View() ;
+  virtual void View();
 };
 
 class PurchaseInvoice : public Invoice {
@@ -98,6 +98,7 @@ public:
   void InsertToDb() override;
   void InsertModal();
   void UpdateModal();
+  void UpdateToDb();
   ItemsContainer<InvoiceItem> items;
   static constexpr std::string_view table = "purchase_invoices";
   static inline const std::string column = "invoice_number";

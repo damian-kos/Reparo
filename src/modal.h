@@ -10,6 +10,7 @@
 #include <memory>
 #include "observer.h"
 #include "reparo_windows.h"
+#include "window_manager.h"
 
 class TextField;
 
@@ -138,7 +139,7 @@ class PartModal : public BaseModal {
 
  private:
   Part part;
-
+   
   // ModalState_UpdateWindow
   PartsWin part_win;
   // ModalState_Update
@@ -174,6 +175,20 @@ private:
   DeviceWin device_win;
 };
 
+class PurchaseInvoiceModal : public BaseModal {
+public:
+  PurchaseInvoiceModal(const PurchaseInvoice& _invoice, ModalConfig& _config)
+    : BaseModal(_config), invoice(_invoice) {
+    invoice_win = PurchaseInvoiceWin(invoice);
+  }
+
+  bool ModalContents() override;
+
+private:
+  PurchaseInvoice invoice;
+  PurchaseInvoiceWin invoice_win;
+};
+
 template <typename T>
 class ConfirmCancelModal : public BaseModal {
 public:
@@ -184,6 +199,7 @@ public:
   bool ModalContents() override;
 private:
   T model;
+  
 };
 
 /// <summary>
@@ -283,16 +299,26 @@ template<typename T>
 inline bool ConfirmCancelModal<T>::ModalContents() {
   bool action = false;
 
-  if (config.state == ModalState_Insert) {
+  if constexpr (requires { model.View(); }) {
     model.View();
-    if (ImGui::Button(BTN_CONFIRM)) {
-      action = true;
-      model.InsertToDb();
-      ImGui::CloseCurrentPopup();
-    }
-    if (ImGui::Button(BTN_CANCEL)) {
-      ImGui::CloseCurrentPopup();
-    }
   }
+  else {
+    ImGui::Text("Error: View method is missing");
+  }
+
+  if (ImGui::Button(BTN_CONFIRM)) {
+    action = true;
+    if (config.state == ModalState_Insert) {
+      model.InsertToDb();
+    }
+    else if (config.state == ModalState_Update) {
+      model.UpdateToDb();
+    }
+    ImGui::CloseCurrentPopup();
+  }
+  if (ImGui::Button(BTN_CANCEL)) {
+    ImGui::CloseCurrentPopup();
+  }
+
   return action;
 }

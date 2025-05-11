@@ -1043,16 +1043,21 @@ template class SimpleModelWin<DeviceType>;
 template class SimpleModelWin<Color>;
 template class SimpleModelWin<Quality>;
  
-PurchaseInvoiceWin::PurchaseInvoiceWin()
-  : invoice_number(_("Invoice number"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError, "invoice_number"),
-   external_id(_("External ID"), 0, TFFlags_HasPopup | TFFlags_DuplicateWarning , "external_id", "purchase_invoices", "external_id"),
-   supplier_field(_("Supplier"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence)
-{
+PurchaseInvoiceWin::PurchaseInvoiceWin() {
   Init();
-} 
+}
+
+PurchaseInvoiceWin::PurchaseInvoiceWin(PurchaseInvoice& _invoice) {
+  Init();
+  // Fill fields logic with _invoice
+}
+
 
 void PurchaseInvoiceWin::Init() {
   open = true;
+  invoice_number = SimpleModelField<PurchaseInvoice>(_("Invoice number"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError);
+  external_id = QueriedTextField(_("External ID"), 0, TFFlags_HasPopup | TFFlags_DuplicateWarning, "external_id", "purchase_invoices", "external_id");
+  supplier_field = SimpleModelField<Supplier>(_("Supplier"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence);
   ImGui::SetDateToday(&create_date.date);
   ImGui::SetDateToday(&purchase_date.date);
   ImGui::SetDateToday(&arrival_date.date);
