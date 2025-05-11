@@ -23,7 +23,6 @@ const std::string PurchaseInvoice::ToString() const {
 }
 
 void PurchaseInvoice::View() {
-  ImGui::Text(TXT_PI_INSERT_MSG);
 }
 
 void PurchaseInvoice::InsertToDb() {
@@ -41,7 +40,7 @@ void PurchaseInvoice::InsertModal() {
 
 void PurchaseInvoice::UpdateModal() {
   ModalConfig _config;
-  _config.Title(LBL_PI_UPDATE_TITLE)
+  _config.Title(LBL_PI_EDIT_TITLE)
     .State(ModalState_UpdateWindow);
   PurchaseInvoiceModal _modal(*this, _config);
   ModalManager::SetModal(_modal);

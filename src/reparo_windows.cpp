@@ -1045,36 +1045,48 @@ template class SimpleModelWin<Quality>;
  
 PurchaseInvoiceWin::PurchaseInvoiceWin() {
   Init();
+  invoice_number = SimpleModelField<PurchaseInvoice>(_("Invoice number"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError);
+  ImGui::SetDateToday(&create_date.date);
+  ImGui::SetDateToday(&purchase_date.date);
+  ImGui::SetDateToday(&arrival_date.date);
 }
 
 PurchaseInvoiceWin::PurchaseInvoiceWin(PurchaseInvoice& _invoice) {
   Init();
+  state = WindowState_Update;
+  invoice_number = SimpleModelField<PurchaseInvoice>(_("Invoice number"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence);
+  invoice_number.FillBuffer(_invoice.name);
+  external_id.FillBuffer(_invoice.external_id);
+  supplier_field.FillBuffer(_invoice.supplier.name);
+  supplier = supplier_field.GetFromDb();
+  invoice_items = _invoice.items;
+  ImGui::SetDateFromDate(&create_date.date, _invoice.created_at);
+  ImGui::SetDateFromDate(&purchase_date.date, _invoice.purchased_at);
+  ImGui::SetDateFromDate(&arrival_date.date, _invoice.arrived_at);
   // Fill fields logic with _invoice
 }
 
 
 void PurchaseInvoiceWin::Init() {
   open = true;
-  invoice_number = SimpleModelField<PurchaseInvoice>(_("Invoice number"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError);
   external_id = QueriedTextField(_("External ID"), 0, TFFlags_HasPopup | TFFlags_DuplicateWarning, "external_id", "purchase_invoices", "external_id");
   supplier_field = SimpleModelField<Supplier>(_("Supplier"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence);
-  ImGui::SetDateToday(&create_date.date);
-  ImGui::SetDateToday(&purchase_date.date);
-  ImGui::SetDateToday(&arrival_date.date);
   std::string _last_number = Database::Select<std::string>("invoice_number").From("purchase_invoices").Last().One();
   invoice_number.FillBuffer(_last_number);
+  submit = Buttons(BTN_SUBMIT, 0.2f);
 }
 
 void PurchaseInvoiceWin::Render() {
-  ImGui::OpenPopup(_("Purchase invoice"));
-  if (ImGui::BeginPopupModal(_("Purchase invoice"), &open)) {
-    Feedback();
-    RenderInvoiceHeader();
-    RenderInvoiceItems();
-    RenderAddItemButton();
-    Submit();
-    ImGui::EndPopup();
+  if (state == WindowState_Insert) {
+    RenderInsertState();
   }
+  else if (state == WindowState_Update) {
+    RenderUpdateState();
+  }
+}
+
+bool PurchaseInvoiceWin::IsSubmitPressed() {
+  return submit.pressed;
 }
 
 void PurchaseInvoiceWin::RenderInvoiceHeader() {
@@ -1247,18 +1259,6 @@ void PurchaseInvoiceWin::RenderAddItemButton() {
   }
 }
 
-void PurchaseInvoiceWin::Submit() {
-  ImGui::BeginDisabled(error);
-  if (ImGui::Button(LBL_CREATE_INVOICE)) {
-    PurchaseInvoice _invoice = CreatePurchaseInvoice();
-    Insert(_invoice);
-
-    //ResetFields();
-  }
-  ImGui::EndDisabled();
-  StackModal::RenderModal();
-}
-
 PurchaseInvoice PurchaseInvoiceWin::CreatePurchaseInvoice() {
   PurchaseInvoice _invoice;
   _invoice.name = invoice_number.Get();
@@ -1283,8 +1283,24 @@ void PurchaseInvoiceWin::ResetFields() {
   error = false;
 }
 
+void PurchaseInvoiceWin::RenderSharedBetweenStates() {
+  Feedback();
+  RenderInvoiceHeader();
+  RenderInvoiceItems();
+  RenderAddItemButton();
+}
+
 void PurchaseInvoiceWin::Insert(PurchaseInvoice _invoice) const {
   _invoice.InsertModal();
+}
+
+void PurchaseInvoiceWin::SubmitInsert() {
+    submit.Render(error);
+    if (IsSubmitPressed()) {
+      Insert(CreatePurchaseInvoice());
+    }
+    // Since we are running this window as modal, we use StackModal
+    StackModal::RenderModal();
 }
 
 void PurchaseInvoiceWin::Feedback() {
@@ -1304,6 +1320,35 @@ void PurchaseInvoiceWin::FieldsValidate() {
   arrival_date.warning = ImGui::DateInvalid(arrival_date.date);
 
   error = invoice_number.error || supplier_field.error || invoice_items.records.empty();
+}
+
+void PurchaseInvoiceWin::RenderInsertState() {
+  if (state != WindowState_Insert)
+    return;
+
+  if (!open)
+    return;
+
+  ImGui::OpenPopup(LBL_CREATE_INVOICE);
+  if (ImGui::BeginPopupModal(LBL_CREATE_INVOICE, &open)) {
+    RenderSharedBetweenStates();
+    SubmitInsert();
+    ImGui::EndPopup();
+  }
+}
+
+void PurchaseInvoiceWin::RenderUpdateState() {
+  if (state != WindowState_Update)
+    return;
+  RenderSharedBetweenStates();
+  SubmitUpdate();
+}
+
+void PurchaseInvoiceWin::SubmitUpdate() {
+  if (state == WindowState_Update) {
+    submit.Render(error);
+  }
+  StackModal::RenderModal();
 }
 
 SupplierWin::SupplierWin() 

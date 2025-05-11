@@ -299,11 +299,9 @@ template<typename T>
 inline bool ConfirmCancelModal<T>::ModalContents() {
   bool action = false;
 
+  ImGui::Text(config.message.c_str());
   if constexpr (requires { model.View(); }) {
     model.View();
-  }
-  else {
-    ImGui::Text("Error: View method is missing");
   }
 
   if (ImGui::Button(BTN_CONFIRM)) {

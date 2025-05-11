@@ -45,6 +45,7 @@ namespace ImGui {
   // Some helper methods (note that I cannot use tm directly in this hader file, so we can't initialize a static date directly with these methods)
   IMGUI_API void SetDateZero(tm* date);
   IMGUI_API void SetDateToday(tm* date);
+  IMGUI_API void SetDateFromDate(tm* date, const tm& _date);
   IMGUI_API bool DateInvalid(const tm& date);
 
 

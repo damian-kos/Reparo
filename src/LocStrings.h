@@ -4,6 +4,7 @@
 #define BTN_CONFIRM              _("Confirm") 
 #define BTN_CANCEL               _("Cancel")
 #define BTN_UPDATE               _("Update")
+#define BTN_SUBMIT               _("Submit")
 
 // Part field labels
 #define LBL_ITEM_TITLE           _("Item")
@@ -22,7 +23,8 @@
 // PurchaseInvoiceWin
 #define LBL_CREATE_INVOICE       _("Create Invoice")
 #define LBL_PI_INSERT_TITLE      _("Insert new invoice")
-#define LBL_PI_UPDATE_TITLE      _("Update invoice")
+#define LBL_PI_EDIT_TITLE        _("Edit invoice")
+#define LBL_PI_UPDATE_TITLE      _("Update invoice?")
 #define TXT_PI_INSERT_MSG        _("Are you sure you want to insert invoice?")
 #define TXT_PI_UPDATE_MSG        _("Are you sure you want to update invoice?")
 

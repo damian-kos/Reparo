@@ -85,14 +85,22 @@ namespace ImGui {
     date.tm_yday = 0;		//	 Days in year.[0-365]
     return date;
   }
+
   void SetDateZero(tm* date) {
     if (!date) return;
     *date = GetDateZero();
     return;
   }
+
   void SetDateToday(tm* date) {
     if (!date) return;
     *date = GetCurrentDate();
+    return;
+  }
+
+  void SetDateFromDate(tm* date, const tm& _date) {
+    if (!date) return;
+    *date = _date;
     return;
   }
 

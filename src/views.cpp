@@ -575,10 +575,6 @@ void PurchaseInvoiceView::LoadData(const std::string& _orderby, const int& _dire
       .From("purchase_invoice_items pii")
       .Where("pii.purchase_invoice_id", _id_str)
       .All();
-    std::cout << Database::Select<InvoiceItem>("pi.*")
-      .From("purchase_invoice_items pi")
-      .Where("purchase_invoice_id", _id_str)
-      .GetSql() << std::endl;
     _invoice.items.CalcTotal();
   }
 }

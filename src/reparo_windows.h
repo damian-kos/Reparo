@@ -177,6 +177,7 @@ private:
 
     // WindowState_Insert
     void RenderInsertState();
+    void Insert(Part _part) const;
     void SubmitInsert();
 
     // WindowState_Update
@@ -205,14 +206,7 @@ private:
     Buttons submit;
     bool error = true;
 
-    // WindowState_Insert
-    void Insert(Part _part) const;
-
-    // WindowState_Update
-    //void Update(Part _part) const;
-    //void CompareParts();
     Part previous_part;
-    // updates history for part
 };
 
 class CustomDeviceWin : public RoWindow {
@@ -233,7 +227,13 @@ public:
 
   void Init();
   void Render();
+  bool IsSubmitPressed();
 
+  PurchaseInvoice CreatePurchaseInvoice();
+  void ResetFields();
+
+private:
+  void RenderSharedBetweenStates();
   void RenderInvoiceHeader();
   void RenderInvoiceNumber();
   void RenderDateFields();
@@ -243,12 +243,7 @@ public:
   void RenderInvoiceTableHeaders();
   void RenderInvoiceTableRows();
   void RenderAddItemButton();
-  void Submit();
-  PurchaseInvoice CreatePurchaseInvoice();
-  void ResetFields();
 
-private:
-  void Insert(PurchaseInvoice _invoice) const;
   void Feedback();
   void FieldsValidate();
   SimpleModelField<PurchaseInvoice> invoice_number;
@@ -259,9 +254,17 @@ private:
   SimpleModelField<Supplier> supplier_field;
   Supplier supplier;
   ItemsContainer<InvoiceItem> invoice_items;
+  Buttons submit;
   bool error = true;
 
+  // WidowsState_Insert
+  void RenderInsertState();
+  void Insert(PurchaseInvoice _invoice) const;
+  void SubmitInsert();
+
   // WindowState_Update
+  void RenderUpdateState();
+  void SubmitUpdate();
   PurchaseInvoice previous_invoice;
 };
 
