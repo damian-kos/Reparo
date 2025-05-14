@@ -34,3 +34,12 @@
 // Views
 //// Purchase Invoice 
 #define VIEW_PURCHASE_INVOICE    _("Purchase Invoice")
+
+// Errors 
+#define ERR_EMPTY_FIELD          _("%s is empty")
+#define ERR_TOO_SHORT            _("%s is too short")
+#define ERR_ALREADY_EXISTS       _("%s already exists")
+
+// Warnings
+#define WRG_FUTURE_DATES        _("Some dates are in future")
+#define WRG_ALREADY_EXISTS      _("%s already exists, make sure that you want to proceed")

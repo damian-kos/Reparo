@@ -6,6 +6,7 @@
 #include <sstream>
 #include <vector>
 #include "queries.h"
+#include <unordered_set>
 
 
 class TableCreator;
@@ -270,6 +271,22 @@ public:
         }
         Database::sql.close(); 
         return results;
+    }
+
+    std::unordered_set<T> AllSet() {
+      std::unordered_set<T> results;
+      try {
+        Database::OpenDb();
+        soci::rowset<T> rs = (Database::sql.prepare << sql.str());
+        for (const auto& row : rs) {
+          results.insert(row);  // insert instead of push_back
+        }
+      }
+      catch (const soci::soci_error& e) {
+        std::cerr << "SOCI error executing query: " << e.what() << std::endl;
+      }
+      Database::sql.close();
+      return results;
     }
 
     T One() {

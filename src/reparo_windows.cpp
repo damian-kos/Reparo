@@ -1054,7 +1054,8 @@ PurchaseInvoiceWin::PurchaseInvoiceWin() {
 PurchaseInvoiceWin::PurchaseInvoiceWin(PurchaseInvoice& _invoice) {
   Init();
   state = WindowState_Update;
-  invoice_number = SimpleModelField<PurchaseInvoice>(_("Invoice number"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError | TFFlags_AllowDbPresence);
+  previous_invoice = _invoice;
+  invoice_number = SimpleModelField<PurchaseInvoice>(_("Invoice number"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError);
   invoice_number.FillBuffer(_invoice.name);
   external_id.FillBuffer(_invoice.external_id);
   supplier_field.FillBuffer(_invoice.supplier.name);
@@ -1063,9 +1064,7 @@ PurchaseInvoiceWin::PurchaseInvoiceWin(PurchaseInvoice& _invoice) {
   ImGui::SetDateFromDate(&create_date.date, _invoice.created_at);
   ImGui::SetDateFromDate(&purchase_date.date, _invoice.purchased_at);
   ImGui::SetDateFromDate(&arrival_date.date, _invoice.arrived_at);
-  // Fill fields logic with _invoice
 }
-
 
 void PurchaseInvoiceWin::Init() {
   open = true;
@@ -1109,7 +1108,7 @@ void PurchaseInvoiceWin::RenderInvoiceNumber() {
 
   ImGui::TableNextColumn();
   static bool _copy = false;
-  if (external_id.Render() && _copy)
+  if (external_id.Render() && _copy) 
     invoice_number.FillBuffer(external_id.Get());
 
   ImGui::TableNextColumn();
@@ -1261,6 +1260,10 @@ void PurchaseInvoiceWin::RenderAddItemButton() {
 
 PurchaseInvoice PurchaseInvoiceWin::CreatePurchaseInvoice() {
   PurchaseInvoice _invoice;
+  
+  if (state == WindowState_Update)
+    _invoice.id = previous_invoice.id;
+
   _invoice.name = invoice_number.Get();
   _invoice.external_id = external_id.Get();
   _invoice.purchased_at = purchase_date.date;
@@ -1309,9 +1312,13 @@ void PurchaseInvoiceWin::Feedback() {
   external_id.FeedbackEx();
   supplier_field.FeedbackEx();
   if (create_date.warning || purchase_date.warning || arrival_date.warning ) {
-    ImGui::Text("%s", _("Some dates are in the future")); ImGui::SameLine();
+    ImGui::Text(WRG_FUTURE_DATES); 
+    ImGui::SameLine();
   }
   ImGui::NewLine();
+  ImGui::Text("invoice number: %s", invoice_number.error ? "true" : "false");
+  ImGui::Text("supplier: %s", supplier_field.error ? "true" : "false");
+  ImGui::Text("items: %s", invoice_items.records.empty() ? "true" : "false");
 }
 
 void PurchaseInvoiceWin::FieldsValidate() {
@@ -1319,7 +1326,17 @@ void PurchaseInvoiceWin::FieldsValidate() {
   purchase_date.warning = ImGui::DateInvalid(purchase_date.date);
   arrival_date.warning = ImGui::DateInvalid(arrival_date.date);
 
-  error = invoice_number.error || supplier_field.error || invoice_items.records.empty();
+  if (state == WindowState_Update) {
+    if (previous_invoice.name == invoice_number.Get()) {
+      error = supplier_field.error || invoice_items.records.empty();
+    }
+    else {
+      error = invoice_number.error || supplier_field.error || invoice_items.records.empty();
+    }
+  }
+  else {
+    error = invoice_number.error || supplier_field.error || invoice_items.records.empty();
+  }
 }
 
 void PurchaseInvoiceWin::RenderInsertState() {
