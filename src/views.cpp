@@ -589,11 +589,11 @@ void SupplierView::Init() {
   config.headers = {
     { "id", ID_COLUMN},
     { "supplier", SUPPLIER_NAME},
-    { "line1", SUPPLIER_ADD_1},
-    { "line2", SUPPLIER_ADD_2},
-    { "line3", SUPPLIER_ADD_3},
-    { "line4", SUPPLIER_ADD_4},
-    { "line5", SUPPLIER_ADD_5}
+    { "line1", SUPPLIER_ADDR_1},
+    { "line2", SUPPLIER_ADDR_2},
+    { "line3", SUPPLIER_ADDR_3},
+    { "line4", SUPPLIER_ADDR_4},
+    { "line5", SUPPLIER_ADDR_5}
   };
   config.max_columns = config.headers.size();
   config.is_window = true;

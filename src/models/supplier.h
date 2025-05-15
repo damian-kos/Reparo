@@ -2,6 +2,8 @@
 #include <string>
 #include "address.h"
 
+struct ModelDataView;
+
 class Supplier {
 public:
   Supplier();
@@ -9,9 +11,11 @@ public:
   const std::string ToString(std::string _delimiter = " | ") const;
   const char* GetForCell() const;
   void View();
+  std::vector<ModelDataView> CreateViewData(const Supplier& _previous) const;
   void InsertToDb();
   void Clear();
   void UpdateModal();
+  void UpdateToDb();
   int id = -1;
   std::string name; // in database refered as 'supplier'
 

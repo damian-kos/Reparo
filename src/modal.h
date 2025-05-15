@@ -175,6 +175,7 @@ private:
   DeviceWin device_win;
 };
 
+// Disabled
 class PurchaseInvoiceModal : public BaseModal {
 public:
   PurchaseInvoiceModal(const PurchaseInvoice& _invoice, ModalConfig& _config)
@@ -187,6 +188,28 @@ public:
 private:
   PurchaseInvoice invoice;
   PurchaseInvoiceWin invoice_win;
+};
+
+class SupplierModal : public BaseModal {
+public:
+  SupplierModal(const Supplier& _supplier, ModalConfig& _config)
+    : BaseModal(_config), supplier(_supplier) {
+    supplier_win = SupplierWin(supplier);
+  }
+
+  SupplierModal(const Supplier& _supplier, const Supplier& _previous, ModalConfig& _config)
+    : BaseModal(_config), supplier(_supplier), previous(_previous) {
+    view_data = supplier.CreateViewData(previous);
+  }
+
+  bool ModalContents() override;
+
+private:
+  Supplier supplier;
+  Supplier previous;
+  SupplierWin supplier_win;
+  std::vector<ModelDataView> view_data;
+
 };
 
 template <typename T>

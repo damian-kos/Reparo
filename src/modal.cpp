@@ -193,7 +193,6 @@ bool PartModal::ModalContents() {
     part.View();
     if (ImGui::Button(BTN_CONFIRM)) {
       action = true;
-     // repair.UpdateString(previous);
       part.UpdateToDb();
       ImGui::CloseCurrentPopup();
     }
@@ -229,5 +228,34 @@ bool PurchaseInvoiceModal::ModalContents() {
     }
   }
   
+  return action;
+}
+
+bool SupplierModal::ModalContents() {
+  bool action = false;
+  if (config.state == ModalState_Insert) {
+    // Currently not used
+  } 
+  else if (config.state == ModalState_UpdateWindow) {
+    supplier_win.Render();
+    if (supplier_win.IsSubmitPressed()) {
+      ModalConfig _config;
+      _config.Title(LBL_SUPPLIER_UPDATE)
+        .State(ModalState_Update);
+      SupplierModal _modal(supplier_win.CreateSupplier(), supplier_win.GetPrevious(), _config);
+      StackModal::SetModal(_modal);
+    }
+  }
+  else if (config.state == ModalState_Update) {
+    RoTable::SideBySideText(LBL_SUPPLIER_UPDATE, view_data);
+    if (ImGui::Button(BTN_CONFIRM)) {
+      action = true;
+      supplier.UpdateToDb();
+      ImGui::CloseCurrentPopup();
+    }
+    if (ImGui::Button(BTN_CANCEL)) {
+      ImGui::CloseCurrentPopup();
+    }
+  }
   return action;
 }

@@ -271,20 +271,37 @@ private:
 class SupplierWin : public RoWindow {
 public:
   SupplierWin();
-  void Init();
+  SupplierWin(Supplier& _supplier);
   void Render();
+  void RenderSharedBetweenStates();
+  void RenderInsertState();
+  void RenderUpdateState();
+
   void Feedback();
   void InputFields();
   Supplier GetEntity();
+  Supplier CreateSupplier();
   void Clear();
+  bool IsSubmitPressed();
+  Supplier GetPrevious();
 
 private:
-  void Submit();
+  void Init();
   void FieldsValidate();
+  void Submit();
+
   TextField name;
   std::vector<TextField> address;
   bool error = true;
+  Buttons submit;
+
+  // WindowState_Insert
+  void SubmitInsert();
+  // WindowState_Update
+  void SubmitUpdate();
+  Supplier previous_supplier;
 };
+
 template <typename T>
 class SimpleModelWin : public RoWindow{
 public:

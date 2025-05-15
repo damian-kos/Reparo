@@ -1368,30 +1368,73 @@ void PurchaseInvoiceWin::SubmitUpdate() {
   StackModal::RenderModal();
 }
 
-SupplierWin::SupplierWin() 
-  : name(_("Name"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError)
-{
+SupplierWin::SupplierWin() {
   Init();
+}
+
+SupplierWin::SupplierWin(Supplier& _supplier) {
+  Init();
+  state = WindowState_Update;
+  previous_supplier = _supplier;
+  name.FillBuffer(_supplier.name);
+  std::vector<std::string> _lines = _supplier.address.Get().Lines();
+  for (int i = 0; i < _lines.size(); ++i) {
+    address[i].FillBuffer(_lines[i]);
+  }
+  open = true;
 }
 
 void SupplierWin::Init() {
   open = true;
+  name = TextField(_("Name"), 0, TFFlags_HasPopup | TFFlags_EmptyIsError);
   address.resize(5);
   // Initialize address fields
   for (int i = 0; i < 5; i++) {
     std::string label = _("Address Line ") + std::to_string(i + 1);
     address[i] = TextField(label);
   }
+  submit = Buttons(BTN_SUBMIT, 0.2f);
 }
 
 void SupplierWin::Render() {
-  ImGui::OpenPopup(_("Supplier"));
-  if (ImGui::BeginPopupModal(_("Supplier"), &open)) {
-    Feedback();
-    InputFields();
-    Submit();
+  if (state == WindowState_Insert) {
+    RenderInsertState();
+  }
+  else if (state == WindowState_Update) {
+    RenderUpdateState();
+  }
+}
+
+void SupplierWin::RenderSharedBetweenStates() {
+  Feedback();
+  InputFields();
+}
+
+void SupplierWin::RenderInsertState() {
+  if (state != WindowState_Insert)
+    return;
+
+  if (!open)
+    return;
+
+  ImGui::OpenPopup(LBL_SUPPLIER_INSERT);
+  if (ImGui::BeginPopupModal(LBL_SUPPLIER_INSERT, &open)) {
+    RenderSharedBetweenStates();
+    SubmitInsert();
     ImGui::EndPopup();
   }
+}
+
+void SupplierWin::RenderUpdateState() {
+  if (state != WindowState_Update)
+    return;
+
+  if (!open)
+    return;
+
+  RenderSharedBetweenStates();
+  SubmitUpdate();
+  StackModal::RenderModal();
 }
 
 void SupplierWin::Feedback() {
@@ -1419,12 +1462,31 @@ Supplier SupplierWin::GetEntity() {
   return _supplier;
 }
 
+Supplier SupplierWin::CreateSupplier() {
+  Supplier _supplier;
+
+  if (state == WindowState_Update)
+    _supplier.id = previous_supplier.id;
+
+  _supplier.name = name.Get();
+  _supplier.address.SetLines(address);
+  return _supplier;
+}
+
 void SupplierWin::Clear() {
   name.Clear();
   for (auto& line : address) {
     line.Clear();
   }
   error = true;
+}
+
+bool SupplierWin::IsSubmitPressed() {
+  return submit.pressed;
+}
+
+Supplier SupplierWin::GetPrevious() {
+  return previous_supplier;
 }
 
 void SupplierWin::Submit() {
@@ -1434,6 +1496,22 @@ void SupplierWin::Submit() {
     _supplier.InsertToDb();
   }
   ImGui::EndDisabled();
+}
+
+void SupplierWin::SubmitInsert() {
+  if (state == WindowState_Insert) {
+    submit.Render(error);
+    if (IsSubmitPressed()) {
+      Supplier _supplier = GetEntity();
+      _supplier.InsertToDb();
+    }
+  }
+}
+
+void SupplierWin::SubmitUpdate() {
+  if (state == WindowState_Update) {
+    submit.Render(error);
+  }
 }
 
 void SupplierWin::FieldsValidate() {
