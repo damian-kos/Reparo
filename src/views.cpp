@@ -578,3 +578,44 @@ void PurchaseInvoiceView::LoadData(const std::string& _orderby, const int& _dire
     _invoice.items.CalcTotal();
   }
 }
+
+SupplierView::SupplierView()
+  : BaseTableView<Supplier>(VIEW_SUPPLIERS, config.headers.size() + 1, {}) {
+  Init();
+}
+
+void SupplierView::Init() {
+  config.window_id = VIEW_SUPPLIERS;
+  config.headers = {
+    { "id", ID_COLUMN},
+    { "supplier", SUPPLIER_NAME},
+    { "line1", SUPPLIER_ADD_1},
+    { "line2", SUPPLIER_ADD_2},
+    { "line3", SUPPLIER_ADD_3},
+    { "line4", SUPPLIER_ADD_4},
+    { "line5", SUPPLIER_ADD_5}
+  };
+  config.max_columns = config.headers.size();
+  config.is_window = true;
+  config.flags = ViewStateFlags_Default;
+  LoadData();
+}
+
+void SupplierView::DefaultRenderItem(const Supplier& _supplier) {
+  ImGui::TableNextColumn();
+  ActionsOnTable(const_cast<Supplier&>(_supplier));
+  ImGui::TableNextColumn();
+  ImGui::Text("%s", _supplier.name.c_str());
+  std::vector<std::string> _lines = _supplier.address.Get().Lines();
+  for (auto& line : _lines) {
+    ImGui::TableNextColumn();
+    ImGui::Text("%s", line.c_str());
+  }
+}
+
+void SupplierView::LoadData(const std::string& _orderby, const int& _direction) {
+  data = Database::Select<Supplier>()
+    .From("suppliers s")
+    .OrderBy(_orderby, _direction)
+    .All();
+}

@@ -41,3 +41,7 @@ void Supplier::Clear() {
   name.clear();
   address.Clear();
 }
+
+void Supplier::UpdateModal() {
+  std::cout << "Update supplier" << std::endl;
+}

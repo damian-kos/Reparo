@@ -31,9 +31,19 @@
 // Misc
 #define UNKOWN                   _("Unknown")
 
-// Views
-//// Purchase Invoice 
+//////// Views
+#define ID_COLUMN                _("ID")
+/// Purchase Invoice 
 #define VIEW_PURCHASE_INVOICE    _("Purchase Invoice")
+
+/// Suppliers
+#define VIEW_SUPPLIERS           _("Suppliers")
+#define SUPPLIER_NAME            _("Supplier name")
+#define SUPPLIER_ADD_1           _("Line 1")
+#define SUPPLIER_ADD_2           _("Line 2")
+#define SUPPLIER_ADD_3           _("Line 3")
+#define SUPPLIER_ADD_4           _("Line 4")
+#define SUPPLIER_ADD_5           _("Line 5")
 
 // Errors 
 #define ERR_EMPTY_FIELD          _("%s is empty")

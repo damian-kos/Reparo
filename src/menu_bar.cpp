@@ -25,6 +25,7 @@ void RoMenuBar::Render() {
     DevicesView();
     InventoryView();
     PurchaseInvoicesView();
+    SupplierView();
     AttributesView();
     ImGui::EndMenu();
   }
@@ -127,6 +128,12 @@ void RoMenuBar::InventoryView() {
 void RoMenuBar::PurchaseInvoicesView() {
   if (ImGui::MenuItem(_("Purchase Invoices"))) {
     WindowFactory::AddWindow("purchase_invoices_view");
+  }
+}
+
+void RoMenuBar::SupplierView() {
+  if (ImGui::MenuItem(VIEW_SUPPLIERS)) {
+    WindowFactory::AddWindow("suppliers_view");
   }
 }
 

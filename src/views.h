@@ -189,6 +189,17 @@ private:
 
 };
 
+class SupplierView : public BaseTableView<Supplier> {
+public:
+  explicit SupplierView();
+
+protected:
+  void Init();
+  void DefaultRenderItem(const Supplier& _supplier) override;
+  void LoadData(const std::string& _orderby = "", const int& _direction = 0) override;
+
+};
+
 template<typename T>
 inline void BaseTableView<T>::DefaultAction(T& _item) {
   std::string _id_str = std::to_string(_item.id);

@@ -15,6 +15,7 @@ public:
   void DevicesView();
   void InventoryView();
   void PurchaseInvoicesView();
+  void SupplierView();
   void AttributesView();
 private:
 };

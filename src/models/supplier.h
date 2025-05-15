@@ -11,6 +11,7 @@ public:
   void View();
   void InsertToDb();
   void Clear();
+  void UpdateModal();
   int id = -1;
   std::string name; // in database refered as 'supplier'
 
