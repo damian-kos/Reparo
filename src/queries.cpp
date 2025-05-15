@@ -285,6 +285,16 @@ namespace Query {
     return _supplier_id;
   }
 
+  int UpdateSupplier(Supplier& _supplier) {
+    Supplier _s = _supplier;
+    int _supplier_id = _s.id;
+    Database::sql << "UPDATE suppliers "
+      "SET supplier = :supplier, line1 = :line1, line2 = :line2, line3 = :line3, line4 = :line4, line5 = :line5 "
+      "WHERE id = :id",
+      soci::use(_s);
+    return _supplier_id;
+  }
+
   int InsertPurchaseInvoice(PurchaseInvoice& _invoice) {
     PurchaseInvoice _i = _invoice;
     int _invoice_id = -1;

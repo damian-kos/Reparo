@@ -1227,3 +1227,12 @@ Updater& Updater::Part_(Part& _part) {
     "Update part (Part: " + _part.ToString() + ")"
   );
 }
+
+Updater& Updater::Supplier_(Supplier& _supplier) {
+  return ExecuteTransaction(
+    [&_supplier]() {
+      Query::UpdateSupplier(_supplier);
+    },
+    "Update supplier (Supplier: " + _supplier.ToString() + ")"
+  );
+}

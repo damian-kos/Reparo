@@ -45,6 +45,7 @@ namespace Query {
   int InsertCustomDevice(Repair& repair);
   void InsertRepairPart(RepairItem& _item);
   int InsertSupplier(Supplier& _supplier);
+  int UpdateSupplier(Supplier& _supplier);
   int InsertPurchaseInvoice(PurchaseInvoice& _invoice);
   int InsertInvoiceItem(InvoiceItem& _item);
   void UpdateColors(UpdateSet<Color>& _colors, int _model_id);

@@ -125,6 +125,7 @@ public:
   Updater& Customer_(Customer& _customer);
   Updater& Device_(Device& _device);
   Updater& Part_(Part& _part);
+  Updater& Supplier_(Supplier& _supplier);
 
 private:
   template<typename Func>

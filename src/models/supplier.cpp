@@ -77,5 +77,5 @@ void Supplier::UpdateModal() {
 }
 
 void Supplier::UpdateToDb() {
-  // update
+  Database::Update().Supplier_(*this);
 }
