@@ -63,6 +63,10 @@
 #define ERR_TOO_SHORT            _("%s is too short")
 #define ERR_ALREADY_EXISTS       _("%s already exists")
 
+
+//////// Image
+#define IMG_REPAIR_TICKET        _("Repair ticket") 
+
 // Warnings
 #define WRG_FUTURE_DATES         _("Some dates are in future")
 #define WRG_ALREADY_EXISTS       _("%s already exists, make sure that you want to proceed")
